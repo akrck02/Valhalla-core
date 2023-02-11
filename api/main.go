@@ -9,7 +9,9 @@ import (
 func main() {
 
 	logger := utils.Logger
-	db.ConnectDatabase(logger)
-	services.Start(logger)
+	client := db.CreateClient(logger)
+	conn := db.Connect(logger, *client)
+	services.Start(logger, conn, *client)
+	db.Disconnect(logger, *client, conn)
 
 }

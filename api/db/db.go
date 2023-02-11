@@ -5,36 +5,33 @@ import (
 	"time"
 
 	"github.com/withmandala/go-log"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func ConnectDatabase(logger *log.Logger) {
-	client, err := mongo.NewClient(options.Client().ApplyURI("mongodb://admin:p4ssw0rd@localhost:27017"))
+const MONGO_URL = "mongodb://admin:p4ssw0rd@localhost:27017"
+
+func CreateClient(logger *log.Logger) *mongo.Client {
+	client, err := mongo.NewClient(options.Client().ApplyURI(MONGO_URL))
 	if err != nil {
 		logger.Fatal(err)
 	}
+	return client
+}
+
+func Connect(logger *log.Logger, client mongo.Client) context.Context {
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
-
-	err = client.Connect(ctx)
+	err := client.Connect(ctx)
 
 	if err != nil {
 		logger.Fatal(err)
 	}
 
+	logger.Info("Database connected on " + MONGO_URL)
+	return ctx
+}
+
+func Disconnect(logger *log.Logger, client mongo.Client, ctx context.Context) {
 	defer client.Disconnect(ctx)
-
-	err = client.Ping(ctx, nil)
-	if err != nil {
-		logger.Fatal(err)
-	}
-	databases, err := client.ListDatabaseNames(ctx, bson.M{})
-	if err != nil {
-		logger.Fatal(err)
-	}
-
-	logger.Info(databases)
-	logger.Info("Hola")
 }
