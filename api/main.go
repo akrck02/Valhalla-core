@@ -9,9 +9,7 @@ import (
 func main() {
 
 	logger := utils.Logger
-	db := db.ConnectDatabase
-	db()
-
+	db.ConnectDatabase(logger)
 	services.Start(logger)
 
 }
