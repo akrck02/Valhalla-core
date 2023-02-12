@@ -2,9 +2,10 @@ package services
 
 import (
 	"context"
-	"net/http"
 
+	"github.com/akrck02/valhalla-core/db"
 	"github.com/akrck02/valhalla-core/models"
+	"github.com/akrck02/valhalla-core/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/withmandala/go-log"
 	"go.mongodb.org/mongo-driver/bson"
@@ -24,16 +25,20 @@ const (
 	INVALID_PASSWORD = 1
 )
 
-func Register(c *gin.Context, logger *log.Logger, conn context.Context, client mongo.Client) {
+func Register(c *gin.Context, logger *log.Logger) {
+
+	var client = db.CreateClient(logger)
+	var conn = db.Connect(logger, *client)
+	defer db.Disconnect(logger, *client, conn)
 
 	var params RegisterParams
 	err := c.ShouldBindJSON(&params)
 
 	if err != nil {
-
-		//406
-		SendResponse(c, helpers.Response{Status: http.StatusUnauthorized, Error: []string{"Username and password do not match"}})
-		logger.Error(err)
+		utils.SendResponse(c,
+			utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
+		)
 	}
 
 	var user models.User
@@ -42,15 +47,42 @@ func Register(c *gin.Context, logger *log.Logger, conn context.Context, client m
 	user.Email = params.Email
 
 	if validatePassword(user.Password) == INVALID_PASSWORD {
-		// return message with reasoning for invalid value
-
+		utils.SendResponse(c,
+			utils.HTTP_STATUS_FORBIDDEN,
+			gin.H{"code": utils.HTTP_STATUS_FORBIDDEN, "message": "Invalid password"},
+		)
 		return
 	}
 
-	coll := client.Database("Valhalla").Collection("users")
-	found := exists("", conn, coll)
+	coll := client.Database("valhalla").Collection("users")
+	found := exists(user.Email, conn, coll)
 
 	logger.Info(found)
+
+	if found.Email != "" {
+		utils.SendResponse(c,
+			utils.HTTP_STATUS_CONFLICT,
+			gin.H{"code": utils.HTTP_STATUS_CONFLICT, "message": "User already exists"},
+		)
+		return
+	}
+
+	// register user on database
+	usr, err := coll.InsertOne(conn, user)
+
+	if err != nil {
+		utils.SendResponse(c,
+			utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			gin.H{"code": utils.HTTP_STATUS_INTERNAL_SERVER_ERROR, "message": err.Error()},
+		)
+		return
+	}
+
+	// send response
+	utils.SendResponse(c,
+		utils.HTTP_STATUS_OK,
+		gin.H{"code": utils.HTTP_STATUS_OK, "message": "User created", "data": usr},
+	)
 }
 
 func Login(c *gin.Context) {
@@ -64,7 +96,7 @@ func validatePassword(password string) validatePasswordResponse {
 
 func exists(email string, conn context.Context, coll *mongo.Collection) models.User {
 
-	filter := bson.D{{"email", email}}
+	filter := bson.D{{Key: "email", Value: email}}
 
 	var result models.User
 	coll.FindOne(conn, filter).Decode(&result)

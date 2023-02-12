@@ -1,23 +1,20 @@
 package services
 
 import (
-	"context"
-
 	"github.com/gin-gonic/gin"
 	"github.com/withmandala/go-log"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 const API_PATH = "api"
 const VERSION = "v1"
 const API_COMPLETE = "/" + API_PATH + "/" + VERSION + "/"
 
-func Start(logger *log.Logger, conn context.Context, client mongo.Client) {
+func Start(logger *log.Logger) {
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 
 	router.GET(API_COMPLETE+"ping/", Ping)
-	router.GET(API_COMPLETE+"register/", route(Register, logger, conn, client))
+	router.POST(API_COMPLETE+"register/", route(Register, logger))
 
 	logger.Info("Server started on 127.0.0.1:3333")
 	state := router.Run("127.0.0.1:3333")
@@ -26,10 +23,10 @@ func Start(logger *log.Logger, conn context.Context, client mongo.Client) {
 
 }
 
-func route(function func(c *gin.Context, logger *log.Logger, conn context.Context, client mongo.Client), logger *log.Logger, conn context.Context, client mongo.Client) func(c *gin.Context) {
+func route(function func(c *gin.Context, logger *log.Logger), logger *log.Logger) func(c *gin.Context) {
 
 	return func(c *gin.Context) {
-		function(c, logger, conn, client)
+		function(c, logger)
 	}
 
 }
