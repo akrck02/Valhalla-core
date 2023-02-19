@@ -1,5 +1,7 @@
 FROM golang:latest
 
+ENV PORT=$PORT
+
 WORKDIR /app
 
 COPY go.mod ./
@@ -10,6 +12,6 @@ COPY *.go ./
 COPY . ./
 RUN go build -o /valhalla-core
 
-EXPOSE 3333
+EXPOSE $PORT
 
 CMD [ "/valhalla-core" ]
