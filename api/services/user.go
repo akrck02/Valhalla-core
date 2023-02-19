@@ -2,6 +2,8 @@ package services
 
 import (
 	"context"
+	"encoding/json"
+	"io/ioutil"
 
 	"github.com/akrck02/valhalla-core/db"
 	"github.com/akrck02/valhalla-core/models"
@@ -39,6 +41,7 @@ func Register(c *gin.Context, logger *log.Logger) {
 			utils.HTTP_STATUS_NOT_ACCEPTABLE,
 			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
 		)
+		return
 	}
 
 	var user models.User
@@ -55,9 +58,7 @@ func Register(c *gin.Context, logger *log.Logger) {
 	}
 
 	coll := client.Database("valhalla").Collection("users")
-	found := exists(user.Email, conn, coll)
-
-	logger.Info(found)
+	found := mailExists(user.Email, conn, coll)
 
 	if found.Email != "" {
 		utils.SendResponse(c,
@@ -85,8 +86,36 @@ func Register(c *gin.Context, logger *log.Logger) {
 	)
 }
 
-func Login(c *gin.Context) {
+func Login(c *gin.Context, logger *log.Logger) {
 
+	var client = db.CreateClient(logger)
+	var conn = db.Connect(logger, *client)
+	defer db.Disconnect(logger, *client, conn)
+
+	jsonData, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		utils.Fatal(err.Error())
+	}
+
+	var user models.User
+	json.Unmarshal([]byte(jsonData), &user)
+
+	coll := client.Database("valhalla").Collection("users")
+	found := authorizationOk(user.Username, user.Password, conn, coll)
+
+	if found.Email == "" {
+		utils.SendResponse(c,
+			utils.HTTP_STATUS_FORBIDDEN,
+			gin.H{"code": utils.HTTP_STATUS_NOT_FOUND, "message": "Forbidden"},
+		)
+		return
+	}
+
+	utils.SendResponse(c,
+		utils.HTTP_STATUS_OK,
+		gin.H{"code": utils.HTTP_STATUS_OK, "message": "User found", "data": found},
+	)
+	utils.Info(user.Username + " / " + user.Password)
 }
 
 func validatePassword(password string) validatePasswordResponse {
@@ -94,9 +123,20 @@ func validatePassword(password string) validatePasswordResponse {
 	return VALID_PASSWORD
 }
 
-func exists(email string, conn context.Context, coll *mongo.Collection) models.User {
+func mailExists(email string, conn context.Context, coll *mongo.Collection) models.User {
 
 	filter := bson.D{{Key: "email", Value: email}}
+
+	var result models.User
+	coll.FindOne(conn, filter).Decode(&result)
+
+	return result
+
+}
+
+func authorizationOk(username string, password string, conn context.Context, coll *mongo.Collection) models.User {
+
+	filter := bson.D{{Key: "username", Value: username}, {Key: "password", Value: password}}
 
 	var result models.User
 	coll.FindOne(conn, filter).Decode(&result)

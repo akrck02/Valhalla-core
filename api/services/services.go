@@ -15,6 +15,7 @@ func Start(logger *log.Logger) {
 
 	router.GET(API_COMPLETE+"ping/", Ping)
 	router.POST(API_COMPLETE+"register/", route(Register, logger))
+	router.POST(API_COMPLETE+"login/", route(Login, logger))
 
 	logger.Info("Server started on 127.0.0.1:3333")
 	state := router.Run("127.0.0.1:3333")

@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/akrck02/valhalla-core/lang"
 	"github.com/withmandala/go-log"
 )
 
@@ -14,11 +15,9 @@ const titleChar = "-"
 var Logger = log.New(os.Stderr)
 
 func ShowLogAppTitle() {
-	fmt.Println(strings.Repeat(titleChar, titleCharNum))
-	fmt.Println(`
-	Valhalla API by @akrck02																		
-	`)
-	fmt.Println(strings.Repeat(titleChar, titleCharNum))
+	Line()
+	fmt.Println(lang.APP_TITLE)
+	Line()
 }
 
 func Log(msg string) {
@@ -29,10 +28,37 @@ func Error(msg string) {
 	Logger.Error(msg)
 }
 
+func FormattedError(msg string, args ...string) {
+	Logger.Error(lang.Format(msg, args...))
+}
+
 func Info(msg string) {
 	Logger.Info(msg)
 }
 
+func FormattedInfo(msg string, args ...string) {
+	Logger.Info(lang.Format(msg, args...))
+}
+
 func Jump() {
 	Log("")
+}
+
+func Line() {
+	fmt.Println(strings.Repeat(titleChar, titleCharNum))
+}
+
+func Title(title string) {
+	Jump()
+	Line()
+	fmt.Println("   " + title)
+	Line()
+}
+
+func FormattedTitle(msg string, args ...string) {
+	Title(lang.Format(msg, args...))
+}
+
+func Fatal(msg string) {
+	Logger.Fatal(msg)
 }
