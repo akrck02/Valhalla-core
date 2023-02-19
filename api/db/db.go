@@ -4,34 +4,35 @@ import (
 	"context"
 	"time"
 
-	"github.com/withmandala/go-log"
+	"github.com/akrck02/valhalla-core/log"
+
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const MONGO_URL = "mongodb://admin:p4ssw0rd@localhost:27017"
 
-func CreateClient(logger *log.Logger) *mongo.Client {
+func CreateClient() *mongo.Client {
 	client, err := mongo.NewClient(options.Client().ApplyURI(MONGO_URL))
 	if err != nil {
-		logger.Fatal(err)
+		log.Fatal(err.Error())
 	}
 	return client
 }
 
-func Connect(logger *log.Logger, client mongo.Client) context.Context {
+func Connect(client mongo.Client) context.Context {
 
 	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	err := client.Connect(ctx)
 
 	if err != nil {
-		logger.Fatal(err)
+		log.Fatal(err.Error())
 	}
 
-	logger.Info("Database connected on " + MONGO_URL)
+	log.Info("Database connected on " + MONGO_URL)
 	return ctx
 }
 
-func Disconnect(logger *log.Logger, client mongo.Client, ctx context.Context) {
+func Disconnect(client mongo.Client, ctx context.Context) {
 	defer client.Disconnect(ctx)
 }

@@ -6,10 +6,10 @@ import (
 	"io/ioutil"
 
 	"github.com/akrck02/valhalla-core/db"
+	"github.com/akrck02/valhalla-core/log"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
 	"github.com/gin-gonic/gin"
-	"github.com/withmandala/go-log"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -27,11 +27,11 @@ const (
 	INVALID_PASSWORD = 1
 )
 
-func Register(c *gin.Context, logger *log.Logger) {
+func Register(c *gin.Context) {
 
-	var client = db.CreateClient(logger)
-	var conn = db.Connect(logger, *client)
-	defer db.Disconnect(logger, *client, conn)
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
 
 	var params RegisterParams
 	err := c.ShouldBindJSON(&params)
@@ -86,15 +86,15 @@ func Register(c *gin.Context, logger *log.Logger) {
 	)
 }
 
-func Login(c *gin.Context, logger *log.Logger) {
+func Login(c *gin.Context) {
 
-	var client = db.CreateClient(logger)
-	var conn = db.Connect(logger, *client)
-	defer db.Disconnect(logger, *client, conn)
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
 
 	jsonData, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
-		utils.Fatal(err.Error())
+		log.Fatal(err.Error())
 	}
 
 	var user models.User
@@ -115,7 +115,7 @@ func Login(c *gin.Context, logger *log.Logger) {
 		utils.HTTP_STATUS_OK,
 		gin.H{"code": utils.HTTP_STATUS_OK, "message": "User found", "data": found},
 	)
-	utils.Info(user.Username + " / " + user.Password)
+	log.Info(user.Username + " / " + user.Password)
 }
 
 func validatePassword(password string) validatePasswordResponse {
