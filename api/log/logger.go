@@ -16,7 +16,7 @@ var Logger = log.New(os.Stderr)
 
 func ShowLogAppTitle() {
 	Line()
-	fmt.Println(lang.APP_TITLE)
+	fmt.Println("               " + lang.APP_TITLE)
 	Line()
 }
 

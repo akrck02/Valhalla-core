@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/akrck02/valhalla-core/configuration"
 	"github.com/akrck02/valhalla-core/log"
 	"github.com/gin-gonic/gin"
 )
@@ -10,6 +11,11 @@ const VERSION = "v1"
 const API_COMPLETE = "/" + API_PATH + "/" + VERSION + "/"
 
 func Start() {
+
+	var configuration = configuration.LoadConfiguration()
+
+	log.ShowLogAppTitle()
+
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 
@@ -17,8 +23,8 @@ func Start() {
 	router.POST(API_COMPLETE+"register/", route(Register))
 	router.POST(API_COMPLETE+"login/", route(Login))
 
-	log.Info("Server started on 127.0.0.1:3333")
-	state := router.Run("127.0.0.1:3333")
+	log.FormattedInfo("API started on https://${0}:${1}${2}", configuration.Ip, configuration.Port, API_COMPLETE)
+	state := router.Run(configuration.Ip + ":" + configuration.Port)
 	log.Error(state.Error())
 
 }
