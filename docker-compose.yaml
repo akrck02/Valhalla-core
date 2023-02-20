@@ -27,7 +27,7 @@ services:
       - ./mongo-data:/data/db
     networks:
       backend:
-        ipv4_address: 172.20.0.10
+        ipv4_address: ${IP_MONGODB}
       
   mongo-express:
     image: mongo-express
