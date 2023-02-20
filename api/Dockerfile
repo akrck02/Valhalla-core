@@ -1,17 +1,8 @@
 FROM golang:latest
 
-ENV PORT=$PORT
+ENV APP_HOME /src/
+RUN mkdir -p "$APP_HOME"
 
-WORKDIR /app
-
-COPY go.mod ./
-RUN go mod download
-
-COPY *.go ./
-
-COPY . ./
-RUN go build -o /valhalla-core
-
-EXPOSE $PORT
-
-CMD [ "/valhalla-core" ]
+WORKDIR "$APP_HOME"
+EXPOSE 3333
+CMD go build;GIN_MODE=release ./valhalla-core
