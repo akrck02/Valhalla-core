@@ -11,6 +11,8 @@ services:
     - type: bind
       source: /var/run/docker.sock
       target: /var/run/docker.sock
+    network:
+      - backend
     
   mongodb:
     image: mongo
@@ -23,6 +25,8 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=p4ssw0rd
     volumes:
       - ./mongo-data:/data/db
+    network:
+      - backend
       
   mongo-express:
     image: mongo-express
@@ -30,9 +34,9 @@ services:
     ports:
       - "8080:8081"
     restart: unless-stopped       
+    network:
+      - backend
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
       - ME_CONFIG_MONGODB_ADMINPASSWORD=p4ssw0rd
       - ME_CONFIG_MONGODB_SERVER=mongodb
-      
-      
