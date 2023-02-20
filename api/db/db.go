@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const MONGO_URL = "mongodb://admin:p4ssw0rd@192.168.1.10:27017"
+const MONGO_URL = "mongodb://admin:p4ssw0rd@172.20.0.10:27017"
 
 func CreateClient() *mongo.Client {
 	client, err := mongo.NewClient(options.Client().ApplyURI(MONGO_URL))
