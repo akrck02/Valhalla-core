@@ -26,7 +26,8 @@ services:
     volumes:
       - ./mongo-data:/data/db
     networks:
-      - backend
+      backend:
+        ipv4_address: 192.168.1.10
       
   mongo-express:
     image: mongo-express
@@ -43,3 +44,7 @@ services:
 networks:
       backend:
         name: backend
+        ipam:
+          driver: default
+          config:
+            - subnet: 192.168.1.0/24

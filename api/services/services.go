@@ -20,8 +20,8 @@ func Start() {
 	router.Use(CORSMiddleware())
 
 	router.GET(API_COMPLETE+"ping/", Ping)
-	router.POST(API_COMPLETE+"register/", route(Register))
-	router.POST(API_COMPLETE+"login/", route(Login))
+	router.POST(API_COMPLETE+"register/", Register)
+	router.POST(API_COMPLETE+"login/", Login)
 
 	log.FormattedInfo("API started on https://${0}:${1}${2}", configuration.Ip, configuration.Port, API_COMPLETE)
 	state := router.Run(configuration.Ip + ":" + configuration.Port)
@@ -29,13 +29,6 @@ func Start() {
 
 }
 
-func route(function func(c *gin.Context)) func(c *gin.Context) {
-
-	return func(c *gin.Context) {
-		function(c)
-	}
-
-}
 
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
