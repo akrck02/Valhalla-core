@@ -4,7 +4,6 @@ services:
     
   mongodb:
     image: mongo
-    user : root
     container_name: mongodb   
     ports:
       - "27017:27017"
@@ -13,7 +12,7 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=admin
       - MONGO_INITDB_ROOT_PASSWORD=p4ssw0rd
     volumes:
-          - mongodata:/data/db
+      - ./mongo-data:/data/db
       
   mongo-express:
     image: mongo-express
@@ -25,6 +24,5 @@ services:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
       - ME_CONFIG_MONGODB_ADMINPASSWORD=p4ssw0rd
       - ME_CONFIG_MONGODB_SERVER=mongodb
-volumes:
-  mongodata:
-    external: true
+      
+      
