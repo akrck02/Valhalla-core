@@ -12,8 +12,6 @@ const API_COMPLETE = "/" + API_PATH + "/" + VERSION + "/"
 
 func Start() {
 
-	var configuration = configuration.LoadConfiguration()
-
 	log.ShowLogAppTitle()
 
 	router := gin.Default()
@@ -23,12 +21,11 @@ func Start() {
 	router.POST(API_COMPLETE+"register/", Register)
 	router.POST(API_COMPLETE+"login/", Login)
 
-	log.FormattedInfo("API started on https://${0}:${1}${2}", configuration.Ip, configuration.Port, API_COMPLETE)
-	state := router.Run(configuration.Ip + ":" + configuration.Port)
+	log.FormattedInfo("API started on https://${0}:${1}${2}", configuration.Params.Ip, configuration.Params.Port, API_COMPLETE)
+	state := router.Run(configuration.Params.Ip + ":" + configuration.Params.Port)
 	log.Error(state.Error())
 
 }
-
 
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {

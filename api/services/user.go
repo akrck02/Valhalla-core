@@ -6,6 +6,8 @@ import (
 	"io/ioutil"
 
 	"github.com/akrck02/valhalla-core/db"
+	"github.com/akrck02/valhalla-core/error"
+	"github.com/akrck02/valhalla-core/lang"
 	"github.com/akrck02/valhalla-core/log"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
@@ -20,12 +22,14 @@ type RegisterParams struct {
 	Email    string `json:"email"`
 }
 
-type validatePasswordResponse int64
+type validatePasswordResult struct {
+	Response error.User
+	Message  string
+}
 
-const (
-	VALID_PASSWORD   = 0
-	INVALID_PASSWORD = 1
-)
+const MINIMUM_CHARACTERS_FOR_PASSWORD = 16
+
+var SPECIAL_CHARATERS = []string{"!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "=", "+", "[", "]", "{", "}", "|", ";", ":", "'", ",", ".", "<", ">", "?", "/", "`", "~"}
 
 func Register(c *gin.Context) {
 
@@ -49,10 +53,12 @@ func Register(c *gin.Context) {
 	user.Password = params.Password
 	user.Email = params.Email
 
-	if validatePassword(user.Password) == INVALID_PASSWORD {
+	var checkedPass = validatePassword(user.Password)
+
+	if checkedPass.Response != 200 {
 		utils.SendResponse(c,
 			utils.HTTP_STATUS_FORBIDDEN,
-			gin.H{"code": utils.HTTP_STATUS_FORBIDDEN, "message": "Invalid password"},
+			gin.H{"code": utils.HTTP_STATUS_FORBIDDEN, "error": checkedPass.Response, "message": checkedPass.Message},
 		)
 		return
 	}
@@ -86,6 +92,11 @@ func Register(c *gin.Context) {
 	)
 }
 
+// Check the given credentials.
+//
+//	[HTTP]  POST
+//	[param] username | string: username of the user
+//	[returns] the user can login or not
 func Login(c *gin.Context) {
 
 	var client = db.CreateClient()
@@ -118,11 +129,42 @@ func Login(c *gin.Context) {
 	log.Info(user.Username + " / " + user.Password)
 }
 
-func validatePassword(password string) validatePasswordResponse {
+// Check if the given password is valid
+// following the next rules:
+//
+//		[-] At least 16 characters
+//		[-] At least one special character
+//		[-] At least one number
+//
+//	 [param] password | string: password to check
+//	 [returns] the password is valid or not
+func validatePassword(password string) validatePasswordResult {
 
-	return VALID_PASSWORD
+	if len(password) < MINIMUM_CHARACTERS_FOR_PASSWORD {
+		return validatePasswordResult{
+			Response: error.SHORT_PASSWORD,
+			Message:  "Password must have at least " + lang.Int2String(MINIMUM_CHARACTERS_FOR_PASSWORD) + " characters",
+		}
+	}
+
+	if !utils.ContainsAny(password, SPECIAL_CHARATERS) {
+		return validatePasswordResult{
+			Response: error.NO_SPECIAL_CHARACTERS_PASSWORD,
+			Message:  "Password must have at least one special character",
+		}
+	}
+
+	return validatePasswordResult{
+		Response: 200,
+		Message:  "Ok.",
+	}
 }
 
+// Check email on database
+//
+//	[param] email | string The email to check
+//	[param] conn | context.Context The connection to the database
+//	[returns] model.User | The user found or empty
 func mailExists(email string, conn context.Context, coll *mongo.Collection) models.User {
 
 	filter := bson.D{{Key: "email", Value: email}}
@@ -134,6 +176,12 @@ func mailExists(email string, conn context.Context, coll *mongo.Collection) mode
 
 }
 
+// Get if the given credentials are valid
+//
+//	[param] username | string : The username to check
+//	[param] password | string : The password to check
+//	[param] conn | context.Context : The connection to the database
+//	[returns] model.User | The user found or empty
 func authorizationOk(username string, password string, conn context.Context, coll *mongo.Collection) models.User {
 
 	filter := bson.D{{Key: "username", Value: username}, {Key: "password", Value: password}}
