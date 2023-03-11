@@ -11,12 +11,16 @@ func Format(message string, args ...string) string {
 	var i int
 
 	for i = 0; i < len(args); i++ {
-		message = strings.Replace(message, "${"+int2String(i)+"}", args[i], -1)
+		message = strings.Replace(message, "${"+Int2String(i)+"}", args[i], -1)
 	}
 
 	return message
 }
 
-func int2String(num int) string {
+func Int2String(num int) string {
+	return strconv.FormatInt(int64(num), 10)
+}
+
+func Int642String(num int64) string {
 	return strconv.FormatInt(int64(num), 10)
 }
