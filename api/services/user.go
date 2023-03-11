@@ -63,7 +63,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	coll := client.Database("valhalla").Collection("users")
+	coll := client.Database("valhalla").Collection("user")
 	found := mailExists(user.Email, conn, coll)
 
 	if found.Email != "" {
@@ -111,7 +111,7 @@ func Login(c *gin.Context) {
 	var user models.User
 	json.Unmarshal([]byte(jsonData), &user)
 
-	coll := client.Database("valhalla").Collection("users")
+	coll := client.Database("valhalla").Collection("user")
 	found := authorizationOk(user.Username, user.Password, conn, coll)
 
 	if found.Email == "" {
@@ -122,9 +122,23 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	address := c.Request.Header.Get("User-Agent")
+	ip := c.ClientIP()
+
+	device := models.Device{Address: ip, UserAgent: address}
+	token, err := AddUserDevice(conn, client, found, device)
+
+	if err != nil {
+		utils.SendResponse(c,
+			utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			gin.H{"code": utils.HTTP_STATUS_INTERNAL_SERVER_ERROR, "message": "Cannot generate your auth token"},
+		)
+	}
+
+	found.Password = "********"
 	utils.SendResponse(c,
 		utils.HTTP_STATUS_OK,
-		gin.H{"code": utils.HTTP_STATUS_OK, "message": "User found", "data": found},
+		gin.H{"code": utils.HTTP_STATUS_OK, "message": "User found", "data": found, "auth": token},
 	)
 	log.Info(user.Username + " / " + user.Password)
 }

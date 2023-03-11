@@ -20,3 +20,7 @@ func Format(message string, args ...string) string {
 func Int2String(num int) string {
 	return strconv.FormatInt(int64(num), 10)
 }
+
+func Int642String(num int64) string {
+	return strconv.FormatInt(int64(num), 10)
+}

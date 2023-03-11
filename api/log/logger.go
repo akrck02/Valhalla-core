@@ -40,6 +40,14 @@ func FormattedInfo(msg string, args ...string) {
 	Logger.Info(lang.Format(msg, args...))
 }
 
+func Debug(msg string) {
+	Logger.Debug(msg)
+}
+
+func FormattedDebug(msg string, args ...string) {
+	Logger.Debug(lang.Format(msg, args...))
+}
+
 func Jump() {
 	Log("")
 }

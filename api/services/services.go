@@ -12,6 +12,7 @@ const API_COMPLETE = "/" + API_PATH + "/" + VERSION + "/"
 
 func Start() {
 
+	log.Logger.WithDebug()
 	log.ShowLogAppTitle()
 
 	router := gin.Default()
