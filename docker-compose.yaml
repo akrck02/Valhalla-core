@@ -1,6 +1,18 @@
 version: '3'
 
 services:
+  app:
+    entrypoint:
+    - sleep
+    - infinity
+    image: docker/dev-environments-go:stable-1
+    init: true
+    volumes:
+    - type: bind
+      source: /var/run/docker.sock
+      target: /var/run/docker.sock
+    networks:
+      - backend
     
   mongodb:
     image: mongo
@@ -13,6 +25,9 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=p4ssw0rd
     volumes:
       - ./mongo-data:/data/db
+    networks:
+      backend:
+        ipv4_address: ${IP_MONGODB}
       
   mongo-express:
     image: mongo-express
@@ -20,10 +35,16 @@ services:
     ports:
       - "8080:8081"
     restart: unless-stopped       
+    networks:
+      - backend
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=admin
       - ME_CONFIG_MONGODB_ADMINPASSWORD=p4ssw0rd
       - ME_CONFIG_MONGODB_SERVER=mongodb
-      
-      
-
+networks:
+      backend:
+        name: backend
+        ipam:
+          driver: default
+          config:
+            - subnet: 172.20.0.0/16

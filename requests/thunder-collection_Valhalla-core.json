@@ -1,0 +1,61 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "Valhalla-core",
+    "dateExported": "2023-02-20T14:26:10.405Z",
+    "version": "1.1",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "83fdf309-7f30-4900-ba10-da8d9fbf7ab1",
+            "colId": "5c60a715-d92b-470a-8b84-1c54d5f6f15b",
+            "containerId": "",
+            "name": "ping",
+            "url": "http://127.0.0.1:3333/api/v1/ping",
+            "method": "GET",
+            "sortNum": 10000,
+            "created": "2023-02-20T14:15:18.148Z",
+            "modified": "2023-02-20T14:15:18.148Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "0730c4d9-b6a9-4349-9e2f-08707243e0ba",
+            "colId": "5c60a715-d92b-470a-8b84-1c54d5f6f15b",
+            "containerId": "",
+            "name": "Login",
+            "url": "http://127.0.0.1:3333/api/v1/login",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2023-02-20T14:17:05.063Z",
+            "modified": "2023-02-20T14:19:37.734Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"username\" : \"test\",\n  \"password\" : \"test\",\n  \"email\" : \"test@test.com\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "b5d40fb7-62d3-464a-b6c8-6611a34b88df",
+            "colId": "5c60a715-d92b-470a-8b84-1c54d5f6f15b",
+            "containerId": "",
+            "name": "Register",
+            "url": "http://127.0.0.1:3333/api/v1/register",
+            "method": "POST",
+            "sortNum": 30000,
+            "created": "2023-02-20T14:18:50.675Z",
+            "modified": "2023-02-20T14:19:45.465Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"username\" : \"test\",\n  \"password\" : \"test\",\n  \"email\" : \"test@test.com\"\n}",
+                "form": []
+            },
+            "tests": []
+        }
+    ]
+}

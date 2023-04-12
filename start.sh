@@ -1,1 +1,1 @@
-cd ./api/ && GIN_MODE=release SECRET=cositos PORT=8029 HOST=0.0.0.0 DB=coffee go run .
+cd ./api/ && GIN_MODE=release go run .

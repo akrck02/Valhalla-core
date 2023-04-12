@@ -1,33 +1,31 @@
 package services
 
 import (
+	"github.com/akrck02/valhalla-core/configuration"
+	"github.com/akrck02/valhalla-core/log"
 	"github.com/gin-gonic/gin"
-	"github.com/withmandala/go-log"
 )
 
 const API_PATH = "api"
 const VERSION = "v1"
 const API_COMPLETE = "/" + API_PATH + "/" + VERSION + "/"
 
-func Start(logger *log.Logger) {
+func Start() {
+
+	log.Logger.WithDebug()
+	log.ShowLogAppTitle()
+
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 
-	router.GET(API_COMPLETE+"ping/", Ping)
-	router.POST(API_COMPLETE+"register/", route(Register, logger))
+	router.GET(API_COMPLETE+"ping/", PingHttp)
+	router.POST(API_COMPLETE+"register/", RegisterHttp)
+	router.POST(API_COMPLETE+"login/", LoginHttp)
+	router.POST(API_COMPLETE+"team/create", CreateTeamHttp)
 
-	logger.Info("Server started on 127.0.0.1:3333")
-	state := router.Run("127.0.0.1:3333")
-
-	logger.Error(state)
-
-}
-
-func route(function func(c *gin.Context, logger *log.Logger), logger *log.Logger) func(c *gin.Context) {
-
-	return func(c *gin.Context) {
-		function(c, logger)
-	}
+	log.FormattedInfo("API started on https://${0}:${1}${2}", configuration.Params.Ip, configuration.Params.Port, API_COMPLETE)
+	state := router.Run(configuration.Params.Ip + ":" + configuration.Params.Port)
+	log.Error(state.Error())
 
 }
 
