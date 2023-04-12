@@ -13,6 +13,6 @@ type pingResponse struct {
 /**
  * Status check endpoint
  */
-func Ping(c *gin.Context) {
+func PingHttp(c *gin.Context) {
 	c.IndentedJSON(http.StatusOK, pingResponse{Message: "pong"})
 }
