@@ -10,6 +10,15 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// AddUserDevice adds a new device to the database
+// or updates the token if the device already exists
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] user | models.User: user that owns the device
+// [param] device | models.Device: device to add
+//
+// [return] string: token of the device --> error : The error that occurred
 func AddUserDevice(conn context.Context, client *mongo.Client, user models.User, device models.Device) (string, error) {
 
 	token, err := utils.GenerateAuthToken(user, device)
@@ -22,7 +31,7 @@ func AddUserDevice(conn context.Context, client *mongo.Client, user models.User,
 	device.Token = token
 	device.User = user.Email
 
-	found := findDevice(device, conn, coll)
+	found := findDevice(conn, coll, device)
 
 	if found.Address != "" {
 
@@ -43,7 +52,14 @@ func AddUserDevice(conn context.Context, client *mongo.Client, user models.User,
 	return token, nil
 }
 
-func findDevice(device models.Device, conn context.Context, coll *mongo.Collection) models.Device {
+// findDevice finds a device in the database
+//
+// [param] conn | context.Context: connection to the database
+// [param] coll | *mongo.Collection: collection to search
+// [param] device | models.Device: device to find
+//
+// [return] models.Device: device found --> error : The error that occurred
+func findDevice(conn context.Context, coll *mongo.Collection, device models.Device) models.Device {
 
 	var found models.Device
 	coll.FindOne(conn, bson.M{"user": device.User, "address": device.Address, "useragent": device.UserAgent}).Decode(&found)

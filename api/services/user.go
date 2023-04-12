@@ -31,7 +31,10 @@ const MINIMUM_CHARACTERS_FOR_PASSWORD = 16
 
 var SPECIAL_CHARATERS = []string{"!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "=", "+", "[", "]", "{", "}", "|", ";", ":", "'", ",", ".", "<", ">", "?", "/", "`", "~"}
 
-func Register(c *gin.Context) {
+// Register HTTP API endpoint
+//
+// [param] c | *gin.Context: gin context
+func RegisterHttp(c *gin.Context) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
@@ -53,34 +56,11 @@ func Register(c *gin.Context) {
 	user.Password = params.Password
 	user.Email = params.Email
 
-	var checkedPass = validatePassword(user.Password)
-
-	if checkedPass.Response != 200 {
+	var error = Register(conn, client, &user)
+	if error != nil {
 		utils.SendResponse(c,
-			utils.HTTP_STATUS_FORBIDDEN,
-			gin.H{"code": utils.HTTP_STATUS_FORBIDDEN, "error": checkedPass.Response, "message": checkedPass.Message},
-		)
-		return
-	}
-
-	coll := client.Database("valhalla").Collection("user")
-	found := mailExists(user.Email, conn, coll)
-
-	if found.Email != "" {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_CONFLICT,
-			gin.H{"code": utils.HTTP_STATUS_CONFLICT, "message": "User already exists"},
-		)
-		return
-	}
-
-	// register user on database
-	usr, err := coll.InsertOne(conn, user)
-
-	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
-			gin.H{"code": utils.HTTP_STATUS_INTERNAL_SERVER_ERROR, "message": err.Error()},
+			error.Code,
+			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
 		)
 		return
 	}
@@ -88,16 +68,61 @@ func Register(c *gin.Context) {
 	// send response
 	utils.SendResponse(c,
 		utils.HTTP_STATUS_OK,
-		gin.H{"code": utils.HTTP_STATUS_OK, "message": "User created", "data": usr},
+		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User created"},
 	)
 }
 
-// Check the given credentials.
+// Register user logic
 //
-//	[HTTP]  POST
-//	[param] username | string: username of the user
-//	[returns] the user can login or not
-func Login(c *gin.Context) {
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] user | *models.User: user to register
+//
+// [return] *models.Error: error if any
+func Register(conn context.Context, client *mongo.Client, user *models.User) *models.Error {
+
+	var checkedPass = validatePassword(user.Password)
+
+	if checkedPass.Response != 200 {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Error:   int(checkedPass.Response),
+			Message: checkedPass.Message,
+		}
+	}
+
+	coll := client.Database("valhalla").Collection("user")
+	found := mailExists(user.Email, conn, coll)
+
+	if found.Email != "" {
+
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_CONFLICT,
+			Error:   int(error.USER_ALREADY_EXISTS),
+			Message: "User already exists",
+		}
+	}
+
+	user.Password = utils.EncryptSha256(user.Password)
+
+	// register user on database
+	_, err := coll.InsertOne(conn, user)
+
+	if err != nil {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Error:   int(error.USER_ALREADY_EXISTS),
+			Message: "User already exists",
+		}
+	}
+
+	return nil
+}
+
+// Login HTTP API endpoint
+//
+// [param] c | *gin.Context: gin context
+func LoginHttp(c *gin.Context) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
@@ -111,36 +136,58 @@ func Login(c *gin.Context) {
 	var user models.User
 	json.Unmarshal([]byte(jsonData), &user)
 
+	ip := c.ClientIP()
+	address := c.Request.Header.Get("User-Agent")
+	token, error := Login(conn, client, user, ip, address)
+
+	if error != nil {
+		utils.SendResponse(c,
+			error.Code,
+			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
+		)
+		return
+
+	}
+
+	utils.SendResponse(c,
+		utils.HTTP_STATUS_OK,
+		gin.H{"code": utils.HTTP_STATUS_OK, "message": "User found", "auth": token},
+	)
+
+}
+
+// Login user logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] user | models.User: user to login
+// [param] ip | string: ip address of the user
+// [param] address | string: user agent of the user
+//
+// [return] string: auth token --> *models.Error: error if any
+func Login(conn context.Context, client *mongo.Client, user models.User, ip string, address string) (string, *models.Error) {
+
 	coll := client.Database("valhalla").Collection("user")
 	found := authorizationOk(user.Username, user.Password, conn, coll)
 
 	if found.Email == "" {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_FORBIDDEN,
-			gin.H{"code": utils.HTTP_STATUS_NOT_FOUND, "message": "Forbidden"},
-		)
-		return
+		return "", &models.Error{
+			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Message: "Forbidden",
+		}
 	}
-
-	address := c.Request.Header.Get("User-Agent")
-	ip := c.ClientIP()
 
 	device := models.Device{Address: ip, UserAgent: address}
 	token, err := AddUserDevice(conn, client, found, device)
 
 	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
-			gin.H{"code": utils.HTTP_STATUS_INTERNAL_SERVER_ERROR, "message": "Cannot generate your auth token"},
-		)
+		return "", &models.Error{
+			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Message: "Cannot generate your auth token",
+		}
 	}
 
-	found.Password = "********"
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"code": utils.HTTP_STATUS_OK, "message": "User found", "data": found, "auth": token},
-	)
-	log.Info(user.Username + " / " + user.Password)
+	return token, nil
 }
 
 // Check if the given password is valid
@@ -150,8 +197,9 @@ func Login(c *gin.Context) {
 //		[-] At least one special character
 //		[-] At least one number
 //
-//	 [param] password | string: password to check
-//	 [returns] the password is valid or not
+//	 [param] password : string: password to check
+//
+//	 [return] the password is valid or not
 func validatePassword(password string) validatePasswordResult {
 
 	if len(password) < MINIMUM_CHARACTERS_FOR_PASSWORD {
@@ -178,7 +226,8 @@ func validatePassword(password string) validatePasswordResult {
 //
 //	[param] email | string The email to check
 //	[param] conn | context.Context The connection to the database
-//	[returns] model.User | The user found or empty
+//
+//	[return] model.User : The user found or empty
 func mailExists(email string, conn context.Context, coll *mongo.Collection) models.User {
 
 	filter := bson.D{{Key: "email", Value: email}}
@@ -195,10 +244,11 @@ func mailExists(email string, conn context.Context, coll *mongo.Collection) mode
 //	[param] username | string : The username to check
 //	[param] password | string : The password to check
 //	[param] conn | context.Context : The connection to the database
-//	[returns] model.User | The user found or empty
+//
+//	[return] model.User : The user found or empty
 func authorizationOk(username string, password string, conn context.Context, coll *mongo.Collection) models.User {
 
-	filter := bson.D{{Key: "username", Value: username}, {Key: "password", Value: password}}
+	filter := bson.D{{Key: "username", Value: username}, {Key: "password", Value: utils.EncryptSha256(password)}}
 
 	var result models.User
 	coll.FindOne(conn, filter).Decode(&result)
