@@ -146,7 +146,6 @@ func LoginHttp(c *gin.Context) {
 			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
 		)
 		return
-
 	}
 
 	utils.SendResponse(c,
@@ -188,6 +187,135 @@ func Login(conn context.Context, client *mongo.Client, user models.User, ip stri
 	}
 
 	return token, nil
+}
+
+// Edit user HTTP API endpoint
+//
+// [param] c | *gin.Context: gin context
+func EditUserHttp(c *gin.Context) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	jsonData, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	var user models.User
+	json.Unmarshal([]byte(jsonData), &user)
+
+	updateErr := EditUser(conn, client, user)
+	if updateErr != nil {
+		utils.SendResponse(c,
+			updateErr.Code,
+			gin.H{"http-code": updateErr.Code, "internal-code": updateErr.Error, "message": updateErr.Message},
+		)
+		return
+	}
+
+	utils.SendResponse(c,
+		utils.HTTP_STATUS_OK,
+		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User updated"},
+	)
+
+}
+
+// Edit user logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] user | models.User: user to edit
+//
+// [return] *models.Error: error if any
+func EditUser(conn context.Context, client *mongo.Client, user models.User) *models.Error {
+
+	users := client.Database("valhalla").Collection("user")
+
+	// update user on database
+	res, err := users.UpdateOne(conn, bson.M{"email": user.Email}, bson.M{"$set": bson.M{"username": user.Username, "password": user.Password}})
+
+	if err != nil {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Error:   int(error.USER_NOT_UPDATED),
+			Message: "User not updated",
+		}
+	}
+
+	if res.MatchedCount == 0 && res.ModifiedCount == 0 {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_NOT_FOUND,
+			Error:   int(error.USER_NOT_FOUND),
+			Message: "Users not found",
+		}
+	}
+
+	return nil
+}
+
+func DeleteUserHttp(c *gin.Context) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	jsonData, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	var user models.User
+	json.Unmarshal([]byte(jsonData), &user)
+
+	deleteErr := DeleteUser(conn, client, user)
+	if deleteErr != nil {
+		utils.SendResponse(c,
+			deleteErr.Code,
+			gin.H{"http-code": deleteErr.Code, "internal-code": deleteErr.Error, "message": deleteErr.Message},
+		)
+		return
+	}
+
+	utils.SendResponse(c,
+		utils.HTTP_STATUS_OK,
+		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User deleted"},
+	)
+
+}
+
+// Delete user logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] user | models.User: user to delete
+//
+// [return] *models.Error: error if any
+func DeleteUser(conn context.Context, client *mongo.Client, user models.User) *models.Error {
+
+	users := client.Database("valhalla").Collection("user")
+
+	// delete user on database
+	deleteResult, err := users.DeleteOne(conn, bson.M{"email": user.Email})
+
+	if err != nil {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Error:   int(error.USER_NOT_DELETED),
+			Message: "User not deleted",
+		}
+	}
+
+	if deleteResult.DeletedCount == 0 {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_NOT_FOUND,
+			Error:   int(error.USER_NOT_FOUND),
+			Message: "User not found",
+		}
+	}
+
+	return nil
 }
 
 // Check if the given password is valid
