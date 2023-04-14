@@ -1,58 +1,130 @@
 {
     "client": "Thunder Client",
     "collectionName": "Valhalla-core",
-    "dateExported": "2023-02-20T14:26:10.405Z",
+    "dateExported": "2023-04-14T19:11:54.406Z",
     "version": "1.1",
-    "folders": [],
+    "folders": [
+        {
+            "_id": "c9af3182-d1e4-44d1-b47d-23a27de40633",
+            "name": "user",
+            "containerId": "",
+            "created": "2023-04-14T18:19:43.100Z",
+            "sortNum": 10000
+        },
+        {
+            "_id": "ed7d30f7-b43e-4356-8454-77199b6fa582",
+            "name": "team",
+            "containerId": "",
+            "created": "2023-04-14T18:20:09.956Z",
+            "sortNum": 20000
+        }
+    ],
     "requests": [
         {
-            "_id": "83fdf309-7f30-4900-ba10-da8d9fbf7ab1",
-            "colId": "5c60a715-d92b-470a-8b84-1c54d5f6f15b",
+            "_id": "d48e3804-41a8-48e1-9622-93ffc12cdf65",
+            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
             "containerId": "",
             "name": "ping",
             "url": "http://127.0.0.1:3333/api/v1/ping",
             "method": "GET",
             "sortNum": 10000,
-            "created": "2023-02-20T14:15:18.148Z",
-            "modified": "2023-02-20T14:15:18.148Z",
+            "created": "2023-02-22T18:26:16.352Z",
+            "modified": "2023-02-22T18:26:16.352Z",
             "headers": [],
             "params": [],
             "tests": []
         },
         {
-            "_id": "0730c4d9-b6a9-4349-9e2f-08707243e0ba",
-            "colId": "5c60a715-d92b-470a-8b84-1c54d5f6f15b",
-            "containerId": "",
+            "_id": "5cf2c2ce-33e1-48f0-8513-e18d9fe2e9a0",
+            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
+            "containerId": "c9af3182-d1e4-44d1-b47d-23a27de40633",
             "name": "Login",
             "url": "http://127.0.0.1:3333/api/v1/login",
             "method": "POST",
-            "sortNum": 20000,
-            "created": "2023-02-20T14:17:05.063Z",
-            "modified": "2023-02-20T14:19:37.734Z",
+            "sortNum": 10000,
+            "created": "2023-02-22T18:26:16.353Z",
+            "modified": "2023-04-14T18:19:53.790Z",
             "headers": [],
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "{\n  \"username\" : \"test\",\n  \"password\" : \"test\",\n  \"email\" : \"test@test.com\"\n}",
+                "raw": "{\n  \"username\" : \"test\",\n  \"password\" : \"test1010101010101*\",\n  \"email\" : \"test@test.com\"\n}",
                 "form": []
             },
             "tests": []
         },
         {
-            "_id": "b5d40fb7-62d3-464a-b6c8-6611a34b88df",
-            "colId": "5c60a715-d92b-470a-8b84-1c54d5f6f15b",
-            "containerId": "",
-            "name": "Register",
-            "url": "http://127.0.0.1:3333/api/v1/register",
+            "_id": "32fecf47-5e23-43a3-8042-bdf627c83fbb",
+            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
+            "containerId": "ed7d30f7-b43e-4356-8454-77199b6fa582",
+            "name": "New team",
+            "url": "http://127.0.0.1:3333/api/v1/team/create",
             "method": "POST",
-            "sortNum": 30000,
-            "created": "2023-02-20T14:18:50.675Z",
-            "modified": "2023-02-20T14:19:45.465Z",
+            "sortNum": 10000,
+            "created": "2023-04-12T17:29:41.599Z",
+            "modified": "2023-04-14T18:20:44.129Z",
             "headers": [],
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "{\n  \"username\" : \"test\",\n  \"password\" : \"test\",\n  \"email\" : \"test@test.com\"\n}",
+                "raw": "{\n\t\"Name\" :\"Nightlight Studios\",\n\t\"Description\" : \"\",\n\t\"ProfilePic\" : \"\"\n}\n",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "48037a02-5811-45dc-844b-37cf00847b4d",
+            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
+            "containerId": "c9af3182-d1e4-44d1-b47d-23a27de40633",
+            "name": "Edit user",
+            "url": "http://127.0.0.1:3333/api/v1/user/edit",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2023-04-14T18:14:55.152Z",
+            "modified": "2023-04-14T18:45:02.297Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"username\" : \"test\",\n  \"password\" : \"tesat1010101010101*\",\n  \"email\" : \"test@test.com\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "359b15f1-fb83-4868-9992-e846718550d1",
+            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
+            "containerId": "c9af3182-d1e4-44d1-b47d-23a27de40633",
+            "name": "Delete user ",
+            "url": "http://127.0.0.1:3333/api/v1/user/delete",
+            "method": "POST",
+            "sortNum": 25000,
+            "created": "2023-04-14T18:56:07.786Z",
+            "modified": "2023-04-14T18:56:30.837Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"email\" : \"test@test.com\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "58091a3a-07a2-438a-8d7d-4bf44d39105f",
+            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
+            "containerId": "c9af3182-d1e4-44d1-b47d-23a27de40633",
+            "name": "Register",
+            "url": "http://127.0.0.1:3333/api/v1/register",
+            "method": "POST",
+            "sortNum": 30000,
+            "created": "2023-02-22T18:26:16.354Z",
+            "modified": "2023-04-14T18:19:59.957Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"username\" : \"test\",\n  \"password\" : \"test1010101010101*\",\n  \"email\" : \"test@test.com\"\n}",
                 "form": []
             },
             "tests": []
