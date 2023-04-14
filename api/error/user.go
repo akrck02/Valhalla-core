@@ -1,6 +1,6 @@
 package error
 
-type User int64
+type User int
 
 const (
 	USER_ALREADY_EXISTS            = 600

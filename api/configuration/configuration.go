@@ -2,9 +2,16 @@ package configuration
 
 import (
 	"os"
+	"path/filepath"
+	"runtime"
 
 	"github.com/akrck02/valhalla-core/log"
 	"github.com/joho/godotenv"
+)
+
+var (
+	_, b, _, _ = runtime.Caller(0)
+	BASE_PATH  = filepath.Dir(b) + "/../"
 )
 
 type GlobalConfiguration struct {
@@ -17,7 +24,8 @@ type GlobalConfiguration struct {
 var Params = LoadConfiguration()
 
 func LoadConfiguration() GlobalConfiguration {
-	err := godotenv.Load("./.env")
+	print(BASE_PATH)
+	err := godotenv.Load(BASE_PATH + ".env")
 
 	if err != nil {
 		log.Fatal("Error loading .env file")
