@@ -11,4 +11,5 @@ const (
 	USER_NOT_UPDATED               = 605
 	USER_NOT_FOUND                 = 606
 	USER_NOT_DELETED               = 607
+  NO_UPPER_LOWER_PASSWORD        = 608
 )
