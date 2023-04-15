@@ -344,6 +344,20 @@ func validatePassword(password string) validatePasswordResult {
 		}
 	}
 
+	if !utils.IsLowerCase(password) {
+		return validatePasswordResult{
+			Response: error.NO_UPPER_LOWER_PASSWORD,
+			Message:  "Password must have at least one uppercase character",
+		}
+	}
+
+	if !utils.IsUpperCase(password) {
+		return validatePasswordResult{
+			Response: error.NO_UPPER_LOWER_PASSWORD,
+			Message:  "Password must have at least one lowercase character",
+		}
+	}
+
 	return validatePasswordResult{
 		Response: 200,
 		Message:  "Ok.",
