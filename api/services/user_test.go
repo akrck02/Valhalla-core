@@ -389,6 +389,17 @@ func TestLoginWrongEmail(t *testing.T) {
 
 	log.Info("User not logged in")
 	log.FormattedInfo("Error: ${0}", err.Message)
+
+	// delete the user
+	log.Info("Deleting user")
+	err = DeleteUser(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not deleted", err)
+		return
+	}
+
+	log.Info("User deleted")
 }
 
 // TODO: add tests for the following functions
@@ -455,6 +466,7 @@ func TestChangeUserEmail(t *testing.T) {
 	log.Info("User email changed")
 
 	user.Email = newEmail
+
 	// delete the user
 	log.Info("Deleting user")
 	err = DeleteUser(conn, client, user)
