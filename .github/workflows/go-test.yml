@@ -24,5 +24,8 @@ jobs:
         mongodb-db: valhalla-test
         mongodb-port: 27017
     
+    - name: Create env file
+      run: echo "IP=127.0.0.1 \n PORT=3333 \n SECRET=secret \n GIN_MODE=release \n IP_MONGODB=172.0.0.1" > api/.env
+    
     - name: Run tests 
       run: cd api && go test -v ./...
