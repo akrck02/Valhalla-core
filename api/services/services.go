@@ -21,6 +21,10 @@ func Start() {
 	router.GET(API_COMPLETE+"ping/", PingHttp)
 	router.POST(API_COMPLETE+"register/", RegisterHttp)
 	router.POST(API_COMPLETE+"login/", LoginHttp)
+	router.POST(API_COMPLETE+"user/edit", EditUserHttp)
+	router.POST(API_COMPLETE+"user/password/change", ChangeUserPasswordHttp)
+	router.POST(API_COMPLETE+"user/email/change", ChangeUserEmailHttp)
+	router.POST(API_COMPLETE+"user/delete", DeleteUserHttp)
 	router.POST(API_COMPLETE+"team/create", CreateTeamHttp)
 
 	log.FormattedInfo("API started on https://${0}:${1}${2}", configuration.Params.Ip, configuration.Params.Port, API_COMPLETE)

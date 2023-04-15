@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+
 	"github.com/akrck02/valhalla-core/configuration"
 	"github.com/akrck02/valhalla-core/lang"
 	"github.com/akrck02/valhalla-core/log"
@@ -28,4 +31,10 @@ func GenerateAuthToken(user models.User, device models.Device) (string, error) {
 
 	tokenString, err := token.SignedString([]byte(configuration.Params.Secret))
 	return tokenString, err
+}
+
+func EncryptSha256(text string) string {
+	plainText := []byte(text)
+	sha256Hash := sha256.Sum256(plainText)
+	return hex.EncodeToString(sha256Hash[:])
 }

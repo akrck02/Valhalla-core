@@ -2,9 +2,17 @@ package configuration
 
 import (
 	"os"
+	"path/filepath"
+	"runtime"
+	"strings"
 
 	"github.com/akrck02/valhalla-core/log"
 	"github.com/joho/godotenv"
+)
+
+var (
+	_, b, _, _ = runtime.Caller(0)
+	BASE_PATH  = filepath.Dir(b) + "/../"
 )
 
 type GlobalConfiguration struct {
@@ -17,7 +25,7 @@ type GlobalConfiguration struct {
 var Params = LoadConfiguration()
 
 func LoadConfiguration() GlobalConfiguration {
-	err := godotenv.Load("./.env")
+	err := godotenv.Load(BASE_PATH + ".env")
 
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -35,9 +43,13 @@ func LoadConfiguration() GlobalConfiguration {
 }
 
 func checkCompulsoryVariables(Configuration GlobalConfiguration) {
-	log.Info("Checking compulsory variables")
+	log.Jump()
+	log.Line()
+	log.Info("Configuration variables")
+	log.Line()
 	log.Info("IP: " + Configuration.Ip)
 	log.Info("PORT: " + Configuration.Port)
-	log.Info("SECRET: " + Configuration.Secret)
+	log.Info("SECRET: " + strings.Repeat("*", len(Configuration.Secret)))
 	log.Info("MONGO: " + Configuration.Mongo)
+	log.Line()
 }
