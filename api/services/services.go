@@ -22,7 +22,8 @@ func Start() {
 	router.POST(API_COMPLETE+"register/", RegisterHttp)
 	router.POST(API_COMPLETE+"login/", LoginHttp)
 	router.POST(API_COMPLETE+"user/edit", EditUserHttp)
-	router.POST(API_COMPLETE+"user/password/change", ChangePasswordHttp)
+	router.POST(API_COMPLETE+"user/password/change", ChangeUserPasswordHttp)
+	router.POST(API_COMPLETE+"user/email/change", ChangeUserEmailHttp)
 	router.POST(API_COMPLETE+"user/delete", DeleteUserHttp)
 	router.POST(API_COMPLETE+"team/create", CreateTeamHttp)
 
