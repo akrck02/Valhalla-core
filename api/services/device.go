@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 
+	"github.com/akrck02/valhalla-core/db"
 	"github.com/akrck02/valhalla-core/log"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
@@ -27,7 +28,7 @@ func AddUserDevice(conn context.Context, client *mongo.Client, user models.User,
 		return "", err
 	}
 
-	coll := client.Database("valhalla").Collection("device")
+	coll := client.Database(db.DATABASE_NAME).Collection(db.DEVICE)
 	device.Token = token
 	device.User = user.Email
 
