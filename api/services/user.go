@@ -97,7 +97,7 @@ func Register(conn context.Context, client *mongo.Client, user models.User) *mod
 func Login(conn context.Context, client *mongo.Client, user models.User, ip string, address string) (string, *models.Error) {
 
 	coll := client.Database(db.DATABASE_NAME).Collection(db.USER)
-	found := authorizationOk(user.Username, user.Password, conn, coll)
+	found := authorizationOk(user.Email, user.Password, conn, coll)
 
 	if found.Email == "" {
 		return "", &models.Error{
@@ -418,9 +418,9 @@ func mailExists(email string, conn context.Context, coll *mongo.Collection) mode
 //	[param] conn | context.Context : The connection to the database
 //
 //	[return] model.User : The user found or empty
-func authorizationOk(username string, password string, conn context.Context, coll *mongo.Collection) models.User {
+func authorizationOk(email string, password string, conn context.Context, coll *mongo.Collection) models.User {
 
-	filter := bson.D{{Key: "username", Value: username}, {Key: "password", Value: utils.EncryptSha256(password)}}
+	filter := bson.D{{Key: "email", Value: email}, {Key: "password", Value: utils.EncryptSha256(password)}}
 
 	var result models.User
 	coll.FindOne(conn, filter).Decode(&result)

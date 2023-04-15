@@ -374,8 +374,20 @@ func TestLoginWrongEmail(t *testing.T) {
 	log.Info("Password: " + user.Password)
 	log.Info("Username: " + user.Username)
 
+	err := Register(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not registered", err)
+		return
+	}
+
+	log.FormattedInfo("Login with email that does not exist ${0}", user.Email)
+
 	// login the user
-	_, err := Login(conn, client, user, mock.Ip(), mock.Platform())
+	_, err = Login(conn, client, models.User{
+		Email:    mock.Email(),
+		Password: user.Password,
+	}, mock.Ip(), mock.Platform())
 
 	if err == nil {
 		t.Error("The login was successful")
