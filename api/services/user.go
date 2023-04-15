@@ -2,13 +2,10 @@ package services
 
 import (
 	"context"
-	"encoding/json"
-	"io/ioutil"
 
 	"github.com/akrck02/valhalla-core/db"
 	"github.com/akrck02/valhalla-core/error"
 	"github.com/akrck02/valhalla-core/lang"
-	"github.com/akrck02/valhalla-core/log"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
 	"github.com/gin-gonic/gin"
@@ -45,7 +42,7 @@ func RegisterHttp(c *gin.Context) {
 
 	if err != nil {
 		utils.SendResponse(c,
-			utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			utils.HTTP_STATUS_BAD_REQUEST,
 			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
 		)
 		return
@@ -128,17 +125,12 @@ func LoginHttp(c *gin.Context) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	jsonData, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
 	var user models.User
-	json.Unmarshal([]byte(jsonData), &user)
+	utils.ReadBodyJson(c, &user)
 
 	ip := c.ClientIP()
 	address := c.Request.Header.Get("User-Agent")
-	token, error := Login(conn, client, user, ip, address)
+	token, error := Login(conn, client, &user, ip, address)
 
 	if error != nil {
 		utils.SendResponse(c,
@@ -152,7 +144,6 @@ func LoginHttp(c *gin.Context) {
 		utils.HTTP_STATUS_OK,
 		gin.H{"code": utils.HTTP_STATUS_OK, "message": "User found", "auth": token},
 	)
-
 }
 
 // Login user logic
@@ -164,7 +155,7 @@ func LoginHttp(c *gin.Context) {
 // [param] address | string: user agent of the user
 //
 // [return] string: auth token --> *models.Error: error if any
-func Login(conn context.Context, client *mongo.Client, user models.User, ip string, address string) (string, *models.Error) {
+func Login(conn context.Context, client *mongo.Client, user *models.User, ip string, address string) (string, *models.Error) {
 
 	coll := client.Database("valhalla").Collection("user")
 	found := authorizationOk(user.Username, user.Password, conn, coll)
@@ -198,15 +189,10 @@ func EditUserHttp(c *gin.Context) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	jsonData, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
 	var user models.User
-	json.Unmarshal([]byte(jsonData), &user)
+	utils.ReadBodyJson(c, &user)
 
-	updateErr := EditUser(conn, client, user)
+	updateErr := EditUser(conn, client, &user)
 	if updateErr != nil {
 		utils.SendResponse(c,
 			updateErr.Code,
@@ -219,7 +205,6 @@ func EditUserHttp(c *gin.Context) {
 		utils.HTTP_STATUS_OK,
 		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User updated"},
 	)
-
 }
 
 // Edit user logic
@@ -229,7 +214,7 @@ func EditUserHttp(c *gin.Context) {
 // [param] user | models.User: user to edit
 //
 // [return] *models.Error: error if any
-func EditUser(conn context.Context, client *mongo.Client, user models.User) *models.Error {
+func EditUser(conn context.Context, client *mongo.Client, user *models.User) *models.Error {
 
 	users := client.Database("valhalla").Collection("user")
 
@@ -255,21 +240,20 @@ func EditUser(conn context.Context, client *mongo.Client, user models.User) *mod
 	return nil
 }
 
+// Delete user HTTP API endpoint
+//
+// [param] c | *gin.Context: gin context
+// [return] *models.Error: error if any
 func DeleteUserHttp(c *gin.Context) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	jsonData, err := ioutil.ReadAll(c.Request.Body)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
 	var user models.User
-	json.Unmarshal([]byte(jsonData), &user)
+	utils.ReadBodyJson(c, &user)
 
-	deleteErr := DeleteUser(conn, client, user)
+	deleteErr := DeleteUser(conn, client, &user)
 	if deleteErr != nil {
 		utils.SendResponse(c,
 			deleteErr.Code,
@@ -282,7 +266,6 @@ func DeleteUserHttp(c *gin.Context) {
 		utils.HTTP_STATUS_OK,
 		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User deleted"},
 	)
-
 }
 
 // Delete user logic
@@ -292,7 +275,7 @@ func DeleteUserHttp(c *gin.Context) {
 // [param] user | models.User: user to delete
 //
 // [return] *models.Error: error if any
-func DeleteUser(conn context.Context, client *mongo.Client, user models.User) *models.Error {
+func DeleteUser(conn context.Context, client *mongo.Client, user *models.User) *models.Error {
 
 	users := client.Database("valhalla").Collection("user")
 
@@ -314,6 +297,62 @@ func DeleteUser(conn context.Context, client *mongo.Client, user models.User) *m
 			Message: "User not found",
 		}
 	}
+
+	return nil
+}
+
+// Change password HTTP API endpoint
+//
+// [param] c | *gin.Context: gin context
+// [return] *models.Error: error if any
+func ChangePasswordHttp(c *gin.Context) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user models.User
+	utils.ReadBodyJson(c, &user)
+
+	changeErr := ChangePassword(conn, client, &user)
+	if changeErr != nil {
+		utils.SendResponse(c,
+			changeErr.Code,
+			gin.H{"http-code": changeErr.Code, "internal-code": changeErr.Error, "message": changeErr.Message},
+		)
+		return
+	}
+
+	utils.SendResponse(c,
+		utils.HTTP_STATUS_OK,
+		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Password changed"},
+	)
+}
+
+// Change password logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] user | models.User: user to change password
+//
+// [return] *models.Error: error if any
+func ChangePassword(conn context.Context, client *mongo.Client, user *models.User) *models.Error {
+
+	users := client.Database("valhalla").Collection("user")
+
+	var checkedPass = validatePassword(user.Password)
+	if checkedPass.Response != 200 {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(checkedPass.Response),
+			Message: checkedPass.Message,
+		}
+	}
+
+	user.Password = utils.EncryptSha256(user.Password)
+
+	// update user on database
+	users.UpdateOne(conn, bson.M{"email": user.Email}, bson.M{"$set": bson.M{"password": user.Password}})
 
 	return nil
 }
@@ -344,14 +383,14 @@ func validatePassword(password string) validatePasswordResult {
 		}
 	}
 
-	if !utils.IsLowerCase(password) {
+	if utils.IsLowerCase(password) {
 		return validatePasswordResult{
 			Response: error.NO_UPPER_LOWER_PASSWORD,
 			Message:  "Password must have at least one uppercase character",
 		}
 	}
 
-	if !utils.IsUpperCase(password) {
+	if utils.IsUpperCase(password) {
 		return validatePasswordResult{
 			Response: error.NO_UPPER_LOWER_PASSWORD,
 			Message:  "Password must have at least one lowercase character",
@@ -378,7 +417,6 @@ func mailExists(email string, conn context.Context, coll *mongo.Collection) mode
 	coll.FindOne(conn, filter).Decode(&result)
 
 	return result
-
 }
 
 // Get if the given credentials are valid
@@ -396,5 +434,4 @@ func authorizationOk(username string, password string, conn context.Context, col
 	coll.FindOne(conn, filter).Decode(&result)
 
 	return result
-
 }
