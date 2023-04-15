@@ -10,3 +10,11 @@ func ContainsAny(str string, chars []string) bool {
 	}
 	return false
 }
+
+func IsLowerCase(str string) bool {
+	return str == strings.ToLower(str)
+}
+
+func IsUpperCase(str string) bool {
+	return str == strings.ToUpper(str)
+}
