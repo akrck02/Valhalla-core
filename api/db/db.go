@@ -60,7 +60,11 @@ func SetupTest() {
 	var ctx = Connect(*client)
 
 	log.Info("Dropping database " + DATABASE_NAME)
-	client.Database(DATABASE_NAME).Drop(ctx)
+	err := client.Database(DATABASE_NAME).Drop(ctx)
+	if err != nil {
+		log.FormattedError("Error dropping database ${0} : ${1}", DATABASE_NAME, err.Error())
+	}
+
 	defer Disconnect(*client, ctx)
 }
 
