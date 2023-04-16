@@ -31,4 +31,4 @@ jobs:
         title: valhalla-core-${{ github.sha }}
         files: |
           LICENSE
-          dist/*
+          api/valhalla-core
