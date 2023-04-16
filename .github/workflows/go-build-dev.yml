@@ -20,7 +20,7 @@ jobs:
         go-version: 1.19
         
     - name: Build
-      run: cd api && go build -v ./...
+      run: sh compile.sh
 
     - name: Create a Release of commit
       uses: "marvinpinto/action-automatic-releases@latest"
@@ -31,4 +31,4 @@ jobs:
         title: valhalla-core-${{ github.sha }}
         files: |
           LICENSE
-          **/valhalla-core/**
+          dist/valhalla-core
