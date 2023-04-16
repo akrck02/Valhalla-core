@@ -31,4 +31,4 @@ jobs:
         title: valhalla-core
         files: |
           LICENSE
-          dist/*
+          dist/* 
