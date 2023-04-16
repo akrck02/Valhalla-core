@@ -23,9 +23,9 @@ func TestRegister(t *testing.T) {
 		Username: mock.Username(),
 	}
 
-	log.Info("Registering user: " + user.Email)
-	log.Info("Password: " + user.Password)
-	log.Info("Username: " + user.Username)
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+	log.FormattedInfo("Password: ${0}", user.Password)
+	log.FormattedInfo("Username: ${0}", user.Username)
 
 	err := Register(conn, client, user)
 
@@ -46,7 +46,98 @@ func TestRegister(t *testing.T) {
 	}
 
 	log.Info("User deleted")
+}
 
+func TestRegisterNotEmail(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = models.User{
+		Password: mock.Password(),
+		Username: mock.Username(),
+	}
+
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+	log.FormattedInfo("Password: ${0}", user.Password)
+	log.FormattedInfo("Username: ${0}", user.Username)
+
+	err := Register(conn, client, user)
+
+	if err == nil {
+		t.Error("The user was registered with no email")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_EMAIL {
+		t.Error("The error is not the expected" + err.Message)
+		return
+	}
+
+	log.Info("User not registered")
+	log.FormattedInfo("Error: ${0}", err.Message)
+}
+
+func TestRegisterNotUsername(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = models.User{
+		Email:    mock.Email(),
+		Password: mock.Password(),
+	}
+
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+	log.FormattedInfo("Password: ${0}", user.Password)
+	log.FormattedInfo("Username: ${0}", user.Username)
+
+	err := Register(conn, client, user)
+
+	if err == nil {
+		t.Error("The user was registered with no username")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_USERNAME {
+		t.Error("The error is not the expected" + err.Message)
+		return
+	}
+
+	log.Info("User not registered")
+	log.FormattedInfo("Error: ${0}", err.Message)
+}
+func TestRegisterNotPassword(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = models.User{
+		Email:    mock.Email(),
+		Username: mock.Username(),
+	}
+
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+	log.FormattedInfo("Password: ${0}", user.Password)
+	log.FormattedInfo("Username: ${0}", user.Username)
+
+	err := Register(conn, client, user)
+
+	if err == nil {
+		t.Error("The user was registered with no password")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_PASSWORD {
+		t.Error("The error is not the expected" + err.Message)
+		return
+	}
+
+	log.Info("User not registered")
+	log.FormattedInfo("Error: ${0}", err.Message)
 }
 
 func TestRegisterNotDotEmail(t *testing.T) {
@@ -63,16 +154,16 @@ func TestRegisterNotDotEmail(t *testing.T) {
 
 	err := Register(conn, client, user)
 
-	log.Info("Registering user: " + user.Email)
-	log.Info("Password: " + user.Password)
-	log.Info("Username: " + user.Username)
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+	log.FormattedInfo("Password: ${0}", user.Password)
+	log.FormattedInfo("Username: ${0}", user.Username)
 
 	if err == nil {
 		t.Error("The user was registered with an invalid email")
 		return
 	}
 
-	if err.Error != error.NO_DOT_EMAIL {
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_DOT_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -81,30 +172,28 @@ func TestRegisterNotDotEmail(t *testing.T) {
 	log.FormattedInfo("Error: ${0}", err.Message)
 }
 
-func TestRegisterMinimumCharacters(t *testing.T) {
+func TestRegisterNotAtEmail(t *testing.T) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
 	var user = models.User{
-		Email:    mock.Email(),
-		Password: mock.PasswordShort(),
+		Email:    mock.EmailNotAt(),
+		Password: mock.Password(),
 		Username: mock.Username(),
 	}
 
-	log.Info("Registering user: " + user.Email)
-	log.Info("Password: " + user.Password)
-	log.Info("Username: " + user.Username)
+	log.FormattedInfo("Registering user: ${0}", user.Email)
 
 	err := Register(conn, client, user)
 
 	if err == nil {
-		t.Error("The user was registered with less than minimum characters")
+		t.Error("The user was registered with an invalid email")
 		return
 	}
 
-	if err.Error != error.SHORT_PASSWORD {
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_AT_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -113,7 +202,37 @@ func TestRegisterMinimumCharacters(t *testing.T) {
 	log.FormattedInfo("Error: ${0}", err.Message)
 }
 
-func TestRegisterSpecialCharacters(t *testing.T) {
+func TestRegisterShortMail(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = models.User{
+		Email:    mock.EmailShort(),
+		Password: mock.Password(),
+		Username: mock.Username(),
+	}
+
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+
+	err := Register(conn, client, user)
+
+	if err == nil {
+		t.Error("The user was registered with an invalid email")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_EMAIL {
+		t.Error("The error is not the expected" + err.Message)
+		return
+	}
+
+	log.Info("User not registered")
+	log.FormattedInfo("Error: ${0}", err.Message)
+}
+
+func TestRegisterNotSpecialCharactersPassword(t *testing.T) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
@@ -125,9 +244,9 @@ func TestRegisterSpecialCharacters(t *testing.T) {
 		Username: mock.Username(),
 	}
 
-	log.Info("Registering user: " + user.Email)
-	log.Info("Password: " + user.Password)
-	log.Info("Username: " + user.Username)
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+	log.FormattedInfo("Password: ${0}", user.Password)
+	log.FormattedInfo("Username: ${0}", user.Username)
 
 	err := Register(conn, client, user)
 
@@ -136,7 +255,7 @@ func TestRegisterSpecialCharacters(t *testing.T) {
 		return
 	}
 
-	if err.Error != error.NO_SPECIAL_CHARACTERS_PASSWORD {
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_SPECIAL_CHARACTERS_PASSWORD {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -145,7 +264,7 @@ func TestRegisterSpecialCharacters(t *testing.T) {
 	log.FormattedInfo("Error: ${0}", err.Message)
 }
 
-func TestRegisterUpperCaseLoweCase(t *testing.T) {
+func TestRegisterNotUpperCaseLoweCasePassword(t *testing.T) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
@@ -174,9 +293,9 @@ func TestRegisterUpperCaseLoweCase(t *testing.T) {
 		Username: mock.Username(),
 	}
 
-	log.Info("Registering user: " + user.Email)
-	log.Info("Password: " + user.Password)
-	log.Info("Username: " + user.Username)
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+	log.FormattedInfo("Password: ${0}", user.Password)
+	log.FormattedInfo("Username: ${0}", user.Username)
 
 	err = Register(conn, client, user)
 
@@ -185,7 +304,7 @@ func TestRegisterUpperCaseLoweCase(t *testing.T) {
 		return
 	}
 
-	if err.Error != error.NO_UPPER_LOWER_PASSWORD {
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_UPPER_LOWER_PASSWORD {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -194,7 +313,7 @@ func TestRegisterUpperCaseLoweCase(t *testing.T) {
 	log.FormattedInfo("Error: ${0}", err.Message)
 }
 
-func TestChangeUserPassword(t *testing.T) {
+func TestRegisterShortPassword(t *testing.T) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
@@ -202,40 +321,44 @@ func TestChangeUserPassword(t *testing.T) {
 
 	var user = models.User{
 		Email:    mock.Email(),
-		Password: mock.Password(),
+		Password: mock.PasswordShort(),
 		Username: mock.Username(),
 	}
-
-	log.Info("Registering user: " + user.Email)
-	log.Info("Password: " + user.Password)
-	log.Info("Username: " + user.Username)
-
 	err := Register(conn, client, user)
 
-	if err != nil {
-		t.Error("The user was not registered", err)
+	if err == nil {
+		t.Error("The user was registered with short password")
 		return
 	}
 
-	// change the user password
-	err = ChangeUserPassword(conn, client, user)
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_PASSWORD {
+		t.Error("The error is not the expected" + err.Message)
+		return
+	}
+}
 
-	if err != nil {
-		t.Error("The user password was not changed")
+func TestRegisterNotNumbersPassword(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = models.User{
+		Email:    mock.Email(),
+		Password: mock.PasswordNotNumber(),
+		Username: mock.Username(),
+	}
+	err := Register(conn, client, user)
+
+	if err == nil {
+		t.Error("The user was registered without any number on the password")
 		return
 	}
 
-	log.Info("User password changed")
-
-	// delete the user
-	err = DeleteUser(conn, client, user)
-
-	if err != nil {
-		t.Error("The user was not deleted", err)
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_ALPHANUMERIC_PASSWORD {
+		t.Error("The error is not the expected" + err.Message)
 		return
 	}
-
-	log.Info("User deleted")
 }
 
 func TestLogin(t *testing.T) {
@@ -250,9 +373,9 @@ func TestLogin(t *testing.T) {
 		Username: mock.Username(),
 	}
 
-	log.Info("Registering user: " + user.Email)
-	log.Info("Password: " + user.Password)
-	log.Info("Username: " + user.Username)
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+	log.FormattedInfo("Password: ${0}", user.Password)
+	log.FormattedInfo("Username: ${0}", user.Username)
 
 	err := Register(conn, client, user)
 
@@ -291,7 +414,6 @@ func TestLogin(t *testing.T) {
 	}
 
 	log.Info("User deleted")
-
 }
 
 func TestLoginWrongPassword(t *testing.T) {
@@ -306,9 +428,9 @@ func TestLoginWrongPassword(t *testing.T) {
 		Username: mock.Username(),
 	}
 
-	log.Info("Registering user: " + user.Email)
-	log.Info("Password: " + user.Password)
-	log.Info("Username: " + user.Username)
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+	log.FormattedInfo("Password: ${0}", user.Password)
+	log.FormattedInfo("Username: ${0}", user.Username)
 
 	err := Register(conn, client, user)
 
@@ -370,9 +492,9 @@ func TestLoginWrongEmail(t *testing.T) {
 		Username: mock.Username(),
 	}
 
-	log.Info("Registering user: " + user.Email)
-	log.Info("Password: " + user.Password)
-	log.Info("Username: " + user.Username)
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+	log.FormattedInfo("Password: ${0}", user.Password)
+	log.FormattedInfo("Username: ${0}", user.Username)
 
 	err := Register(conn, client, user)
 
@@ -414,12 +536,120 @@ func TestLoginWrongEmail(t *testing.T) {
 	log.Info("User deleted")
 }
 
-// TODO: add tests for the following functions
-// func ChangePassword
-// func DeleteUser
-// func EditUser
+func TestDeleteUser(t *testing.T) {
 
-func TestChangeUserEmail(t *testing.T) {
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = models.User{
+		Email:    mock.Email(),
+		Password: mock.Password(),
+		Username: mock.Username(),
+	}
+
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+	log.FormattedInfo("Password: ${0}", user.Password)
+	log.FormattedInfo("Username: ${0}", user.Username)
+
+	err := Register(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not registered", err)
+		return
+	}
+
+	log.Info("User registered")
+
+	// login the user
+	var token string
+	token, err = Login(conn, client, user, mock.Ip(), mock.Platform())
+
+	if err != nil {
+		t.Error("The user was not logged in", err)
+		return
+	}
+
+	if token == "" {
+		t.Error("The token is empty")
+		return
+	}
+
+	log.Info("User logged in")
+
+	// delete the user
+	log.Info("Deleting user")
+
+	err = DeleteUser(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not deleted", err)
+		return
+	}
+
+	log.Info("User deleted")
+}
+
+func TestDeleteUserNoEmail(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = models.User{
+		Password: mock.Password(),
+		Username: mock.Username(),
+	}
+
+	log.Info("Deleting user")
+
+	err := DeleteUser(conn, client, user)
+
+	if err == nil {
+		t.Error("The user was deleted")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_EMAIL {
+		t.Error("The error is not the expected" + err.Message)
+		return
+	}
+
+	log.Info("User not deleted")
+	log.FormattedInfo("Error: ${0}", err.Message)
+}
+
+func TestDeleteUserNotFound(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = models.User{
+		Email:    mock.Email(),
+		Password: mock.Password(),
+		Username: mock.Username(),
+	}
+
+	log.Info("Deleting user")
+
+	err := DeleteUser(conn, client, user)
+
+	if err == nil {
+		t.Error("The user was deleted")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_NOT_FOUND {
+		t.Error("The error is not the expected" + err.Message)
+		return
+	}
+
+	log.Info("User not deleted")
+	log.FormattedInfo("Error: ${0}", err.Message)
+}
+
+func TestEditUserEmail(t *testing.T) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
@@ -434,9 +664,9 @@ func TestChangeUserEmail(t *testing.T) {
 		Username: mock.Username(),
 	}
 
-	log.Info("Registering user: " + user.Email)
-	log.Info("Password: " + user.Password)
-	log.Info("Username: " + user.Username)
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+	log.FormattedInfo("Password: ${0}", user.Password)
+	log.FormattedInfo("Username: ${0}", user.Username)
 
 	err := Register(conn, client, user)
 
@@ -468,7 +698,7 @@ func TestChangeUserEmail(t *testing.T) {
 		NewEmail: newEmail,
 	}
 
-	err = ChangeUserEmail(conn, client, emailChangeRequest)
+	err = EditUserEmail(conn, client, emailChangeRequest)
 
 	if err != nil {
 		t.Error("The user email was not changed ", err)
@@ -481,6 +711,485 @@ func TestChangeUserEmail(t *testing.T) {
 
 	// delete the user
 	log.Info("Deleting user")
+	err = DeleteUser(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not deleted", err)
+		return
+	}
+
+	log.Info("User deleted")
+}
+
+func TestEditUserEmailNoEmail(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var emailChangeRequest = EmailChangeRequest{}
+
+	log.Info("Changing user email")
+
+	err := EditUserEmail(conn, client, emailChangeRequest)
+
+	if err == nil {
+		t.Error("The user email was changed")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_EMAIL {
+		t.Error("The error is not the expected" + err.Message)
+		return
+	}
+
+	log.Info("User email not changed")
+	log.FormattedInfo("Error: ${0}", err.Message)
+}
+
+func TestEditUserEmailNoDotEmail(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var email = mock.Email()
+	var newEmail = mock.EmailNotDot()
+
+	var emailChangeRequest = EmailChangeRequest{
+		Email:    email,
+		NewEmail: newEmail,
+	}
+
+	log.Info("Changing user email")
+
+	err := EditUserEmail(conn, client, emailChangeRequest)
+
+	if err == nil {
+		t.Error("The user email was changed")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_DOT_EMAIL {
+		t.Error("The error is not the expected" + err.Message)
+		return
+	}
+
+	log.Info("User email not changed")
+	log.FormattedInfo("Error: ${0}", err.Message)
+
+}
+
+func TestEditUserEmailNoAtEmail(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var email = mock.Email()
+	var newEmail = mock.EmailNotAt()
+
+	var emailChangeRequest = EmailChangeRequest{
+		Email:    email,
+		NewEmail: newEmail,
+	}
+
+	log.Info("Changing user email")
+
+	err := EditUserEmail(conn, client, emailChangeRequest)
+
+	if err == nil {
+		t.Error("The user email was changed")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_AT_EMAIL {
+		t.Error("The error is not the expected" + err.Message)
+		return
+	}
+
+	log.Info("User email not changed")
+	log.FormattedInfo("Error: ${0}", err.Message)
+}
+
+func TestEditUserEmailShortEmail(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var email = mock.Email()
+	var newEmail = mock.EmailShort()
+
+	var emailChangeRequest = EmailChangeRequest{
+		Email:    email,
+		NewEmail: newEmail,
+	}
+
+	log.Info("Changing user email")
+
+	err := EditUserEmail(conn, client, emailChangeRequest)
+
+	if err == nil {
+		t.Error("The user email was changed")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_EMAIL {
+		t.Error("The error is not the expected" + err.Message)
+		return
+	}
+
+	log.Info("User email not changed")
+	log.FormattedInfo("Error: ${0}", err.Message)
+}
+
+func TestEditUserEmailNotFound(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var email = mock.Email()
+	var newEmail = "xXx" + mock.Email()
+
+	var emailChangeRequest = EmailChangeRequest{
+		Email:    email,
+		NewEmail: newEmail,
+	}
+
+	log.Info("Changing user email")
+
+	err := EditUserEmail(conn, client, emailChangeRequest)
+
+	if err == nil {
+		t.Error("The user email was changed")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_NOT_FOUND {
+		t.Error("The error is not the expected", err.Message)
+		return
+	}
+
+	log.Info("User email not changed")
+	log.FormattedInfo("Error: ${0}", err.Message)
+}
+
+func TestEditUserSameEmail(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var email = mock.Email()
+
+	var emailChangeRequest = EmailChangeRequest{
+		Email:    email,
+		NewEmail: email,
+	}
+
+	log.Info("Changing user email")
+
+	err := EditUserEmail(conn, client, emailChangeRequest)
+
+	if err == nil {
+		t.Error("The user email was changed")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMAILS_EQUAL {
+		t.Error("The error is not the expected", err.Message)
+		return
+	}
+
+	log.Info("User email not changed")
+	log.FormattedInfo("Error: ${0}", err.Message)
+}
+
+func TestEditUserPassword(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = models.User{
+		Email:    mock.Email(),
+		Password: mock.Password(),
+		Username: mock.Username(),
+	}
+
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+	log.FormattedInfo("Password: ${0}", user.Password)
+	log.FormattedInfo("Username: ${0}", user.Username)
+
+	err := Register(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not registered", err)
+		return
+	}
+
+	// change the user password
+	err = EditUser(conn, client, user)
+
+	if err != nil {
+		t.Error("The user password was not changed")
+		return
+	}
+
+	log.Info("User password changed")
+
+	// check if the user can login with the new password
+	var token string
+	token, err = Login(conn, client, user, mock.Ip(), mock.Platform())
+
+	if err != nil {
+		t.Error("The user was not logged in", err)
+		return
+	}
+
+	if token == "" {
+		t.Error("The token is empty")
+		return
+	}
+
+	log.Info("User logged in")
+
+	// delete the user
+	err = DeleteUser(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not deleted", err)
+		return
+	}
+
+	log.Info("User deleted")
+}
+
+func TestEditUserPasswordUserNotFound(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = models.User{
+		Email:    mock.Email(),
+		Password: mock.Password(),
+		Username: mock.Username(),
+	}
+
+	log.Info("Changing user password")
+
+	err := EditUser(conn, client, user)
+
+	if err == nil {
+		t.Error("The user password was changed")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_NOT_FOUND {
+		t.Error("The error is not the expected", err.Message)
+		return
+	}
+
+	log.Info("User password not changed")
+	log.FormattedInfo("Error: ${0}", err.Message)
+}
+
+func TestEditUserPasswordShort(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = models.User{
+		Email:    mock.Email(),
+		Password: mock.Password(),
+		Username: mock.Username(),
+	}
+
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+
+	err := Register(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not registered", err)
+		return
+	}
+
+	// change the user password
+	user.Password = mock.PasswordShort()
+
+	err = EditUser(conn, client, user)
+
+	if err == nil {
+		t.Error("The user password was changed")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_PASSWORD {
+		t.Error("The error is not the expected", err.Message)
+		return
+	}
+
+	log.Info("User password not changed")
+	log.FormattedInfo("Error: ${0}", err.Message)
+
+	// delete the user
+	err = DeleteUser(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not deleted", err)
+		return
+	}
+
+	log.Info("User deleted")
+}
+
+func TestEditUserPasswordNoLowercase(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = models.User{
+		Email:    mock.Email(),
+		Password: mock.Password(),
+		Username: mock.Username(),
+	}
+
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+
+	err := Register(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not registered", err)
+		return
+	}
+
+	// change the user password
+
+	user.Password = mock.PasswordNotLowerCase()
+
+	err = EditUser(conn, client, user)
+
+	if err == nil {
+		t.Error("The user password was changed")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_UPPER_LOWER_PASSWORD {
+		t.Error("The error is not the expected", err.Message)
+		return
+	}
+
+	log.Info("User password not changed")
+	log.FormattedInfo("Error: ${0}", err.Message)
+
+	// delete the user
+	err = DeleteUser(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not deleted", err)
+		return
+	}
+
+	log.Info("User deleted")
+}
+
+func TestEditUserPasswordNoUppercase(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = models.User{
+		Email:    mock.Email(),
+		Password: mock.Password(),
+		Username: mock.Username(),
+	}
+
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+
+	err := Register(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not registered", err)
+		return
+	}
+
+	// change the user password
+
+	user.Password = mock.PasswordNotUpperCase()
+
+	err = EditUser(conn, client, user)
+
+	if err == nil {
+		t.Error("The user password was changed")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_UPPER_LOWER_PASSWORD {
+		t.Error("The error is not the expected", err.Message)
+		return
+	}
+
+	log.Info("User password not changed")
+	log.FormattedInfo("Error: ${0}", err.Message)
+
+	// delete the user
+	err = DeleteUser(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not deleted", err)
+		return
+	}
+
+	log.Info("User deleted")
+}
+
+func TestEditUserPasswordNoNumber(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = models.User{
+		Email:    mock.Email(),
+		Password: mock.Password(),
+		Username: mock.Username(),
+	}
+
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+
+	err := Register(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not registered", err)
+		return
+	}
+
+	// change the user password
+
+	user.Password = mock.PasswordNotNumber()
+
+	err = EditUser(conn, client, user)
+
+	if err == nil {
+		t.Error("The user password was changed")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_ALPHANUMERIC_PASSWORD {
+		t.Error("The error is not the expected", err.Message)
+		return
+	}
+
+	log.Info("User password not changed")
+	log.FormattedInfo("Error: ${0}", err.Message)
+
+	// delete the user
 	err = DeleteUser(conn, client, user)
 
 	if err != nil {

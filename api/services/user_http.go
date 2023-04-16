@@ -121,6 +121,42 @@ func EditUserHttp(c *gin.Context) {
 	)
 }
 
+// Change email HTTP API endpoint
+//
+// [param] c | *gin.Context: gin context
+// [return] *models.Error: error if any
+func EditUserEmailHttp(c *gin.Context) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var email EmailChangeRequest
+	err := utils.ReadBodyJson(c, &email)
+
+	if err != nil {
+		utils.SendResponse(c,
+			utils.HTTP_STATUS_BAD_REQUEST,
+			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
+		)
+		return
+	}
+
+	changeErr := EditUserEmail(conn, client, email)
+	if changeErr != nil {
+		utils.SendResponse(c,
+			changeErr.Code,
+			gin.H{"http-code": changeErr.Code, "internal-code": changeErr.Error, "message": changeErr.Message},
+		)
+		return
+	}
+
+	utils.SendResponse(c,
+		utils.HTTP_STATUS_OK,
+		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Email changed"},
+	)
+}
+
 // Delete user HTTP API endpoint
 //
 // [param] c | *gin.Context: gin context
@@ -157,11 +193,8 @@ func DeleteUserHttp(c *gin.Context) {
 	)
 }
 
-// Change password HTTP API endpoint
-//
-// [param] c | *gin.Context: gin context
-// [return] *models.Error: error if any
-func ChangeUserPasswordHttp(c *gin.Context) {
+// Get user HTTP API endpoint
+func GetUserHttp(c *gin.Context) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
@@ -178,53 +211,19 @@ func ChangeUserPasswordHttp(c *gin.Context) {
 		return
 	}
 
-	changeErr := ChangeUserPassword(conn, client, user)
-	if changeErr != nil {
+	var foundUser models.User
+	var error = GetUser(conn, client, user, &foundUser)
+	if error != nil {
 		utils.SendResponse(c,
-			changeErr.Code,
-			gin.H{"http-code": changeErr.Code, "internal-code": changeErr.Error, "message": changeErr.Message},
+			error.Code,
+			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
 		)
 		return
 	}
 
 	utils.SendResponse(c,
 		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Password changed"},
+		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User found", "user": foundUser},
 	)
-}
 
-// Change email HTTP API endpoint
-//
-// [param] c | *gin.Context: gin context
-// [return] *models.Error: error if any
-func ChangeUserEmailHttp(c *gin.Context) {
-
-	var client = db.CreateClient()
-	var conn = db.Connect(*client)
-	defer db.Disconnect(*client, conn)
-
-	var email EmailChangeRequest
-	err := utils.ReadBodyJson(c, &email)
-
-	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
-	}
-
-	changeErr := ChangeUserEmail(conn, client, email)
-	if changeErr != nil {
-		utils.SendResponse(c,
-			changeErr.Code,
-			gin.H{"http-code": changeErr.Code, "internal-code": changeErr.Error, "message": changeErr.Message},
-		)
-		return
-	}
-
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Email changed"},
-	)
 }

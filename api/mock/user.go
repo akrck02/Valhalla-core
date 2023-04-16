@@ -12,6 +12,10 @@ func EmailNotAt() string {
 	return "thelegendoflumberjack.com"
 }
 
+func EmailShort() string {
+	return "a@s."
+}
+
 func Password() string {
 	return "PasswordPassword1#"
 }

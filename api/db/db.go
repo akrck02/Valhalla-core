@@ -16,8 +16,6 @@ const MONGO_USER = "admin"
 const MONGO_PASSWORD = "p4ssw0rd"
 const MONGO_PORT = "27017"
 
-var DATABASE_NAME = "valhalla"
-
 const TEST_DATABASE_NAME = "valhalla-test"
 
 const USER = "user"
@@ -28,6 +26,8 @@ const TASK = "task"
 const NOTE = "note"
 const WIKI = "wiki"
 const ROLE = "role"
+
+var CurrentDatabase = "valhalla"
 
 func CreateClient() *mongo.Client {
 
@@ -49,20 +49,20 @@ func Connect(client mongo.Client) context.Context {
 		log.Fatal(err.Error())
 	}
 
-	log.FormattedInfo("Database (${0}) connected on mongodb [${1}:${2}]", DATABASE_NAME, configuration.Params.Mongo, MONGO_PORT)
+	log.FormattedInfo("Database (${0}) connected on mongodb [${1}:${2}]", CurrentDatabase, configuration.Params.Mongo, MONGO_PORT)
 	return ctx
 }
 
 func SetupTest() {
 
-	DATABASE_NAME = TEST_DATABASE_NAME
+	CurrentDatabase = TEST_DATABASE_NAME
 	var client = CreateClient()
 	var ctx = Connect(*client)
 
-	log.Info("Dropping database " + DATABASE_NAME)
-	err := client.Database(DATABASE_NAME).Drop(ctx)
+	log.Info("Dropping database " + CurrentDatabase)
+	err := client.Database(CurrentDatabase).Drop(ctx)
 	if err != nil {
-		log.FormattedError("Error dropping database ${0} : ${1}", DATABASE_NAME, err.Error())
+		log.FormattedError("Error dropping database ${0} : ${1}", CurrentDatabase, err.Error())
 	}
 
 	defer Disconnect(*client, ctx)

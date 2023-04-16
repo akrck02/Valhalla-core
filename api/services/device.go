@@ -28,7 +28,7 @@ func AddUserDevice(conn context.Context, client *mongo.Client, user models.User,
 		return "", err
 	}
 
-	coll := client.Database(db.DATABASE_NAME).Collection(db.DEVICE)
+	coll := client.Database(db.CurrentDatabase).Collection(db.DEVICE)
 	device.Token = token
 	device.User = user.Email
 

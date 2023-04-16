@@ -32,3 +32,4 @@ jobs:
         files: |
           LICENSE
           dist/valhalla-core
+

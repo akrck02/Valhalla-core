@@ -16,4 +16,9 @@ const (
 	SHORT_EMAIL                    = 610
 	NO_AT_EMAIL                    = 611
 	NO_DOT_EMAIL                   = 612
+	NO_ALPHANUMERIC_PASSWORD       = 613
+	EMAILS_EQUAL                   = 614
+	EMPTY_USERNAME                 = 615
+	EMPTY_PASSWORD                 = 616
+	EMPTY_EMAIL                    = 617
 )
