@@ -193,13 +193,13 @@ func EditUser(conn context.Context, client *mongo.Client, user models.User) *mod
 	}
 
 	// update user on database
-	res, err := users.UpdateOne(conn, bson.M{"email": user.Email}, bson.M{"$set": bson.M{"username": user.Username, "password": utils.EncryptSha256(user.Password)}})
+	res, err := users.UpdateOne(conn, bson.M{"email": user.Email}, bson.M{"$set": bson.M{"username": user.Username, "password": utils.EncryptSha256(user.Password), "ProfilePic": user.ProfilePic}})
 
 	if err != nil {
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.USER_NOT_UPDATED),
-			Message: "User not updated",
+			Message: "User not updated ",
 		}
 	}
 
@@ -306,6 +306,33 @@ func EditUserEmail(conn context.Context, client *mongo.Client, mail EmailChangeR
 			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.USER_NOT_UPDATED),
 			Message: "User devices not updated",
+		}
+	}
+
+	return nil
+}
+
+func EditUserProfilePicture(conn context.Context, client *mongo.Client, user models.User, picture []byte) *models.Error {
+
+	if utils.IsEmpty(user.Email) {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.EMPTY_EMAIL),
+			Message: "Email cannot be empty",
+		}
+	}
+
+	var profilePicPath = utils.GetProfilePicturePath(user.Email)
+	utils.SaveFile(profilePicPath, picture)
+
+	user.ProfilePic = profilePicPath
+	err := EditUser(conn, client, user)
+
+	if err != nil {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Error:   int(error.USER_NOT_UPDATED),
+			Message: "User not updated ",
 		}
 	}
 

@@ -1,6 +1,9 @@
 package services
 
 import (
+	"fmt"
+	"os"
+	"path"
 	"testing"
 
 	"github.com/akrck02/valhalla-core/db"
@@ -1198,4 +1201,63 @@ func TestEditUserPasswordNoNumber(t *testing.T) {
 	}
 
 	log.Info("User deleted")
+}
+
+func TestEditProfilePicture(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = models.User{
+		Email:    mock.Email(),
+		Password: mock.Password(),
+		Username: mock.Username(),
+	}
+
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+
+	err := Register(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not registered", err)
+		return
+	}
+
+	profilePic, readErr := mock.ProfilePicture()
+
+	if readErr != nil {
+		t.Error("The file was not read", readErr)
+		return
+	}
+
+	err = EditUserProfilePicture(conn, client, user, profilePic)
+
+	if err != nil {
+		t.Error("The profile picture was not changed", err)
+		return
+	}
+
+	log.Info("Profile picture changed")
+
+	// delete the user
+	err = DeleteUser(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not deleted", err)
+		return
+	}
+
+	log.Info("User deleted")
+}
+
+func TestOsDirName(t *testing.T) {
+	filepath, err := os.Getwd()
+	if err != nil {
+		log.Info(err.Error())
+	}
+
+	filepath = path.Dir(path.Dir(filepath))
+
+	fmt.Println(filepath)
 }
