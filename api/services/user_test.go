@@ -879,6 +879,81 @@ func TestEditUserEmailNotFound(t *testing.T) {
 	log.FormattedInfo("Error: ${0}", err.Message)
 }
 
+func TestEditUserEmailExists(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var email = mock.Email()
+	var newEmail = mock.Email() + "xXx"
+
+	var user = models.User{
+		Email:    email,
+		Password: mock.Password(),
+		Username: mock.Username(),
+	}
+
+	log.FormattedInfo("Registering original user: ${0}", user.Email)
+	log.FormattedInfo("Password: ${0}", user.Password)
+	log.FormattedInfo("Username: ${0}", user.Username)
+
+	err := Register(conn, client, user)
+
+	if err != nil {
+		t.Error("The original user was not registered", err)
+		return
+	}
+
+	log.Info("Original user registered")
+	log.Jump()
+
+	// Create a new user with the new email
+	user = models.User{
+		Email:    newEmail,
+		Password: mock.Password(),
+		Username: mock.Username(),
+	}
+
+	log.FormattedInfo("Registering new user: ${0}", user.Email)
+	log.FormattedInfo("Password: ${0}", user.Password)
+	log.FormattedInfo("Username: ${0}", user.Username)
+
+	err = Register(conn, client, user)
+
+	if err != nil {
+		t.Error("The new user was not registered", err)
+		return
+	}
+
+	log.Info("New user registered")
+	log.Jump()
+
+	// Change the email
+	var emailChangeRequest = EmailChangeRequest{
+		Email:    email,
+		NewEmail: newEmail,
+	}
+
+	log.FormattedInfo("Changing user email to ${0}", newEmail)
+
+	err = EditUserEmail(conn, client, emailChangeRequest)
+
+	if err == nil {
+		t.Error("The user email was changed")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_CONFLICT || err.Error != error.USER_ALREADY_EXISTS {
+		t.Error("The error is not the expected", err.Message)
+		return
+	}
+
+	log.Jump()
+	log.Info("User email not changed")
+	log.FormattedInfo("Error: ${0}", err.Message)
+}
+
 func TestEditUserSameEmail(t *testing.T) {
 
 	var client = db.CreateClient()

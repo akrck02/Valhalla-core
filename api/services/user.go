@@ -240,8 +240,19 @@ func EditUserEmail(conn context.Context, client *mongo.Client, mail EmailChangeR
 		}
 	}
 
-	// update user on database
+	// Check if user exists
 	users := client.Database(db.CurrentDatabase).Collection(db.USER)
+	found := mailExists(mail.NewEmail, conn, users)
+
+	if found.Email != "" {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_CONFLICT,
+			Error:   int(error.USER_ALREADY_EXISTS),
+			Message: "That email is already in use",
+		}
+	}
+
+	// update user on database
 	var checkedEmail = utils.ValidateEmail(mail.NewEmail)
 	if checkedEmail.Response != 200 {
 		return &models.Error{
