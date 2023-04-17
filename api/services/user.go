@@ -140,30 +140,6 @@ func Login(conn context.Context, client *mongo.Client, user models.User, ip stri
 // [return] *models.Error: error if any
 func EditUser(conn context.Context, client *mongo.Client, user models.User) *models.Error {
 
-	if utils.IsEmpty(user.Email) {
-		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   int(error.EMPTY_EMAIL),
-			Message: "Email cannot be empty",
-		}
-	}
-
-	if utils.IsEmpty(user.Password) {
-		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   int(error.EMPTY_PASSWORD),
-			Message: "Password cannot be empty",
-		}
-	}
-
-	if utils.IsEmpty(user.Username) {
-		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   int(error.EMPTY_USERNAME),
-			Message: "Username cannot be empty",
-		}
-	}
-
 	users := client.Database(db.CurrentDatabase).Collection(db.USER)
 
 	// validate email
@@ -192,8 +168,22 @@ func EditUser(conn context.Context, client *mongo.Client, user models.User) *mod
 		}
 	}
 
+	toUpdate := bson.M{"$set": bson.M{}}
+
+	if user.Username != "" {
+		toUpdate["$set"].(bson.M)["username"] = user.Username
+	}
+
+	if user.Password != "" {
+		toUpdate["$set"].(bson.M)["password"] = utils.EncryptSha256(user.Password)
+	}
+
+	if user.ProfilePic != "" {
+		toUpdate["$set"].(bson.M)["profilePic"] = user.ProfilePic
+	}
+
 	// update user on database
-	res, err := users.UpdateOne(conn, bson.M{"email": user.Email}, bson.M{"$set": bson.M{"username": user.Username, "password": utils.EncryptSha256(user.Password), "ProfilePic": user.ProfilePic}})
+	res, err := users.UpdateOne(conn, bson.M{"email": user.Email}, toUpdate)
 
 	if err != nil {
 		return &models.Error{
@@ -312,6 +302,14 @@ func EditUserEmail(conn context.Context, client *mongo.Client, mail EmailChangeR
 	return nil
 }
 
+// Change profile picture logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] user | models.User: user to change email
+// [param] picture | []byte: picture to change
+//
+// [return] *models.Error: error if any
 func EditUserProfilePicture(conn context.Context, client *mongo.Client, user models.User, picture []byte) *models.Error {
 
 	if utils.IsEmpty(user.Email) {
