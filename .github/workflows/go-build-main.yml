@@ -14,11 +14,25 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    # Cache go build cache, used to speedup go test
+    - name: Go Build Cache
+      uses: actions/cache@v2
+      with:
+        path: ${{ steps.go-cache-paths.outputs.go-build }}
+        key: ${{ runner.os }}-go-build-${{ hashFiles('**/go.sum') }}
+
+    # Cache go mod cache, used to speedup builds
+    - name: Go Mod Cache
+      uses: actions/cache@v2
+      with:
+        path: ${{ steps.go-cache-paths.outputs.go-mod }}
+        key: ${{ runner.os }}-go-mod-${{ hashFiles('**/go.sum') }}
+
     - name: Set up Go
       uses: actions/setup-go@v3
       with:
         go-version: 1.19
-        
+      
     - name: Build
       run: sh compile.sh
 
