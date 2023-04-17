@@ -1,3 +1,4 @@
 mongo-data
 dist
 api/.env
+api/resources/profile_pictures

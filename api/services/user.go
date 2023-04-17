@@ -140,30 +140,6 @@ func Login(conn context.Context, client *mongo.Client, user models.User, ip stri
 // [return] *models.Error: error if any
 func EditUser(conn context.Context, client *mongo.Client, user models.User) *models.Error {
 
-	if utils.IsEmpty(user.Email) {
-		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   int(error.EMPTY_EMAIL),
-			Message: "Email cannot be empty",
-		}
-	}
-
-	if utils.IsEmpty(user.Password) {
-		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   int(error.EMPTY_PASSWORD),
-			Message: "Password cannot be empty",
-		}
-	}
-
-	if utils.IsEmpty(user.Username) {
-		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   int(error.EMPTY_USERNAME),
-			Message: "Username cannot be empty",
-		}
-	}
-
 	users := client.Database(db.CurrentDatabase).Collection(db.USER)
 
 	// validate email
@@ -192,14 +168,28 @@ func EditUser(conn context.Context, client *mongo.Client, user models.User) *mod
 		}
 	}
 
+	toUpdate := bson.M{"$set": bson.M{}}
+
+	if user.Username != "" {
+		toUpdate["$set"].(bson.M)["username"] = user.Username
+	}
+
+	if user.Password != "" {
+		toUpdate["$set"].(bson.M)["password"] = utils.EncryptSha256(user.Password)
+	}
+
+	if user.ProfilePic != "" {
+		toUpdate["$set"].(bson.M)["profilePic"] = user.ProfilePic
+	}
+
 	// update user on database
-	res, err := users.UpdateOne(conn, bson.M{"email": user.Email}, bson.M{"$set": bson.M{"username": user.Username, "password": utils.EncryptSha256(user.Password)}})
+	res, err := users.UpdateOne(conn, bson.M{"email": user.Email}, toUpdate)
 
 	if err != nil {
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.USER_NOT_UPDATED),
-			Message: "User not updated",
+			Message: "User not updated ",
 		}
 	}
 
@@ -250,8 +240,19 @@ func EditUserEmail(conn context.Context, client *mongo.Client, mail EmailChangeR
 		}
 	}
 
-	// update user on database
+	// Check if user exists
 	users := client.Database(db.CurrentDatabase).Collection(db.USER)
+	found := mailExists(mail.NewEmail, conn, users)
+
+	if found.Email != "" {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_CONFLICT,
+			Error:   int(error.USER_ALREADY_EXISTS),
+			Message: "That email is already in use",
+		}
+	}
+
+	// update user on database
 	var checkedEmail = utils.ValidateEmail(mail.NewEmail)
 	if checkedEmail.Response != 200 {
 		return &models.Error{
@@ -306,6 +307,41 @@ func EditUserEmail(conn context.Context, client *mongo.Client, mail EmailChangeR
 			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.USER_NOT_UPDATED),
 			Message: "User devices not updated",
+		}
+	}
+
+	return nil
+}
+
+// Change profile picture logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] user | models.User: user to change email
+// [param] picture | []byte: picture to change
+//
+// [return] *models.Error: error if any
+func EditUserProfilePicture(conn context.Context, client *mongo.Client, user models.User, picture []byte) *models.Error {
+
+	if utils.IsEmpty(user.Email) {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.EMPTY_EMAIL),
+			Message: "Email cannot be empty",
+		}
+	}
+
+	var profilePicPath = utils.GetProfilePicturePath(user.Email)
+	utils.SaveFile(profilePicPath, picture)
+
+	user.ProfilePic = profilePicPath
+	err := EditUser(conn, client, user)
+
+	if err != nil {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Error:   int(error.USER_NOT_UPDATED),
+			Message: "User not updated ",
 		}
 	}
 

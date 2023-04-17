@@ -1,6 +1,9 @@
 package services
 
 import (
+	"fmt"
+	"os"
+	"path"
 	"testing"
 
 	"github.com/akrck02/valhalla-core/db"
@@ -876,6 +879,108 @@ func TestEditUserEmailNotFound(t *testing.T) {
 	log.FormattedInfo("Error: ${0}", err.Message)
 }
 
+func TestEditUserEmailExists(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var email = mock.Email()
+	var newEmail = mock.Email() + "xXx"
+
+	var user = models.User{
+		Email:    email,
+		Password: mock.Password(),
+		Username: mock.Username(),
+	}
+
+	log.FormattedInfo("Registering original user: ${0}", user.Email)
+	log.FormattedInfo("Password: ${0}", user.Password)
+	log.FormattedInfo("Username: ${0}", user.Username)
+
+	err := Register(conn, client, user)
+
+	if err != nil {
+		t.Error("The original user was not registered", err)
+		return
+	}
+
+	log.Info("Original user registered")
+	log.Jump()
+
+	// Create a new user with the new email
+	newUser := models.User{
+		Email:    newEmail,
+		Password: mock.Password(),
+		Username: mock.Username(),
+	}
+
+	log.FormattedInfo("Registering new user: ${0}", newUser.Email)
+	log.FormattedInfo("Password: ${0}", newUser.Password)
+	log.FormattedInfo("Username: ${0}", newUser.Username)
+
+	err = Register(conn, client, newUser)
+
+	if err != nil {
+		t.Error("The new user was not registered", err)
+		return
+	}
+
+	log.Info("New user registered")
+	log.Jump()
+
+	// Change the email
+	var emailChangeRequest = EmailChangeRequest{
+		Email:    email,
+		NewEmail: newEmail,
+	}
+
+	log.FormattedInfo("Changing user email to ${0}", newEmail)
+
+	err = EditUserEmail(conn, client, emailChangeRequest)
+
+	if err == nil {
+		t.Error("The user email was changed")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_CONFLICT || err.Error != error.USER_ALREADY_EXISTS {
+		t.Error("The error is not the expected", err.Message)
+		return
+	}
+
+	log.Jump()
+	log.Info("User email not changed")
+	log.FormattedInfo("Error: ${0}", err.Message)
+	log.Jump()
+
+	// Delete the new user
+	log.Info("Deleting the original user")
+
+	err = DeleteUser(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not deleted", err)
+		return
+	}
+
+	log.Info("User deleted")
+	log.Jump()
+
+	// Delete the new user
+	log.Info("Deleting the new user")
+
+	err = DeleteUser(conn, client, newUser)
+
+	if err != nil {
+		t.Error("The user was not deleted", err)
+		return
+	}
+
+	log.Info("User deleted")
+
+}
+
 func TestEditUserSameEmail(t *testing.T) {
 
 	var client = db.CreateClient()
@@ -1198,4 +1303,63 @@ func TestEditUserPasswordNoNumber(t *testing.T) {
 	}
 
 	log.Info("User deleted")
+}
+
+func TestEditProfilePicture(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = models.User{
+		Email:    mock.Email(),
+		Password: mock.Password(),
+		Username: mock.Username(),
+	}
+
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+
+	err := Register(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not registered", err)
+		return
+	}
+
+	profilePic, readErr := mock.ProfilePicture()
+
+	if readErr != nil {
+		t.Error("The file was not read", readErr)
+		return
+	}
+
+	err = EditUserProfilePicture(conn, client, user, profilePic)
+
+	if err != nil {
+		t.Error("The profile picture was not changed", err)
+		return
+	}
+
+	log.Info("Profile picture changed")
+
+	// delete the user
+	err = DeleteUser(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not deleted", err)
+		return
+	}
+
+	log.Info("User deleted")
+}
+
+func TestOsDirName(t *testing.T) {
+	filepath, err := os.Getwd()
+	if err != nil {
+		log.Info(err.Error())
+	}
+
+	filepath = path.Dir(path.Dir(filepath))
+
+	fmt.Println(filepath)
 }

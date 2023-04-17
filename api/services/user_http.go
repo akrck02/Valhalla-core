@@ -227,3 +227,43 @@ func GetUserHttp(c *gin.Context) {
 	)
 
 }
+
+// Get user HTTP API endpoint
+func EditUserProfilePictureHttp(c *gin.Context) {
+
+	// Get user
+	var user models.User = models.User{
+		Email: c.PostForm("Email"),
+	}
+
+	// Get image
+	bytes, err := utils.MultipartToBytes(c, "ProfilePicture")
+
+	if err != nil {
+		utils.SendResponse(c,
+			utils.HTTP_STATUS_BAD_REQUEST,
+			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
+		)
+		return
+	}
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	// Upload image
+	var error = EditUserProfilePicture(conn, client, user, bytes)
+	if error != nil {
+		utils.SendResponse(c,
+			error.Code,
+			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
+		)
+		return
+	}
+
+	utils.SendResponse(c,
+		utils.HTTP_STATUS_OK,
+		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Profile picture updated"},
+	)
+
+}
