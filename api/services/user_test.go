@@ -909,17 +909,17 @@ func TestEditUserEmailExists(t *testing.T) {
 	log.Jump()
 
 	// Create a new user with the new email
-	user = models.User{
+	newUser := models.User{
 		Email:    newEmail,
 		Password: mock.Password(),
 		Username: mock.Username(),
 	}
 
-	log.FormattedInfo("Registering new user: ${0}", user.Email)
-	log.FormattedInfo("Password: ${0}", user.Password)
-	log.FormattedInfo("Username: ${0}", user.Username)
+	log.FormattedInfo("Registering new user: ${0}", newUser.Email)
+	log.FormattedInfo("Password: ${0}", newUser.Password)
+	log.FormattedInfo("Username: ${0}", newUser.Username)
 
-	err = Register(conn, client, user)
+	err = Register(conn, client, newUser)
 
 	if err != nil {
 		t.Error("The new user was not registered", err)
@@ -952,6 +952,33 @@ func TestEditUserEmailExists(t *testing.T) {
 	log.Jump()
 	log.Info("User email not changed")
 	log.FormattedInfo("Error: ${0}", err.Message)
+	log.Jump()
+
+	// Delete the new user
+	log.Info("Deleting the original user")
+
+	err = DeleteUser(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not deleted", err)
+		return
+	}
+
+	log.Info("User deleted")
+	log.Jump()
+
+	// Delete the new user
+	log.Info("Deleting the new user")
+
+	err = DeleteUser(conn, client, newUser)
+
+	if err != nil {
+		t.Error("The user was not deleted", err)
+		return
+	}
+
+	log.Info("User deleted")
+
 }
 
 func TestEditUserSameEmail(t *testing.T) {
