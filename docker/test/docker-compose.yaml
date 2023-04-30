@@ -1,0 +1,21 @@
+version: '3'
+services:
+  valhalla:
+    image: akrck02/valhalla-core-test:latest
+    container_name: valhalla-core-test
+    restart: always
+    ports:
+      - 3334:3334
+    volumes:
+      - ../../api:/test
+      - ./cache:/cache
+    networks:
+      - backend
+
+networks:
+      backend:
+        name: backend
+        ipam:
+          driver: default
+          config:
+            - subnet: 172.20.0.0/16
