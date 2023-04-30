@@ -1,0 +1,21 @@
+version: '3'
+services:
+  valhalla:
+    image: akrck02/valhalla-core:latest
+    container_name: valhalla
+    restart: always
+    ports:
+      - 3333:3333
+    volumes:
+      - ../../api:/compile
+      - ./cache:/cache
+    networks:
+      - backend
+
+networks:
+      backend:
+        name: backend
+        ipam:
+          driver: default
+          config:
+            - subnet: 172.20.0.0/16

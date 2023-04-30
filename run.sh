@@ -1,1 +1,0 @@
-docker run -it -p 3333:3333 -v ./api:/compile -v ./cache:/cache --network=backend akrck02/valhalla-core:v0.1 

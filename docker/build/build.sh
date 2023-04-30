@@ -1,1 +1,0 @@
-docker build -t akrck02/valhalla-core:v0.1 .
