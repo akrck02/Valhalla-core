@@ -27,10 +27,26 @@ func CreateTeamHttp(c *gin.Context) {
 	var team models.Team
 
 	team.Name = params.Name
+	team.Description = params.Description
+	team.Owner = params.Owner
+	team.ProfilePic = params.ProfilePic
 
+	var error = CreateTeam(conn, client, team)
+	if error != nil {
+		utils.SendResponse(c,
+			error.Code,
+			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
+		)
+		return
+	}
+
+	utils.SendResponse(c,
+		utils.HTTP_STATUS_OK,
+		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User created"},
+	)
 }
 
-func EditTeam(c *gin.Context) {
+func EditTeamHttp(c *gin.Context) {
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
@@ -49,8 +65,70 @@ func EditTeam(c *gin.Context) {
 	var team models.Team
 
 	team.Name = params.Name
+
+	var error = EditTeam(conn, client, team)
+
+	if error != nil {
+		utils.SendResponse(c,
+			error.Code,
+			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
+		)
+		return
+	}
+
+	utils.SendResponse(c,
+		utils.HTTP_STATUS_OK,
+		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Team deleted"},
+	)
 }
 
-func DeleteTeam(c *gin.Context) {
+func DeleteTeamHttp(c *gin.Context) {
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
 
+	var params models.Team
+	err := utils.ReadBodyJson(c, &params)
+
+	if err != nil {
+		utils.SendResponse(c,
+			utils.HTTP_STATUS_BAD_REQUEST,
+			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
+		)
+		return
+	}
+
+	/* var team models.Team
+
+	var error = nil
+
+	if error != nil {
+		utils.SendResponse(c,
+			error.Code,
+			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
+		)
+		return
+	} */
+
+	utils.SendResponse(c,
+		utils.HTTP_STATUS_OK,
+		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Team deleted"},
+	)
+}
+
+func GetTeamHttp(c *gin.Context) {
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+	var params models.Team
+
+	err := utils.ReadBodyJson(c, &params)
+
+	if err != nil {
+		utils.SendResponse(c,
+			utils.HTTP_STATUS_BAD_REQUEST,
+			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
+		)
+		return
+	}
 }
