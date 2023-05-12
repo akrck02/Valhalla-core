@@ -74,7 +74,39 @@ func EditTeamHttp(c *gin.Context) {
 
 	utils.SendResponse(c,
 		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Team deleted"},
+		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Team changed"},
+	)
+}
+
+func EditTeamOwnerHttp(c *gin.Context) {
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var params models.Team
+	err := utils.ReadBodyJson(c, &params)
+
+	if err != nil {
+		utils.SendResponse(c,
+			utils.HTTP_STATUS_BAD_REQUEST,
+			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
+		)
+		return
+	}
+
+	var error = EditTeamOwner(conn, client, params)
+
+	if error != nil {
+		utils.SendResponse(c,
+			error.Code,
+			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
+		)
+		return
+	}
+
+	utils.SendResponse(c,
+		utils.HTTP_STATUS_OK,
+		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Team owner edited"},
 	)
 }
 
@@ -94,9 +126,7 @@ func DeleteTeamHttp(c *gin.Context) {
 		return
 	}
 
-	var team models.Team
-
-	error := DeleteTeam(conn, client, team)
+	error := DeleteTeam(conn, client, params)
 
 	if error != nil {
 		utils.SendResponse(c,
@@ -127,4 +157,20 @@ func GetTeamHttp(c *gin.Context) {
 		)
 		return
 	}
+
+	team, error := GetTeam(conn, client, params)
+
+	if error != nil {
+		utils.SendResponse(c,
+			error.Code,
+			gin.H{"http-code": error.Code, "internal-code": err.Error, "message": error.Message},
+		)
+		return
+	}
+
+	utils.SendResponse(c,
+		utils.HTTP_STATUS_OK,
+		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Team found", "team": team},
+	)
+
 }

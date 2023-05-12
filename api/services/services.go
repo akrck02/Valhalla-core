@@ -31,6 +31,7 @@ func Start() {
 	// Team endpoints
 	router.POST(API_COMPLETE+"team/create", CreateTeamHttp)
 	router.POST(API_COMPLETE+"team/edit", EditTeamHttp)
+	router.POST(API_COMPLETE+"team/edit/owner", EditTeamOwnerHttp)
 	router.POST(API_COMPLETE+"team/delete", DeleteTeamHttp)
 	router.POST(API_COMPLETE+"team/get", GetTeamHttp)
 

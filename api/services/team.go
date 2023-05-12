@@ -51,12 +51,28 @@ func CreateTeam(conn context.Context, client *mongo.Client, team models.Team) *m
 
 func DeleteTeam(conn context.Context, client *mongo.Client, team models.Team) *models.Error {
 
-	/*
-		objID, err := utils.StringToObjectId(id)
+	objID, err := utils.StringToObjectId(team.ID)
 
-		teams := client.Database(db.CurrentDatabase).Collection(db.TEAM)
-		teams.DeleteMany(conn, bson.M{"_id": team.Owner})
-	*/
+	if err != nil {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.BAD_OBJECT_ID),
+			Message: "Bad object id",
+		}
+	}
+
+	coll := client.Database(db.CurrentDatabase).Collection(db.TEAM)
+
+	_, err = coll.DeleteOne(conn, bson.M{"_id": objID})
+
+	if err != nil {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Error:   int(error.TEAM_NOT_FOUND),
+			Message: "Team not found",
+		}
+	}
+
 	return nil
 }
 
@@ -74,17 +90,25 @@ func EditTeam(conn context.Context, client *mongo.Client, team models.Team) *mod
 
 	coll := client.Database(db.CurrentDatabase).Collection(db.TEAM)
 
-	coll.FindOneAndUpdate(conn, bson.M{"_id": objID}, bson.M{"$set": bson.M{
+	_, err = coll.UpdateByID(conn, bson.M{"_id": objID}, bson.M{"$set": bson.M{
 		"name":        team.Name,
 		"description": team.Description,
 		"profilepic":  team.ProfilePic,
 	},
 	})
 
+	if err != nil {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.UPDATE_ERROR),
+			Message: "Could not update team",
+		}
+	}
+
 	return nil
 }
 
-func ChangeOwner(conn context.Context, client *mongo.Client, team models.Team) *models.Error {
+func EditTeamOwner(conn context.Context, client *mongo.Client, team models.Team) *models.Error {
 
 	if utils.IsEmpty(team.Owner) {
 		return &models.Error{
@@ -122,8 +146,8 @@ func ChangeOwner(conn context.Context, client *mongo.Client, team models.Team) *
 	if err != nil {
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   int(error.UPDATE_ERROR),
-			Message: "Bad object id",
+			Error:   int(365),
+			Message: "Could not change owner",
 		}
 	}
 
@@ -143,9 +167,32 @@ func GetTeams(conn context.Context, client *mongo.Client, team models.Team) *mod
 	return nil
 }
 
-func GetTeam(conn context.Context, client *mongo.Client, team models.Team) *models.Error {
+func GetTeam(conn context.Context, client *mongo.Client, team models.Team) (*models.Team, *models.Error) {
 
-	return nil
+	objID, err := utils.StringToObjectId(team.ID)
+
+	if err != nil {
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.BAD_OBJECT_ID),
+			Message: "Bad object id",
+		}
+	}
+
+	coll := client.Database(db.CurrentDatabase).Collection(db.TEAM)
+	var foundTeam models.Team
+
+	err = coll.FindOne(conn, bson.M{"_id": objID}).Decode(&foundTeam)
+
+	if err != nil {
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.TEAM_NOT_FOUND),
+			Message: "Team not found",
+		}
+	}
+
+	return &foundTeam, nil
 }
 
 func ownerExists(owner string, conn context.Context, client *mongo.Client) *models.Error {
