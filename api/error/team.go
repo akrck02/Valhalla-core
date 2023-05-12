@@ -9,4 +9,6 @@ const (
 	NO_OWNER            = 633
 	OWNER_DOESNT_EXIST  = 634
 	BAD_OBJECT_ID       = 635
+	UPDATE_ERROR        = 636
+	UPDATE              = 637
 )

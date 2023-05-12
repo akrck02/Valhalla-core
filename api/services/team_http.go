@@ -62,11 +62,7 @@ func EditTeamHttp(c *gin.Context) {
 		return
 	}
 
-	var team models.Team
-
-	team.Name = params.Name
-
-	var error = EditTeam(conn, client, team)
+	var error = EditTeam(conn, client, params)
 
 	if error != nil {
 		utils.SendResponse(c,
@@ -98,17 +94,17 @@ func DeleteTeamHttp(c *gin.Context) {
 		return
 	}
 
-	/* var team models.Team
+	var team models.Team
 
-	var error = nil
+	error := DeleteTeam(conn, client, team)
 
 	if error != nil {
 		utils.SendResponse(c,
 			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
+			gin.H{"http-code": error.Code, "internal-code": err.Error, "message": error.Message},
 		)
 		return
-	} */
+	}
 
 	utils.SendResponse(c,
 		utils.HTTP_STATUS_OK,
