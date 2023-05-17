@@ -2,31 +2,19 @@ package services
 
 import (
 	"context"
-	"strings"
 
 	"github.com/akrck02/valhalla-core/db"
 	"github.com/akrck02/valhalla-core/error"
-	"github.com/akrck02/valhalla-core/lang"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type validateResult struct {
-	Response error.User
-	Message  string
-}
-
 type EmailChangeRequest struct {
 	Email    string `json:"email"`
 	NewEmail string `json:"new_email"`
 }
-
-const MINIMUM_CHARACTERS_FOR_PASSWORD = 16
-const MINIMUM_CHARACTERS_FOR_EMAIL = 5
-
-var SPECIAL_CHARATERS = []string{"!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "=", "+", "[", "]", "{", "}", "|", ";", ":", "'", ",", ".", "<", ">", "?", "/", "`", "~"}
 
 // Register user logic
 //
@@ -37,27 +25,51 @@ var SPECIAL_CHARATERS = []string{"!", "@", "#", "$", "%", "^", "&", "*", "(", ")
 // [return] *models.Error: error if any
 func Register(conn context.Context, client *mongo.Client, user models.User) *models.Error {
 
-	var checkedPass = validatePassword(user.Password)
+	if utils.IsEmpty(user.Email) {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.EMPTY_EMAIL),
+			Message: "Email cannot be empty",
+		}
+	}
+
+	if utils.IsEmpty(user.Password) {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.EMPTY_PASSWORD),
+			Message: "Password cannot be empty",
+		}
+	}
+
+	if utils.IsEmpty(user.Username) {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.EMPTY_USERNAME),
+			Message: "Username cannot be empty",
+		}
+	}
+
+	var checkedPass = utils.ValidatePassword(user.Password)
 
 	if checkedPass.Response != 200 {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(checkedPass.Response),
 			Message: checkedPass.Message,
 		}
 	}
 
-	checkedPass = validateEmail(user.Email)
+	checkedPass = utils.ValidateEmail(user.Email)
 
 	if checkedPass.Response != 200 {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(checkedPass.Response),
 			Message: checkedPass.Message,
 		}
 	}
 
-	coll := client.Database(db.DATABASE_NAME).Collection(db.USER)
+	coll := client.Database(db.CurrentDatabase).Collection(db.USER)
 	found := mailExists(user.Email, conn, coll)
 
 	if found.Email != "" {
@@ -96,7 +108,7 @@ func Register(conn context.Context, client *mongo.Client, user models.User) *mod
 // [return] string: auth token --> *models.Error: error if any
 func Login(conn context.Context, client *mongo.Client, user models.User, ip string, address string) (string, *models.Error) {
 
-	coll := client.Database(db.DATABASE_NAME).Collection(db.USER)
+	coll := client.Database(db.CurrentDatabase).Collection(db.USER)
 	found := authorizationOk(user.Email, user.Password, conn, coll)
 
 	if found.Email == "" {
@@ -128,15 +140,15 @@ func Login(conn context.Context, client *mongo.Client, user models.User, ip stri
 // [return] *models.Error: error if any
 func EditUser(conn context.Context, client *mongo.Client, user models.User) *models.Error {
 
-	users := client.Database(db.DATABASE_NAME).Collection(db.USER)
+	users := client.Database(db.CurrentDatabase).Collection(db.USER)
 
 	// validate email
 	if user.Email != "" {
-		checkedPass := validateEmail(user.Email)
+		checkedPass := utils.ValidateEmail(user.Email)
 
 		if checkedPass.Response != 200 {
 			return &models.Error{
-				Code:    utils.HTTP_STATUS_FORBIDDEN,
+				Code:    utils.HTTP_STATUS_BAD_REQUEST,
 				Error:   int(checkedPass.Response),
 				Message: checkedPass.Message,
 			}
@@ -145,25 +157,39 @@ func EditUser(conn context.Context, client *mongo.Client, user models.User) *mod
 
 	// validate password
 	if user.Password != "" {
-		checkedPass := validatePassword(user.Password)
+		checkedPass := utils.ValidatePassword(user.Password)
 
 		if checkedPass.Response != 200 {
 			return &models.Error{
-				Code:    utils.HTTP_STATUS_FORBIDDEN,
+				Code:    utils.HTTP_STATUS_BAD_REQUEST,
 				Error:   int(checkedPass.Response),
 				Message: checkedPass.Message,
 			}
 		}
 	}
 
+	toUpdate := bson.M{"$set": bson.M{}}
+
+	if user.Username != "" {
+		toUpdate["$set"].(bson.M)["username"] = user.Username
+	}
+
+	if user.Password != "" {
+		toUpdate["$set"].(bson.M)["password"] = utils.EncryptSha256(user.Password)
+	}
+
+	if user.ProfilePic != "" {
+		toUpdate["$set"].(bson.M)["profilePic"] = user.ProfilePic
+	}
+
 	// update user on database
-	res, err := users.UpdateOne(conn, bson.M{"email": user.Email}, bson.M{"$set": bson.M{"username": user.Username, "password": user.Password}})
+	res, err := users.UpdateOne(conn, bson.M{"email": user.Email}, toUpdate)
 
 	if err != nil {
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.USER_NOT_UPDATED),
-			Message: "User not updated",
+			Message: "User not updated ",
 		}
 	}
 
@@ -178,51 +204,34 @@ func EditUser(conn context.Context, client *mongo.Client, user models.User) *mod
 	return nil
 }
 
-// Delete user logic
+// Change email logic
 //
 // [param] conn | context.Context: connection to the database
 // [param] client | *mongo.Client: client to the database
-// [param] user | models.User: user to delete
+// [param] user | models.User: user to change email
 //
 // [return] *models.Error: error if any
-func DeleteUser(conn context.Context, client *mongo.Client, user models.User) *models.Error {
+func EditUserEmail(conn context.Context, client *mongo.Client, mail EmailChangeRequest) *models.Error {
 
-	users := client.Database(db.DATABASE_NAME).Collection(db.USER)
-
-	// delete user on database
-	deleteResult, err := users.DeleteOne(conn, bson.M{"email": user.Email})
-
-	if err != nil {
+	if utils.IsEmpty(mail.Email) || utils.IsEmpty(mail.NewEmail) {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
-			Error:   int(error.USER_NOT_DELETED),
-			Message: "User not deleted",
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.EMPTY_EMAIL),
+			Message: "Email cannot be empty",
 		}
 	}
 
-	if deleteResult.DeletedCount == 0 {
+	// Equal emails
+	if mail.Email == mail.NewEmail {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_NOT_FOUND,
-			Error:   int(error.USER_NOT_FOUND),
-			Message: "User not found",
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.EMAILS_EQUAL),
+			Message: "The new email is the same as the old one",
 		}
 	}
 
-	return nil
-}
-
-// Change password logic
-//
-// [param] conn | context.Context: connection to the database
-// [param] client | *mongo.Client: client to the database
-// [param] user | models.User: user to change password
-//
-// [return] *models.Error: error if any
-func ChangeUserPassword(conn context.Context, client *mongo.Client, user models.User) *models.Error {
-
-	users := client.Database(db.DATABASE_NAME).Collection(db.USER)
-
-	var checkedPass = validatePassword(user.Password)
+	// validate email
+	var checkedPass = utils.ValidateEmail(mail.Email)
 	if checkedPass.Response != 200 {
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_BAD_REQUEST,
@@ -231,26 +240,20 @@ func ChangeUserPassword(conn context.Context, client *mongo.Client, user models.
 		}
 	}
 
-	user.Password = utils.EncryptSha256(user.Password)
+	// Check if user exists
+	users := client.Database(db.CurrentDatabase).Collection(db.USER)
+	found := mailExists(mail.NewEmail, conn, users)
+
+	if found.Email != "" {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_CONFLICT,
+			Error:   int(error.USER_ALREADY_EXISTS),
+			Message: "That email is already in use",
+		}
+	}
 
 	// update user on database
-	users.UpdateOne(conn, bson.M{"email": user.Email}, bson.M{"$set": bson.M{"password": user.Password}})
-
-	return nil
-}
-
-// Change email logic
-//
-// [param] conn | context.Context: connection to the database
-// [param] client | *mongo.Client: client to the database
-// [param] user | models.User: user to change email
-//
-// [return] *models.Error: error if any
-func ChangeUserEmail(conn context.Context, client *mongo.Client, mail EmailChangeRequest) *models.Error {
-
-	// update user on database
-	users := client.Database(db.DATABASE_NAME).Collection(db.USER)
-	var checkedEmail = validateEmail(mail.NewEmail)
+	var checkedEmail = utils.ValidateEmail(mail.NewEmail)
 	if checkedEmail.Response != 200 {
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_BAD_REQUEST,
@@ -287,7 +290,7 @@ func ChangeUserEmail(conn context.Context, client *mongo.Client, mail EmailChang
 	}
 
 	// update user devices on database
-	devices := client.Database(db.DATABASE_NAME).Collection(db.DEVICE)
+	devices := client.Database(db.CurrentDatabase).Collection(db.DEVICE)
 
 	updateStatus, err = devices.UpdateMany(conn, bson.M{"user": mail.Email}, bson.M{"$set": bson.M{"user": mail.NewEmail}})
 
@@ -310,89 +313,128 @@ func ChangeUserEmail(conn context.Context, client *mongo.Client, mail EmailChang
 	return nil
 }
 
-// Check if the given password is valid
-// following the next rules:
+// Change profile picture logic
 //
-//		[-] At least 16 characters
-//		[-] At least one special character
-//		[-] At least one number
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] user | models.User: user to change email
+// [param] picture | []byte: picture to change
 //
-//	 [param] password : string: password to check
-//
-//	 [return] the password is valid or not
-func validatePassword(password string) validateResult {
+// [return] *models.Error: error if any
+func EditUserProfilePicture(conn context.Context, client *mongo.Client, user models.User, picture []byte) *models.Error {
 
-	if len(password) < MINIMUM_CHARACTERS_FOR_PASSWORD {
-		return validateResult{
-			Response: error.SHORT_PASSWORD,
-			Message:  "Password must have at least " + lang.Int2String(MINIMUM_CHARACTERS_FOR_PASSWORD) + " characters",
+	if utils.IsEmpty(user.Email) {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.EMPTY_EMAIL),
+			Message: "Email cannot be empty",
 		}
 	}
 
-	if !utils.ContainsAny(password, SPECIAL_CHARATERS) {
-		return validateResult{
-			Response: error.NO_SPECIAL_CHARACTERS_PASSWORD,
-			Message:  "Password must have at least one special character",
+	var profilePicPath = utils.GetProfilePicturePath(user.Email)
+	utils.SaveFile(profilePicPath, picture)
+
+	user.ProfilePic = profilePicPath
+	err := EditUser(conn, client, user)
+
+	if err != nil {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Error:   int(error.USER_NOT_UPDATED),
+			Message: "User not updated ",
 		}
 	}
 
-	if utils.IsLowerCase(password) {
-		return validateResult{
-			Response: error.NO_UPPER_LOWER_PASSWORD,
-			Message:  "Password must have at least one uppercase character",
-		}
-	}
-
-	if utils.IsUpperCase(password) {
-		return validateResult{
-			Response: error.NO_UPPER_LOWER_PASSWORD,
-			Message:  "Password must have at least one lowercase character",
-		}
-	}
-
-	return validateResult{
-		Response: 200,
-		Message:  "Ok.",
-	}
+	return nil
 }
 
-// Check if the given email is valid
-// following the next rules:
+// Delete user logic
 //
-//		[-] At least 5 characters
-//		[-] At least one @
-//		[-] At least one .
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] user | models.User: user to delete
 //
-//	 [param] email : string: email to check
-//
-//	 [return] the email is valid or not
-func validateEmail(email string) validateResult {
+// [return] *models.Error: error if any
+func DeleteUser(conn context.Context, client *mongo.Client, user models.User) *models.Error {
 
-	if len(email) < MINIMUM_CHARACTERS_FOR_EMAIL {
-		return validateResult{
-			Response: error.SHORT_EMAIL,
-			Message:  "Email must have at least " + lang.Int2String(MINIMUM_CHARACTERS_FOR_EMAIL) + " characters",
+	if utils.IsEmpty(user.Email) {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.EMPTY_EMAIL),
+			Message: "Email cannot be empty",
 		}
 	}
 
-	if !strings.Contains(email, "@") {
-		return validateResult{
-			Response: error.NO_AT_EMAIL,
-			Message:  "Email must have at least one @",
+	// delete user devices
+	devices := client.Database(db.CurrentDatabase).Collection(db.DEVICE)
+	_, err := devices.DeleteMany(conn, bson.M{"user": user.Email})
+
+	if err != nil {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Error:   int(error.USER_NOT_DELETED),
+			Message: "User not deleted",
 		}
 	}
 
-	if !strings.Contains(email, ".") {
-		return validateResult{
-			Response: error.NO_DOT_EMAIL,
-			Message:  "Email must have at least one .",
+	// delete user on database
+	users := client.Database(db.CurrentDatabase).Collection(db.USER)
+
+	var deleteResult *mongo.DeleteResult
+	deleteResult, err = users.DeleteOne(conn, bson.M{"email": user.Email})
+
+	if err != nil {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Error:   int(error.USER_NOT_DELETED),
+			Message: "User not deleted",
 		}
 	}
 
-	return validateResult{
-		Response: 200,
-		Message:  "Ok.",
+	if deleteResult.DeletedCount == 0 {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_NOT_FOUND,
+			Error:   int(error.USER_NOT_FOUND),
+			Message: "User not found",
+		}
 	}
+
+	return nil
+}
+
+// Get user logic
+func GetUser(conn context.Context, client *mongo.Client, user models.User, found *models.User) *models.Error { // get user from database
+
+	users := client.Database(db.CurrentDatabase).Collection(db.USER)
+
+	err := users.FindOne(conn, bson.M{"email": user.Email}).Decode(&found)
+
+	if err != nil {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_NOT_FOUND,
+			Error:   int(error.USER_NOT_FOUND),
+			Message: "User not found",
+		}
+	}
+
+	found = &models.User{
+		Email:    found.Email,
+		Username: found.Username,
+	}
+
+	return nil
+}
+
+// Validate user logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] code | string: code to validate
+//
+// [return] *models.Error: error if any
+func ValidateUser(conn context.Context, client *mongo.Client, code string) *models.Error {
+
+	return nil
 }
 
 // Check email on database

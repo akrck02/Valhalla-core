@@ -18,14 +18,23 @@ func Start() {
 	router := gin.Default()
 	router.Use(CORSMiddleware())
 
-	router.GET(API_COMPLETE+"ping/", PingHttp)
-	router.POST(API_COMPLETE+"register/", RegisterHttp)
-	router.POST(API_COMPLETE+"login/", LoginHttp)
+	router.GET(API_COMPLETE+"ping", PingHttp)
+
+	// User endpoints
+	router.POST(API_COMPLETE+"user/register", RegisterHttp)
+	router.POST(API_COMPLETE+"user/login", LoginHttp)
 	router.POST(API_COMPLETE+"user/edit", EditUserHttp)
-	router.POST(API_COMPLETE+"user/password/change", ChangeUserPasswordHttp)
-	router.POST(API_COMPLETE+"user/email/change", ChangeUserEmailHttp)
+	router.POST(API_COMPLETE+"user/edit/email", EditUserEmailHttp)
+	router.POST(API_COMPLETE+"user/edit/profilepicture", EditUserProfilePictureHttp)
 	router.POST(API_COMPLETE+"user/delete", DeleteUserHttp)
+	router.POST(API_COMPLETE+"user/get", GetUserHttp)
+
+	// Team endpoints
 	router.POST(API_COMPLETE+"team/create", CreateTeamHttp)
+	router.POST(API_COMPLETE+"team/edit", EditTeamHttp)
+	router.POST(API_COMPLETE+"team/edit/owner", EditTeamOwnerHttp)
+	router.POST(API_COMPLETE+"team/delete", DeleteTeamHttp)
+	router.POST(API_COMPLETE+"team/get", GetTeamHttp)
 
 	log.FormattedInfo("API started on https://${0}:${1}${2}", configuration.Params.Ip, configuration.Params.Port, API_COMPLETE)
 	state := router.Run(configuration.Params.Ip + ":" + configuration.Params.Port)

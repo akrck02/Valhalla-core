@@ -1,7 +1,7 @@
 {
     "client": "Thunder Client",
     "collectionName": "Valhalla-core",
-    "dateExported": "2023-04-14T19:11:54.406Z",
+    "dateExported": "2023-04-17T15:54:50.160Z",
     "version": "1.1",
     "folders": [
         {
@@ -21,6 +21,25 @@
     ],
     "requests": [
         {
+            "_id": "58091a3a-07a2-438a-8d7d-4bf44d39105f",
+            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
+            "containerId": "c9af3182-d1e4-44d1-b47d-23a27de40633",
+            "name": "Register",
+            "url": "http://127.0.0.1:3333/api/v1/user/register",
+            "method": "POST",
+            "sortNum": 5000,
+            "created": "2023-02-22T18:26:16.354Z",
+            "modified": "2023-04-16T14:13:31.813Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"username\" : \"test\",\n  \"password\" : \"Test1010101010101*\",\n  \"email\" : \"test@test.com\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
             "_id": "d48e3804-41a8-48e1-9622-93ffc12cdf65",
             "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
             "containerId": "",
@@ -39,16 +58,16 @@
             "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
             "containerId": "c9af3182-d1e4-44d1-b47d-23a27de40633",
             "name": "Login",
-            "url": "http://127.0.0.1:3333/api/v1/login",
+            "url": "http://127.0.0.1:3333/api/v1/user/login",
             "method": "POST",
             "sortNum": 10000,
             "created": "2023-02-22T18:26:16.353Z",
-            "modified": "2023-04-14T18:19:53.790Z",
+            "modified": "2023-04-16T14:12:15.112Z",
             "headers": [],
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "{\n  \"username\" : \"test\",\n  \"password\" : \"test1010101010101*\",\n  \"email\" : \"test@test.com\"\n}",
+                "raw": "{\n  \"username\" : \"test\",\n  \"password\" : \"Test1010101010101*\",\n  \"email\" : \"test@test.com\"\n}",
                 "form": []
             },
             "tests": []
@@ -81,12 +100,85 @@
             "method": "POST",
             "sortNum": 20000,
             "created": "2023-04-14T18:14:55.152Z",
-            "modified": "2023-04-14T18:45:02.297Z",
+            "modified": "2023-04-15T19:59:00.134Z",
             "headers": [],
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "{\n  \"username\" : \"test\",\n  \"password\" : \"tesat1010101010101*\",\n  \"email\" : \"test@test.com\"\n}",
+                "raw": "{\n  \"username\" : \"test\",\n  \"password\" : \"tTesat1010101010101*\",\n  \"email\" : \"test@test.com\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "44142b4d-8707-4162-a6f8-ff159328d356",
+            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
+            "containerId": "c9af3182-d1e4-44d1-b47d-23a27de40633",
+            "name": "Edit password",
+            "url": "http://127.0.0.1:3333/api/v1/user/edit/",
+            "method": "POST",
+            "sortNum": 22500,
+            "created": "2023-04-15T19:54:06.473Z",
+            "modified": "2023-04-16T16:04:47.655Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"username\" : \"test\",\n  \"email\" : \"test@test.com\",\n  \"password\" : \"20AdAaaAA#AAaaAA02\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "73d0bdaf-592e-405a-8aa8-a3d9c9ab9379",
+            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
+            "containerId": "c9af3182-d1e4-44d1-b47d-23a27de40633",
+            "name": "Edit Profile Picture",
+            "url": "http://127.0.0.1:3333/api/v1/user/edit/profilepicture",
+            "method": "POST",
+            "sortNum": 23125,
+            "created": "2023-04-17T14:12:58.057Z",
+            "modified": "2023-04-17T14:35:12.634Z",
+            "headers": [
+                {
+                    "name": "enctype",
+                    "value": "multipart/form-data"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "formdata",
+                "raw": "",
+                "form": [
+                    {
+                        "name": "Email",
+                        "value": "test@test.com"
+                    }
+                ],
+                "files": [
+                    {
+                        "name": "ProfilePicture",
+                        "value": "/home/vscode/Valhalla-core/api/resources/images/cat.jpg"
+                    }
+                ]
+            },
+            "tests": []
+        },
+        {
+            "_id": "7c4e1d6a-cdea-4a55-8dda-f14a772d42e8",
+            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
+            "containerId": "c9af3182-d1e4-44d1-b47d-23a27de40633",
+            "name": "Edit email",
+            "url": "http://127.0.0.1:3333/api/v1/user/edit/email",
+            "method": "POST",
+            "sortNum": 23750,
+            "created": "2023-04-15T19:54:33.029Z",
+            "modified": "2023-04-17T15:13:10.300Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"email\" : \"test@test.com\",\n  \"new_email\" : \"test0@test0.com\"\n}",
                 "form": []
             },
             "tests": []
@@ -100,31 +192,12 @@
             "method": "POST",
             "sortNum": 25000,
             "created": "2023-04-14T18:56:07.786Z",
-            "modified": "2023-04-14T18:56:30.837Z",
+            "modified": "2023-04-16T14:14:06.894Z",
             "headers": [],
             "params": [],
             "body": {
                 "type": "json",
-                "raw": "{\n  \"email\" : \"test@test.com\"\n}",
-                "form": []
-            },
-            "tests": []
-        },
-        {
-            "_id": "58091a3a-07a2-438a-8d7d-4bf44d39105f",
-            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
-            "containerId": "c9af3182-d1e4-44d1-b47d-23a27de40633",
-            "name": "Register",
-            "url": "http://127.0.0.1:3333/api/v1/register",
-            "method": "POST",
-            "sortNum": 30000,
-            "created": "2023-02-22T18:26:16.354Z",
-            "modified": "2023-04-14T18:19:59.957Z",
-            "headers": [],
-            "params": [],
-            "body": {
-                "type": "json",
-                "raw": "{\n  \"username\" : \"test\",\n  \"password\" : \"test1010101010101*\",\n  \"email\" : \"test@test.com\"\n}",
+                "raw": "{\n  \"email\" : \"test0@test0.com\"\n}",
                 "form": []
             },
             "tests": []

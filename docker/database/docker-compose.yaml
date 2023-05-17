@@ -1,19 +1,5 @@
 version: '3'
-
-services:
-  app:
-    entrypoint:
-    - sleep
-    - infinity
-    image: docker/dev-environments-go:stable-1
-    init: true
-    volumes:
-    - type: bind
-      source: /var/run/docker.sock
-      target: /var/run/docker.sock
-    networks:
-      - backend
-    
+services:    
   mongodb:
     image: mongo
     container_name: mongodb   
