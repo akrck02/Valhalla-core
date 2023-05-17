@@ -425,6 +425,18 @@ func GetUser(conn context.Context, client *mongo.Client, user models.User, found
 	return nil
 }
 
+// Validate user logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] code | string: code to validate
+//
+// [return] *models.Error: error if any
+func ValidateUser(conn context.Context, client *mongo.Client, code string) *models.Error {
+
+	return nil
+}
+
 // Check email on database
 //
 //	[param] email | string The email to check

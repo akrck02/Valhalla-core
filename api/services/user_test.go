@@ -1326,7 +1326,7 @@ func TestEditProfilePicture(t *testing.T) {
 		return
 	}
 
-	profilePic, readErr := mock.ProfilePicture()
+	profilePic, readErr := utils.ReadFile(mock.ProfilePicture())
 
 	if readErr != nil {
 		t.Error("The file was not read", readErr)
