@@ -1,6 +1,10 @@
 package utils
 
-import "strings"
+import (
+	"strings"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 // ContainsAny returns true if the string contains any of the chars
 //
@@ -55,4 +59,13 @@ func ContainsSpecialCharacters(str string) bool {
 // [return] bool: true if the string is empty
 func IsEmpty(str string) bool {
 	return str == ""
+}
+
+// StringToObjectId converts a string to a primitive.ObjectID
+//
+// [param] str | string: string to convert
+//
+// [return] primitive.ObjectID: converted string
+func StringToObjectId(str string) (primitive.ObjectID, error) {
+	return primitive.ObjectIDFromHex(str)
 }
