@@ -25,6 +25,7 @@ func Start() {
 	router.POST(API_COMPLETE+"user/login", LoginHttp)
 	router.POST(API_COMPLETE+"user/edit", EditUserHttp)
 	router.POST(API_COMPLETE+"user/edit/email", EditUserEmailHttp)
+	router.POST(API_COMPLETE+"user/edit/profilepicture", EditUserProfilePictureHttp)
 	router.POST(API_COMPLETE+"user/delete", DeleteUserHttp)
 	router.POST(API_COMPLETE+"user/get", GetUserHttp)
 
