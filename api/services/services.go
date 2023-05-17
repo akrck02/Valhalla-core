@@ -36,6 +36,12 @@ func Start() {
 	router.POST(API_COMPLETE+"team/delete", DeleteTeamHttp)
 	router.POST(API_COMPLETE+"team/get", GetTeamHttp)
 
+	// Role endpoints
+	router.POST(API_COMPLETE+"rol/create", CreateRoleHttp)
+	router.POST(API_COMPLETE+"rol/edit", EditRoleHttp)
+	router.POST(API_COMPLETE+"rol/delete", DeleteRoleHttp)
+	router.POST(API_COMPLETE+"rol/get", GetRoleHttp)
+
 	log.FormattedInfo("API started on https://${0}:${1}${2}", configuration.Params.Ip, configuration.Params.Port, API_COMPLETE)
 	state := router.Run(configuration.Params.Ip + ":" + configuration.Params.Port)
 	log.Error(state.Error())
