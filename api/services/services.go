@@ -29,6 +29,7 @@ func Start() {
 	router.POST(API_COMPLETE+"user/get", GetUserHttp)
 
 	// Team endpoints
+	router.POST(API_COMPLETE+"team/create", CreateTeamHttp)
 
 	// Role endpoints
 	router.POST(API_COMPLETE+"rol/create", CreateRoleHttp)
