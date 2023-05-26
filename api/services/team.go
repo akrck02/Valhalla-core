@@ -12,7 +12,7 @@ import (
 )
 
 func CreateTeam(conn context.Context, client *mongo.Client, team models.Team) *models.Error {
-
+	// AAAA
 	if utils.IsEmpty(team.Name) {
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_BAD_REQUEST,
