@@ -106,6 +106,29 @@ func EditUserHttp(c *gin.Context) {
 		return
 	}
 
+	// Get token from header
+	var token = c.Request.Header.Get("Authorization")
+
+	// Get user from token
+	tokenUser, error := GetUserFromToken(conn, client, token)
+	if error != nil {
+		utils.SendResponse(c,
+			error.Code,
+			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
+		)
+		return
+
+	}
+
+	// Check if user is the same
+	if tokenUser.Email != user.Email {
+		utils.SendResponse(c,
+			utils.HTTP_STATUS_BAD_REQUEST,
+			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
+		)
+		return
+	}
+
 	updateErr := EditUser(conn, client, user)
 	if updateErr != nil {
 		utils.SendResponse(c,

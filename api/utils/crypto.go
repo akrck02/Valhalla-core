@@ -40,6 +40,18 @@ func GenerateAuthToken(user models.User, device models.Device) (string, error) {
 	return tokenString, err
 }
 
+// Decrypt a token
+//
+// [param] token | string | The token
+//
+// [return] *jwt.Token | The token --> error if something went wrong
+func DecryptToken(token string) (*jwt.Token, error) {
+
+	return jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		return []byte(configuration.Params.Secret), nil
+	})
+}
+
 // Encrypt a string using sha256
 //
 // [param] text | string | The text to encrypt
