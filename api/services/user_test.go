@@ -1363,3 +1363,98 @@ func TestOsDirName(t *testing.T) {
 
 	fmt.Println(filepath)
 }
+
+func TestTokenValidation(t *testing.T) {
+
+	// Create a new user
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = models.User{
+		Username: mock.Username(),
+		Email:    mock.Email(),
+		Password: mock.Password(),
+	}
+
+	err := Register(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not registered", err)
+		return
+	}
+
+	// Login the user
+	var token string
+	token, err = Login(conn, client, user, mock.Ip(), mock.Platform())
+
+	if err != nil {
+		t.Error("The user was not logged in", err)
+		return
+	}
+
+	err = IsTokenValid(client, token)
+
+	if err != nil {
+		t.Error("The token was not validated", err)
+		return
+	}
+
+	// delete the user
+	err = DeleteUser(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not deleted", err)
+		return
+	}
+
+	log.Info("User deleted")
+}
+
+func TestTokenValidationInvalidToken(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	// Create a fake token
+	token := mock.Token()
+	err := IsTokenValid(client, token)
+
+	if err == nil {
+		t.Error("The token was validated")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_FORBIDDEN || err.Error != error.INVALID_TOKEN {
+		t.Error("The error is not the expected", err.Message)
+		return
+	}
+
+	log.FormattedInfo("Token not validated, error { http: ${0}, internal: ${1}, message: \"${2}\" }", utils.Int2String(err.Code), utils.Int2String(err.Error), err.Message)
+
+}
+
+func TestTokenValidationInvalidTokenFormat(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	// Create a fake token
+	token := mock.Username()
+	err := IsTokenValid(client, token)
+
+	if err == nil {
+		t.Error("The token was validated")
+		return
+	}
+
+	if err.Code != utils.HTTP_STATUS_FORBIDDEN || err.Error != error.INVALID_TOKEN {
+		t.Error("The error is not the expected", err.Message)
+		return
+	}
+
+	log.FormattedInfo("Token not validated, error { http: ${0}, internal: ${1}, message: \"${2}\" }", utils.Int2String(err.Code), utils.Int2String(err.Error), err.Message)
+
+}

@@ -57,3 +57,15 @@ func MultipartToBytes(c *gin.Context, key string) ([]byte, error) {
 
 	return buf.Bytes(), nil
 }
+
+const (
+	HTTP_METHOD_GET     = 0
+	HTTP_METHOD_POST    = 1
+	HTTP_METHOD_PUT     = 2
+	HTTP_METHOD_DELETE  = 3
+	HTTP_METHOD_PATCH   = 4
+	HTTP_METHOD_HEAD    = 5
+	HTTP_METHOD_OPTIONS = 6
+	HTTP_METHOD_TRACE   = 7
+	HTTP_METHOD_CONNECT = 8
+)

@@ -21,4 +21,5 @@ const (
 	EMPTY_USERNAME                 = 615
 	EMPTY_PASSWORD                 = 616
 	EMPTY_EMAIL                    = 617
+	INVALID_TOKEN                  = 618
 )
