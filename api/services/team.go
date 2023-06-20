@@ -11,8 +11,16 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// Create team logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] user | *models.Tean: team to create
+//
+// [return] error: *models.Error: error if any
 func CreateTeam(conn context.Context, client *mongo.Client, team models.Team) *models.Error {
 
+	// Check if team name is empty
 	if utils.IsEmpty(team.Name) {
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_BAD_REQUEST,
@@ -21,6 +29,38 @@ func CreateTeam(conn context.Context, client *mongo.Client, team models.Team) *m
 		}
 	}
 
+	// Check if team name is valid
+	checkedName := utils.ValidateName(team.Name)
+
+	if checkedName.Response != 200 {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(checkedName.Response),
+			Message: checkedName.Message,
+		}
+	}
+
+	// Check if team description is empty
+	if utils.IsEmpty(team.Description) {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.EMPTY_TEAM_DESCRIPTION),
+			Message: "Team cannot be descriptionless",
+		}
+	}
+
+	// Check if team description is valid
+	checkedDescription := utils.ValidateDescription(team.Description)
+
+	if checkedDescription.Response != 200 {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(checkedDescription.Response),
+			Message: checkedDescription.Message,
+		}
+	}
+
+	// Check if team owner is empty
 	if utils.IsEmpty(team.Owner) {
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_BAD_REQUEST,
@@ -29,16 +69,23 @@ func CreateTeam(conn context.Context, client *mongo.Client, team models.Team) *m
 		}
 	}
 
-	err := ownerExists(team.Owner, conn, client)
+	// Check if team already exists
+	coll := client.Database(db.CurrentDatabase).Collection(db.TEAM)
 
-	if err != nil {
-		return err
+	found := teamAlreadyExists(&team, conn, coll)
+
+	if found.Name != "" {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Error:   int(error.TEAM_ALREADY_EXISTS),
+			Message: "Team already exists with name " + team.Name,
+		}
 	}
 
-	coll := client.Database(db.CurrentDatabase).Collection(db.TEAM)
-	_, err2 := coll.InsertOne(conn, team)
+	// Create team
+	_, err := coll.InsertOne(conn, team)
 
-	if err2 != nil {
+	if err != nil {
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.TEAM_ALREADY_EXISTS),
@@ -221,4 +268,17 @@ func ownerExists(owner string, conn context.Context, client *mongo.Client) *mode
 	}
 
 	return nil
+}
+
+func teamAlreadyExists(team *models.Team, conn context.Context, coll *mongo.Collection) models.Team {
+
+	filter := bson.D{
+		{Key: "name", Value: team.Name},
+		{Key: "owner", Value: team.Owner},
+	}
+	var result models.Team
+
+	coll.FindOne(conn, filter).Decode(&result)
+
+	return result
 }
