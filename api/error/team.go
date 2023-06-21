@@ -16,4 +16,7 @@ const (
 	SHORT_DESCRIPTION      = 640
 	LONG_DESCRIPTION       = 641
 	EMPTY_TEAM_DESCRIPTION = 642
+	NO_MEMBER              = 643
+	NO_TEAM                = 644
+	NO_PROJECT             = 645
 )
