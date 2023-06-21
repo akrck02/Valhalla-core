@@ -21,4 +21,6 @@ const (
 	EMPTY_USERNAME                 = 615
 	EMPTY_PASSWORD                 = 616
 	EMPTY_EMAIL                    = 617
+	USER_ALREADY_MEMBER            = 618
+	USER_IS_OWNER                  = 619
 )
