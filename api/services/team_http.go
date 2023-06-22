@@ -7,6 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Create team HTTP API endpoint
+//
+// [param] c | *gin.Context: gin context
 func CreateTeamHttp(c *gin.Context) {
 
 	var client = db.CreateClient()
@@ -14,9 +17,9 @@ func CreateTeamHttp(c *gin.Context) {
 	defer db.Disconnect(*client, conn)
 
 	var params models.Team
-	err := utils.ReadBodyJson(c, &params)
+	err1 := utils.ReadBodyJson(c, &params)
 
-	if err != nil {
+	if err1 != nil {
 		utils.SendResponse(c,
 			utils.HTTP_STATUS_BAD_REQUEST,
 			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
@@ -31,11 +34,11 @@ func CreateTeamHttp(c *gin.Context) {
 	team.Owner = params.Owner
 	team.ProfilePic = params.ProfilePic
 
-	var error = CreateTeam(conn, client, team)
-	if error != nil {
+	var err2 = CreateTeam(conn, client, team)
+	if err2 != nil {
 		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
+			err2.Code,
+			gin.H{"http-code": err2.Code, "internal-code": err2.err2, "message": err2.Message},
 		)
 		return
 	}
@@ -46,15 +49,18 @@ func CreateTeamHttp(c *gin.Context) {
 	)
 }
 
+// Edit team HTTP API endpoint
+//
+// [param] c | *gin.Context: gin context
 func EditTeamHttp(c *gin.Context) {
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
 	var params models.Team
-	err := utils.ReadBodyJson(c, &params)
+	err1 := utils.ReadBodyJson(c, &params)
 
-	if err != nil {
+	if err1 != nil {
 		utils.SendResponse(c,
 			utils.HTTP_STATUS_BAD_REQUEST,
 			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
@@ -62,12 +68,12 @@ func EditTeamHttp(c *gin.Context) {
 		return
 	}
 
-	var error = EditTeam(conn, client, params)
+	var err2 = EditTeam(conn, client, params)
 
-	if error != nil {
+	if err2 != nil {
 		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
+			err2.Code,
+			gin.H{"http-code": err2.Code, "internal-code": err2.err2, "message": err2.Message},
 		)
 		return
 	}
@@ -78,15 +84,18 @@ func EditTeamHttp(c *gin.Context) {
 	)
 }
 
+// Edit team owner HTTP API endpoint
+//
+// [param] c | *gin.Context: gin context
 func EditTeamOwnerHttp(c *gin.Context) {
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
 	var params models.Team
-	err := utils.ReadBodyJson(c, &params)
+	err1 := utils.ReadBodyJson(c, &params)
 
-	if err != nil {
+	if err1 != nil {
 		utils.SendResponse(c,
 			utils.HTTP_STATUS_BAD_REQUEST,
 			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
@@ -94,12 +103,12 @@ func EditTeamOwnerHttp(c *gin.Context) {
 		return
 	}
 
-	var error = EditTeamOwner(conn, client, params)
+	var err2 = EditTeamOwner(conn, client, params)
 
-	if error != nil {
+	if err2 != nil {
 		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
+			err2.Code,
+			gin.H{"http-code": err2.Code, "internal-code": err2.err2, "message": err2.Message},
 		)
 		return
 	}
@@ -110,15 +119,18 @@ func EditTeamOwnerHttp(c *gin.Context) {
 	)
 }
 
+// Delete team HTTP API endpoint
+//
+// [param] c | *gin.Context: gin context
 func DeleteTeamHttp(c *gin.Context) {
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
 	var params models.Team
-	err := utils.ReadBodyJson(c, &params)
+	err1 := utils.ReadBodyJson(c, &params)
 
-	if err != nil {
+	if err1 != nil {
 		utils.SendResponse(c,
 			utils.HTTP_STATUS_BAD_REQUEST,
 			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
@@ -126,12 +138,12 @@ func DeleteTeamHttp(c *gin.Context) {
 		return
 	}
 
-	error := DeleteTeam(conn, client, params)
+	err2 := DeleteTeam(conn, client, params)
 
-	if error != nil {
+	if err2 != nil {
 		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": err.Error, "message": error.Message},
+			err2.Code,
+			gin.H{"http-code": err2.Code, "internal-code": err1.err2, "message": err2.Message},
 		)
 		return
 	}
@@ -142,15 +154,18 @@ func DeleteTeamHttp(c *gin.Context) {
 	)
 }
 
+// Get team HTTP API endpoint
+//
+// [param] c | *gin.Context: gin context
 func GetTeamHttp(c *gin.Context) {
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 	var params models.Team
 
-	err := utils.ReadBodyJson(c, &params)
+	err1 := utils.ReadBodyJson(c, &params)
 
-	if err != nil {
+	if err1 != nil {
 		utils.SendResponse(c,
 			utils.HTTP_STATUS_BAD_REQUEST,
 			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
@@ -158,12 +173,12 @@ func GetTeamHttp(c *gin.Context) {
 		return
 	}
 
-	team, error := GetTeam(conn, client, params)
+	team, err2 := GetTeam(conn, client, params)
 
-	if error != nil {
+	if err2 != nil {
 		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": err.Error, "message": error.Message},
+			err2.Code,
+			gin.H{"http-code": err2.Code, "internal-code": err1.err2, "message": err2.Message},
 		)
 		return
 	}
@@ -173,4 +188,39 @@ func GetTeamHttp(c *gin.Context) {
 		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Team found", "team": team},
 	)
 
+}
+
+// Add user to team HTTP API endpoint
+//
+// [param] c | *gin.Context: gin context
+func AddMemberHTTP(c *gin.Context) {
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+	var params MemberChangeRequest
+
+	err1 := utils.ReadBodyJson(c, &params)
+
+	if err1 != nil {
+		utils.SendResponse(c,
+			utils.HTTP_STATUS_BAD_REQUEST,
+			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
+		)
+		return
+	}
+
+	err2 := AddMember(conn, client, params)
+
+	if err2 != nil {
+		utils.SendResponse(c,
+			err2.Code,
+			gin.H{"http-code": err2.Code, "internal-code": err1.err2, "message": err2.Message},
+		)
+		return
+	}
+
+	utils.SendResponse(c,
+		utils.HTTP_STATUS_OK,
+		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Member added"},
+	)
 }
