@@ -1,5 +1,13 @@
 version: '3'
-services:    
+services:
+  valhalla:
+    image: akrck02/valhalla-core-prod:latest
+    container_name: valhalla
+    restart: always
+    ports:
+      - 3333:3333
+    networks:
+      - backend
   mongodb:
     image: mongo
     container_name: mongodb   

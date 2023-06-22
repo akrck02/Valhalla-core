@@ -5,8 +5,10 @@ import (
 
 	"github.com/akrck02/valhalla-core/db"
 	"github.com/akrck02/valhalla-core/error"
+	"github.com/akrck02/valhalla-core/log"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
+	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -425,6 +427,18 @@ func GetUser(conn context.Context, client *mongo.Client, user models.User, found
 	return nil
 }
 
+// Validate user logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] code | string: code to validate
+//
+// [return] *models.Error: error if any
+func ValidateUser(conn context.Context, client *mongo.Client, code string) *models.Error {
+
+	return nil
+}
+
 // Check email on database
 //
 //	[param] email | string The email to check
@@ -456,4 +470,87 @@ func authorizationOk(email string, password string, conn context.Context, coll *
 	coll.FindOne(conn, filter).Decode(&result)
 
 	return result
+}
+
+// Get user from token
+//
+//	[param] conn | context.Context : The connection to the database
+//	[param] client | *mongo.Client : The client to the database
+//	[param] token | *string : The token to check
+//	[param] tokenUser | *models.User : The user found or empty --> *models.Error: error if any
+func GetUserFromToken(conn context.Context, client *mongo.Client, token string) (models.User, *models.Error) {
+
+	var tokenDevice models.Device
+
+	devices := client.Database(db.CurrentDatabase).Collection(db.DEVICE)
+	err := devices.FindOne(conn, bson.M{"token": token}).Decode(&tokenDevice)
+
+	if err != nil {
+		return models.User{}, &models.Error{
+			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Error:   int(error.INVALID_TOKEN),
+			Message: "User not matching token",
+		}
+	}
+
+	var tokenUser models.User
+
+	users := client.Database(db.CurrentDatabase).Collection(db.USER)
+	err = users.FindOne(conn, bson.M{"email": tokenDevice.User}).Decode(&tokenUser)
+
+	if err != nil {
+		return models.User{}, &models.Error{
+			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Error:   int(error.INVALID_TOKEN),
+			Message: "User not matching token",
+		}
+	}
+
+	return tokenUser, nil
+}
+
+// Get  if token is valid
+//
+//	[param] token | string : The token to check
+//
+//	[return] bool : True if token is valid --> *models.Error: error if any
+func IsTokenValid(client *mongo.Client, token string) *models.Error {
+
+	// decode token
+	claims, err := utils.DecryptToken(token)
+
+	if err != nil {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Error:   int(error.INVALID_TOKEN),
+			Message: "invalid token format",
+		}
+	}
+
+	// log token claims
+	log.Info("device: " + claims.Claims.(jwt.MapClaims)["device"].(string))
+	log.Info("username: " + claims.Claims.(jwt.MapClaims)["username"].(string))
+	log.Info("email: " + claims.Claims.(jwt.MapClaims)["email"].(string))
+
+	email := claims.Claims.(jwt.MapClaims)["email"].(string)
+
+	foundUser, tokenUserErr := GetUserFromToken(context.Background(), client, token)
+
+	if tokenUserErr != nil {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Error:   int(error.INVALID_TOKEN),
+			Message: "invalid token",
+		}
+	}
+
+	if foundUser.Email != email {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Error:   int(error.INVALID_TOKEN),
+			Message: "invalid token",
+		}
+	}
+
+	return nil
 }
