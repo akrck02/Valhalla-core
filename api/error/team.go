@@ -19,4 +19,6 @@ const (
 	NO_MEMBER              = 643
 	NO_TEAM                = 644
 	NO_PROJECT             = 645
+	USER_IS_OWNER          = 646
+	USER_ALREADY_MEMBER    = 647
 )
