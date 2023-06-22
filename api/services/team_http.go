@@ -193,7 +193,7 @@ func GetTeamHttp(c *gin.Context) {
 // Add user to team HTTP API endpoint
 //
 // [param] c | *gin.Context: gin context
-func AddMemberHTTP(c *gin.Context) {
+func AddMemberHttp(c *gin.Context) {
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
