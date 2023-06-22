@@ -37,6 +37,7 @@ var endpoints = []Endpoint{
 	{"team/edit/owner", utils.HTTP_METHOD_POST, EditTeamOwnerHttp, true},
 	{"team/delete", utils.HTTP_METHOD_POST, DeleteTeamHttp, true},
 	{"team/get", utils.HTTP_METHOD_POST, GetTeamHttp, true},
+	{"team/add/member", utils.HTTP_METHOD_POST, AddMemberHttp, true},
 
 	// Role endpoints
 	{"rol/create", utils.HTTP_METHOD_POST, CreateRoleHttp, true},
