@@ -34,11 +34,11 @@ func CreateTeamHttp(c *gin.Context) {
 	team.Owner = params.Owner
 	team.ProfilePic = params.ProfilePic
 
-	var err2 = CreateTeam(conn, client, team)
-	if err2 != nil {
+	var error = CreateTeam(conn, client, team)
+	if error != nil {
 		utils.SendResponse(c,
-			err2.Code,
-			gin.H{"http-code": err2.Code, "internal-code": err2.err2, "message": err2.Message},
+			error.Code,
+			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
 		)
 		return
 	}
@@ -68,12 +68,12 @@ func EditTeamHttp(c *gin.Context) {
 		return
 	}
 
-	var err2 = EditTeam(conn, client, params)
+	var error = EditTeam(conn, client, params)
 
-	if err2 != nil {
+	if error != nil {
 		utils.SendResponse(c,
-			err2.Code,
-			gin.H{"http-code": err2.Code, "internal-code": err2.err2, "message": err2.Message},
+			error.Code,
+			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
 		)
 		return
 	}
@@ -103,12 +103,12 @@ func EditTeamOwnerHttp(c *gin.Context) {
 		return
 	}
 
-	var err2 = EditTeamOwner(conn, client, params)
+	var error = EditTeamOwner(conn, client, params)
 
-	if err2 != nil {
+	if error != nil {
 		utils.SendResponse(c,
-			err2.Code,
-			gin.H{"http-code": err2.Code, "internal-code": err2.err2, "message": err2.Message},
+			error.Code,
+			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
 		)
 		return
 	}
@@ -138,12 +138,12 @@ func DeleteTeamHttp(c *gin.Context) {
 		return
 	}
 
-	err2 := DeleteTeam(conn, client, params)
+	var error = DeleteTeam(conn, client, params)
 
-	if err2 != nil {
+	if error != nil {
 		utils.SendResponse(c,
-			err2.Code,
-			gin.H{"http-code": err2.Code, "internal-code": err1.err2, "message": err2.Message},
+			error.Code,
+			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
 		)
 		return
 	}
@@ -173,12 +173,12 @@ func GetTeamHttp(c *gin.Context) {
 		return
 	}
 
-	team, err2 := GetTeam(conn, client, params)
+	team, error := GetTeam(conn, client, params)
 
-	if err2 != nil {
+	if error != nil {
 		utils.SendResponse(c,
-			err2.Code,
-			gin.H{"http-code": err2.Code, "internal-code": err1.err2, "message": err2.Message},
+			error.Code,
+			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
 		)
 		return
 	}
@@ -209,12 +209,12 @@ func AddMemberHTTP(c *gin.Context) {
 		return
 	}
 
-	err2 := AddMember(conn, client, params)
+	var error = AddMember(conn, client, params)
 
-	if err2 != nil {
+	if error != nil {
 		utils.SendResponse(c,
-			err2.Code,
-			gin.H{"http-code": err2.Code, "internal-code": err1.err2, "message": err2.Message},
+			error.Code,
+			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
 		)
 		return
 	}
