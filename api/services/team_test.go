@@ -1,13 +1,6 @@
 package services
 
-import (
-	"testing"
-
-	"github.com/akrck02/valhalla-core/db"
-	"github.com/akrck02/valhalla-core/log"
-	"github.com/akrck02/valhalla-core/mock"
-	"github.com/akrck02/valhalla-core/models"
-)
+import ()
 
 /*
 func TestCreateTeam(t *testing.T) {
