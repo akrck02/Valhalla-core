@@ -405,26 +405,23 @@ func DeleteUser(conn context.Context, client *mongo.Client, user models.User) *m
 }
 
 // Get user logic
-func GetUser(conn context.Context, client *mongo.Client, user models.User, found *models.User) *models.Error { // get user from database
+func GetUser(conn context.Context, client *mongo.Client, user models.User) (*models.User, *models.Error) { // get user from database
 
 	users := client.Database(db.CurrentDatabase).Collection(db.USER)
+
+	var found models.User
 
 	err := users.FindOne(conn, bson.M{"email": user.Email}).Decode(&found)
 
 	if err != nil {
-		return &models.Error{
+		return nil, &models.Error{
 			Code:    utils.HTTP_STATUS_NOT_FOUND,
 			Error:   int(error.USER_NOT_FOUND),
 			Message: "User not found",
 		}
 	}
 
-	found = &models.User{
-		Email:    found.Email,
-		Username: found.Username,
-	}
-
-	return nil
+	return &found, nil
 }
 
 // Validate user logic

@@ -234,8 +234,7 @@ func GetUserHttp(c *gin.Context) {
 		return
 	}
 
-	var foundUser models.User
-	var error = GetUser(conn, client, user, &foundUser)
+	var foundUser, error = GetUser(conn, client, user)
 	if error != nil {
 		utils.SendResponse(c,
 			error.Code,
