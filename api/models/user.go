@@ -6,5 +6,5 @@ type User struct {
 	Username   string `bson:"username,omitempty"`
 	Validated  bool   `bson:"validated"`
 	ProfilePic string `bson:"profile_pic,omitempty"`
-  ID        string `bson:"_id,omitempty"`
+	ID         string `bson:"_id,omitempty"`
 }

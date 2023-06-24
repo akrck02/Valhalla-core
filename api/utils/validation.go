@@ -106,3 +106,65 @@ func ValidatePassword(password string) validateResult {
 		Message:  "Ok.",
 	}
 }
+
+// Check if the given name string is valid
+// following the next rules:
+//
+//		[-] At least 2 characters
+//		[-] At most 50 characters
+//
+//	 [param] name : string: name to check
+//
+//	 [return] the name is valid or not
+func ValidateName(name string) validateResult {
+
+	if len(name) < 2 {
+		return validateResult{
+			Response: error.SHORT_NAME,
+			Message:  "Name must have at least 2 characters",
+		}
+	}
+
+	if len(name) > 50 {
+		return validateResult{
+			Response: error.LONG_NAME,
+			Message:  "Name must have at most 50 characters",
+		}
+	}
+
+	return validateResult{
+		Response: 200,
+		Message:  "Ok.",
+	}
+}
+
+// Check if the given description string is valid
+// following the next rules:
+//
+//		[-] At least 8 characters
+//		[-] At most 500 characters
+//
+//	 [param] description : string: description to check
+//
+//	 [return] the description is valid or not
+func ValidateDescription(description string) validateResult {
+
+	if len(description) < 2 {
+		return validateResult{
+			Response: error.SHORT_DESCRIPTION,
+			Message:  "Description must have at least 2 characters",
+		}
+	}
+
+	if len(description) > 500 {
+		return validateResult{
+			Response: error.LONG_DESCRIPTION,
+			Message:  "Description must have at most 500 characters",
+		}
+	}
+
+	return validateResult{
+		Response: 200,
+		Message:  "Ok.",
+	}
+}
