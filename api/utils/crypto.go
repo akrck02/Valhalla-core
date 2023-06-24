@@ -18,7 +18,7 @@ import (
 // [param] device | models.Device | The device
 //
 // [return] string | The token --> error if something went wrong
-func GenerateAuthToken(user models.User, device models.Device) (string, error) {
+func GenerateAuthToken(user *models.User, device *models.Device) (string, error) {
 
 	now := getCurrentMillis()
 
@@ -68,16 +68,16 @@ func EncryptSha256(text string) string {
 // [param] text | string | The text to encrypt
 //
 // [return] string | The encrypted text
-func GenerateValidationCode(text string) string {
+func GenerateValidationCode(text string) (string, error) {
 
 	// Generate a random string
-	randomString, err := GenerateOTP(10)
+	randomString, err := GenerateOTP(20)
 
 	if err != nil {
-		log.Error(err.Error())
+		return "", err
 	}
 
-	return randomString
+	return randomString + EncryptSha256(text), nil
 }
 
 const otpChars = "1234567890"

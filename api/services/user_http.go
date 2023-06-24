@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/akrck02/valhalla-core/db"
+	"github.com/akrck02/valhalla-core/log"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
 	"github.com/gin-gonic/gin"
@@ -27,7 +28,7 @@ func RegisterHttp(c *gin.Context) {
 		return
 	}
 
-	var user models.User
+	var user *models.User
 	user.Username = params.Username
 	user.Password = params.Password
 	user.Email = params.Email
@@ -57,8 +58,8 @@ func LoginHttp(c *gin.Context) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user models.User
-	err := utils.ReadBodyJson(c, &user)
+	var user *models.User
+	err := utils.ReadBodyJson(c, user)
 
 	if err != nil {
 		utils.SendResponse(c,
@@ -95,8 +96,8 @@ func EditUserHttp(c *gin.Context) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user models.User
-	err := utils.ReadBodyJson(c, &user)
+	var user *models.User
+	err := utils.ReadBodyJson(c, user)
 
 	if err != nil {
 		utils.SendResponse(c,
@@ -147,7 +148,6 @@ func EditUserHttp(c *gin.Context) {
 // Change email HTTP API endpoint
 //
 // [param] c | *gin.Context: gin context
-// [return] *models.Error: error if any
 func EditUserEmailHttp(c *gin.Context) {
 
 	var client = db.CreateClient()
@@ -183,15 +183,14 @@ func EditUserEmailHttp(c *gin.Context) {
 // Delete user HTTP API endpoint
 //
 // [param] c | *gin.Context: gin context
-// [return] *models.Error: error if any
 func DeleteUserHttp(c *gin.Context) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user models.User
-	err := utils.ReadBodyJson(c, &user)
+	var user *models.User
+	err := utils.ReadBodyJson(c, user)
 
 	if err != nil {
 		utils.SendResponse(c,
@@ -217,14 +216,16 @@ func DeleteUserHttp(c *gin.Context) {
 }
 
 // Get user HTTP API endpoint
+//
+// [param] c | *gin.Context: gin context
 func GetUserHttp(c *gin.Context) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user models.User
-	err := utils.ReadBodyJson(c, &user)
+	var user *models.User
+	err := utils.ReadBodyJson(c, user)
 
 	if err != nil {
 		utils.SendResponse(c,
@@ -234,7 +235,7 @@ func GetUserHttp(c *gin.Context) {
 		return
 	}
 
-	var foundUser, error = GetUser(conn, client, user)
+	var foundUser, error = GetUser(conn, client, user, true)
 	if error != nil {
 		utils.SendResponse(c,
 			error.Code,
@@ -250,11 +251,13 @@ func GetUserHttp(c *gin.Context) {
 
 }
 
-// Get user HTTP API endpoint
+// Edit user profile picture HTTP API endpoint
+//
+// [param] c | *gin.Context: gin context
 func EditUserProfilePictureHttp(c *gin.Context) {
 
 	// Get user
-	var user models.User = models.User{
+	var user *models.User = &models.User{
 		Email: c.PostForm("Email"),
 	}
 
@@ -288,4 +291,30 @@ func EditUserProfilePictureHttp(c *gin.Context) {
 		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Profile picture updated"},
 	)
 
+}
+
+// Validate user account HTTP API endpoint
+func ValidateUserHttp(c *gin.Context) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	// Get code from url GET parameter
+	code := c.Query("code")
+	log.Info("Query code: " + code)
+
+	var error = ValidateUser(conn, client, code)
+	if error != nil {
+		utils.SendResponse(c,
+			error.Code,
+			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
+		)
+		return
+	}
+
+	utils.SendResponse(c,
+		utils.HTTP_STATUS_OK,
+		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User validated"},
+	)
 }

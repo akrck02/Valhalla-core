@@ -30,6 +30,7 @@ var endpoints = []Endpoint{
 	{"user/edit/profilepicture", utils.HTTP_METHOD_POST, EditUserProfilePictureHttp, true},
 	{"user/delete", utils.HTTP_METHOD_POST, DeleteUserHttp, true},
 	{"user/get", utils.HTTP_METHOD_POST, GetUserHttp, true},
+	{"user/validate", utils.HTTP_METHOD_GET, ValidateUserHttp, false},
 
 	// Team endpoints
 	{"team/create", utils.HTTP_METHOD_POST, CreateTeamHttp, true},

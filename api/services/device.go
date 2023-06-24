@@ -20,7 +20,7 @@ import (
 // [param] device | models.Device: device to add
 //
 // [return] string: token of the device --> error : The error that occurred
-func AddUserDevice(conn context.Context, client *mongo.Client, user models.User, device models.Device) (string, error) {
+func AddUserDevice(conn context.Context, client *mongo.Client, user *models.User, device *models.Device) (string, error) {
 
 	token, err := utils.GenerateAuthToken(user, device)
 
@@ -34,7 +34,7 @@ func AddUserDevice(conn context.Context, client *mongo.Client, user models.User,
 
 	found := findDevice(conn, coll, device)
 
-	if found.Address != "" {
+	if found != nil {
 
 		log.Debug("Device already exists, updating token")
 		coll.ReplaceOne(conn, found, device)
@@ -60,10 +60,10 @@ func AddUserDevice(conn context.Context, client *mongo.Client, user models.User,
 // [param] device | models.Device: device to find
 //
 // [return] models.Device: device found --> error : The error that occurred
-func findDevice(conn context.Context, coll *mongo.Collection, device models.Device) models.Device {
+func findDevice(conn context.Context, coll *mongo.Collection, device *models.Device) *models.Device {
 
-	var found models.Device
-	coll.FindOne(conn, bson.M{"user": device.User, "address": device.Address, "useragent": device.UserAgent}).Decode(&found)
+	var found *models.Device
+	coll.FindOne(conn, bson.M{"user": device.User, "address": device.Address, "useragent": device.UserAgent}).Decode(found)
 
 	return found
 }
