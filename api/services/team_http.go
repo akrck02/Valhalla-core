@@ -34,7 +34,7 @@ func CreateTeamHttp(c *gin.Context) {
 	team.Owner = params.Owner
 	team.ProfilePic = params.ProfilePic
 
-	var error = CreateTeam(conn, client, team)
+	var error = CreateTeam(conn, client, &team)
 	if error != nil {
 		utils.SendResponse(c,
 			error.Code,
@@ -68,7 +68,7 @@ func EditTeamHttp(c *gin.Context) {
 		return
 	}
 
-	var error = EditTeam(conn, client, params)
+	var error = EditTeam(conn, client, &params)
 
 	if error != nil {
 		utils.SendResponse(c,
@@ -103,7 +103,7 @@ func EditTeamOwnerHttp(c *gin.Context) {
 		return
 	}
 
-	var error = EditTeamOwner(conn, client, params)
+	var error = EditTeamOwner(conn, client, &params)
 
 	if error != nil {
 		utils.SendResponse(c,
@@ -138,7 +138,7 @@ func DeleteTeamHttp(c *gin.Context) {
 		return
 	}
 
-	var error = DeleteTeam(conn, client, params)
+	var error = DeleteTeam(conn, client, &params)
 
 	if error != nil {
 		utils.SendResponse(c,
@@ -173,7 +173,7 @@ func GetTeamHttp(c *gin.Context) {
 		return
 	}
 
-	team, error := GetTeam(conn, client, params)
+	team, error := GetTeam(conn, client, &params)
 
 	if error != nil {
 		utils.SendResponse(c,
@@ -209,7 +209,7 @@ func AddMemberHttp(c *gin.Context) {
 		return
 	}
 
-	var error = AddMember(conn, client, params)
+	var error = AddMember(conn, client, &params)
 
 	if error != nil {
 		utils.SendResponse(c,
