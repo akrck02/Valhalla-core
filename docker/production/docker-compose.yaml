@@ -2,15 +2,15 @@ version: '3'
 services:
   valhalla:
     image: akrck02/valhalla-core-prod:latest
-    container_name: valhalla
+    container_name: valhalla-core-prod
     restart: always
     ports:
       - 3333:3333
     networks:
-      - backend
+      - valhalla-prod
   mongodb:
     image: mongo
-    container_name: mongodb   
+    container_name: valhalla-core-prod-mongodb   
     ports:
       - "27017:27017"
     restart: unless-stopped       
@@ -20,25 +20,26 @@ services:
     volumes:
       - ./mongo-data:/data/db
     networks:
-      backend:
+      valhalla-prod:
         ipv4_address: ${IP_MONGODB}
       
-  mongo-express:
-    image: mongo-express
-    container_name: mongo-express    
-    ports:
-      - "8080:8081"
-    restart: unless-stopped       
-    networks:
-      - backend
-    environment:
-      - ME_CONFIG_MONGODB_ADMINUSERNAME=${MONGO_ADMIN_USERNAME}
-      - ME_CONFIG_MONGODB_ADMINPASSWORD=${MONGO_ADMIN_PASSWORD}
-      - ME_CONFIG_MONGODB_SERVER=${MONGO_ADMIN_SERVER}
+#  mongo-express:
+#    image: mongo-express
+#    container_name: mongo-express    
+#    ports:
+#      - "8080:8081"
+#    restart: unless-stopped       
+#    networks:
+#      - valhalla-prod
+#    environment:
+#      - ME_CONFIG_MONGODB_ADMINUSERNAME=${MONGO_ADMIN_USERNAME}
+#      - ME_CONFIG_MONGODB_ADMINPASSWORD=${MONGO_ADMIN_PASSWORD}
+#      - ME_CONFIG_MONGODB_SERVER=${MONGO_ADMIN_SERVER}
+      
 networks:
-      backend:
-        name: backend
-        ipam:
-          driver: default
-          config:
-            - subnet: ${MASK_MONGODB}
+  valhalla-prod:
+    name: valhalla-prod
+    ipam:
+      driver: default
+      config:
+        - subnet: ${MASK_MONGODB}

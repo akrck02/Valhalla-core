@@ -74,7 +74,7 @@ func Register(conn context.Context, client *mongo.Client, user *models.User) *mo
 	coll := client.Database(db.CurrentDatabase).Collection(db.USER)
 	found := mailExists(user.Email, conn, coll)
 
-	if found.Email != "" {
+	if found != nil {
 
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_CONFLICT,
@@ -96,8 +96,6 @@ func Register(conn context.Context, client *mongo.Client, user *models.User) *mo
 	userToInsert := user.Clone()
 	userToInsert.Password = utils.EncryptSha256(user.Clone().Password)
 	userToInsert.ValidationCode = code
-
-	// create a new user from this point
 
 	// register user on database
 	_, err = coll.InsertOne(conn, userToInsert)
@@ -265,7 +263,7 @@ func EditUserEmail(conn context.Context, client *mongo.Client, mail EmailChangeR
 	users := client.Database(db.CurrentDatabase).Collection(db.USER)
 	found := mailExists(mail.NewEmail, conn, users)
 
-	if found.Email != "" {
+	if found != nil {
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_CONFLICT,
 			Error:   int(error.USER_ALREADY_EXISTS),
@@ -525,7 +523,12 @@ func mailExists(email string, conn context.Context, coll *mongo.Collection) *mod
 	filter := bson.D{{Key: "email", Value: email}}
 
 	var result models.User
-	coll.FindOne(conn, filter).Decode(&result)
+	err := coll.FindOne(conn, filter).Decode(&result)
+
+	if err != nil {
+		log.FormattedError("Error: ${0}", err.Error())
+		return nil
+	}
 
 	return &result
 }
@@ -539,12 +542,20 @@ func mailExists(email string, conn context.Context, coll *mongo.Collection) *mod
 //	[return] model.User : The user found or empty
 func authorizationOk(email string, password string, conn context.Context, coll *mongo.Collection) *models.User {
 
-	filter := bson.D{{Key: "email", Value: email}, {Key: "password", Value: utils.EncryptSha256(password)}}
+	filter := bson.D{
+		{Key: "email", Value: email},
+		{Key: "password", Value: utils.EncryptSha256(password)},
+	}
 
-	var result *models.User
-	coll.FindOne(conn, filter).Decode(result)
+	var result models.User
+	err := coll.FindOne(conn, filter).Decode(&result)
 
-	return result
+	if err != nil {
+		log.FormattedError("Error: ${0}", err.Error())
+		return nil
+	}
+
+	return &result
 }
 
 // Get user from token

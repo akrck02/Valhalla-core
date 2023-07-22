@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"time"
 
 	"github.com/akrck02/valhalla-core/configuration"
 	"github.com/akrck02/valhalla-core/log"
@@ -42,7 +41,7 @@ func CreateClient() *mongo.Client {
 
 func Connect(client mongo.Client) context.Context {
 
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx := context.Background() //context.WithTimeout(context.Background(), 10*time.Second)
 	err := client.Connect(ctx)
 
 	if err != nil {

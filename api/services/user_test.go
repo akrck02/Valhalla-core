@@ -362,6 +362,7 @@ func TestRegisterNotNumbersPassword(t *testing.T) {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
+
 }
 
 func TestLogin(t *testing.T) {
