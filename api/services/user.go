@@ -25,7 +25,7 @@ type EmailChangeRequest struct {
 // [param] user | *models.User: user to register
 //
 // [return] *models.Error: error if any
-func Register(conn context.Context, client *mongo.Client, user models.User) *models.Error {
+func Register(conn context.Context, client *mongo.Client, user *models.User) *models.Error {
 
 	if utils.IsEmpty(user.Email) {
 		return &models.Error{
@@ -74,7 +74,7 @@ func Register(conn context.Context, client *mongo.Client, user models.User) *mod
 	coll := client.Database(db.CurrentDatabase).Collection(db.USER)
 	found := mailExists(user.Email, conn, coll)
 
-	if found.Email != "" {
+	if found != nil {
 
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_CONFLICT,
@@ -83,10 +83,22 @@ func Register(conn context.Context, client *mongo.Client, user models.User) *mod
 		}
 	}
 
-	user.Password = utils.EncryptSha256(user.Password)
+	code, err := utils.GenerateValidationCode(user.Email)
+
+	if err != nil {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Error:   int(error.CANNOT_CREATE_VALIDATION_CODE),
+			Message: "User not created",
+		}
+	}
+
+	userToInsert := user.Clone()
+	userToInsert.Password = utils.EncryptSha256(user.Clone().Password)
+	userToInsert.ValidationCode = code
 
 	// register user on database
-	_, err := coll.InsertOne(conn, user)
+	_, err = coll.InsertOne(conn, userToInsert)
 
 	if err != nil {
 		return &models.Error{
@@ -108,19 +120,20 @@ func Register(conn context.Context, client *mongo.Client, user models.User) *mod
 // [param] address | string: user agent of the user
 //
 // [return] string: auth token --> *models.Error: error if any
-func Login(conn context.Context, client *mongo.Client, user models.User, ip string, address string) (string, *models.Error) {
+func Login(conn context.Context, client *mongo.Client, user *models.User, ip string, address string) (string, *models.Error) {
 
 	coll := client.Database(db.CurrentDatabase).Collection(db.USER)
-	found := authorizationOk(user.Email, user.Password, conn, coll)
+	log.Info("Password: " + user.Password)
+	found := authorizationOk(user.Email, user.Clone().Password, conn, coll)
 
-	if found.Email == "" {
+	if found == nil {
 		return "", &models.Error{
 			Code:    utils.HTTP_STATUS_FORBIDDEN,
 			Message: "Invalid credentials",
 		}
 	}
 
-	device := models.Device{Address: ip, UserAgent: address}
+	device := &models.Device{Address: ip, UserAgent: address}
 	token, err := AddUserDevice(conn, client, found, device)
 
 	if err != nil {
@@ -140,7 +153,7 @@ func Login(conn context.Context, client *mongo.Client, user models.User, ip stri
 // [param] user | models.User: user to edit
 //
 // [return] *models.Error: error if any
-func EditUser(conn context.Context, client *mongo.Client, user models.User) *models.Error {
+func EditUser(conn context.Context, client *mongo.Client, user *models.User) *models.Error {
 
 	users := client.Database(db.CurrentDatabase).Collection(db.USER)
 
@@ -159,6 +172,7 @@ func EditUser(conn context.Context, client *mongo.Client, user models.User) *mod
 
 	// validate password
 	if user.Password != "" {
+
 		checkedPass := utils.ValidatePassword(user.Password)
 
 		if checkedPass.Response != 200 {
@@ -177,7 +191,10 @@ func EditUser(conn context.Context, client *mongo.Client, user models.User) *mod
 	}
 
 	if user.Password != "" {
-		toUpdate["$set"].(bson.M)["password"] = utils.EncryptSha256(user.Password)
+		log.Info("password: " + user.Password)
+		encryptedPass := user.Password
+		toUpdate["$set"].(bson.M)["password"] = utils.EncryptSha256(encryptedPass)
+		log.Info("encrypted password: " + encryptedPass)
 	}
 
 	if user.ProfilePic != "" {
@@ -246,7 +263,7 @@ func EditUserEmail(conn context.Context, client *mongo.Client, mail EmailChangeR
 	users := client.Database(db.CurrentDatabase).Collection(db.USER)
 	found := mailExists(mail.NewEmail, conn, users)
 
-	if found.Email != "" {
+	if found != nil {
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_CONFLICT,
 			Error:   int(error.USER_ALREADY_EXISTS),
@@ -323,7 +340,7 @@ func EditUserEmail(conn context.Context, client *mongo.Client, mail EmailChangeR
 // [param] picture | []byte: picture to change
 //
 // [return] *models.Error: error if any
-func EditUserProfilePicture(conn context.Context, client *mongo.Client, user models.User, picture []byte) *models.Error {
+func EditUserProfilePicture(conn context.Context, client *mongo.Client, user *models.User, picture []byte) *models.Error {
 
 	if utils.IsEmpty(user.Email) {
 		return &models.Error{
@@ -357,7 +374,7 @@ func EditUserProfilePicture(conn context.Context, client *mongo.Client, user mod
 // [param] user | models.User: user to delete
 //
 // [return] *models.Error: error if any
-func DeleteUser(conn context.Context, client *mongo.Client, user models.User) *models.Error {
+func DeleteUser(conn context.Context, client *mongo.Client, user *models.User) *models.Error {
 
 	if utils.IsEmpty(user.Email) {
 		return &models.Error{
@@ -405,7 +422,7 @@ func DeleteUser(conn context.Context, client *mongo.Client, user models.User) *m
 }
 
 // Get user logic
-func GetUser(conn context.Context, client *mongo.Client, user models.User) (*models.User, *models.Error) { // get user from database
+func GetUser(conn context.Context, client *mongo.Client, user *models.User, secure bool) (*models.User, *models.Error) { // get user from database
 
 	users := client.Database(db.CurrentDatabase).Collection(db.USER)
 
@@ -421,6 +438,10 @@ func GetUser(conn context.Context, client *mongo.Client, user models.User) (*mod
 		}
 	}
 
+	if secure {
+		found.Password = "****************"
+	}
+
 	return &found, nil
 }
 
@@ -433,6 +454,61 @@ func GetUser(conn context.Context, client *mongo.Client, user models.User) (*mod
 // [return] *models.Error: error if any
 func ValidateUser(conn context.Context, client *mongo.Client, code string) *models.Error {
 
+	if utils.IsEmpty(code) {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.INVALID_VALIDATION_CODE),
+			Message: "Code cannot be empty",
+		}
+	}
+
+	var user = &models.User{
+		ValidationCode: code,
+	}
+	coll := client.Database(db.CurrentDatabase).Collection(db.USER)
+	err := coll.FindOne(conn, user).Decode(user)
+
+	log.FormattedInfo("user: ${0}", user.Email)
+	log.FormattedInfo("code: ${0}", code)
+
+	if err != nil {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_NOT_FOUND,
+			Error:   int(error.USER_NOT_FOUND),
+			Message: "Invalid validation code",
+		}
+	}
+
+	if user.ValidationCode != code {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.INVALID_VALIDATION_CODE),
+			Message: "Invalid validation code",
+		}
+	}
+
+	user.ValidationCode = ""
+	user.Validated = true
+
+	// update user on database
+	result, editerr := coll.UpdateOne(conn, bson.M{"email": user.Email}, bson.M{"$set": bson.M{"validation_code": "", "validated": true}})
+
+	if result.MatchedCount == 0 {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_NOT_FOUND,
+			Error:   int(error.USER_NOT_FOUND),
+			Message: "User not found",
+		}
+	}
+
+	if editerr != nil {
+		return &models.Error{
+			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Error:   int(error.USER_NOT_UPDATED),
+			Message: "User not validated: " + editerr.Error(),
+		}
+	}
+
 	return nil
 }
 
@@ -442,14 +518,19 @@ func ValidateUser(conn context.Context, client *mongo.Client, code string) *mode
 //	[param] conn | context.Context The connection to the database
 //
 //	[return] model.User : The user found or empty
-func mailExists(email string, conn context.Context, coll *mongo.Collection) models.User {
+func mailExists(email string, conn context.Context, coll *mongo.Collection) *models.User {
 
 	filter := bson.D{{Key: "email", Value: email}}
 
 	var result models.User
-	coll.FindOne(conn, filter).Decode(&result)
+	err := coll.FindOne(conn, filter).Decode(&result)
 
-	return result
+	if err != nil {
+		log.FormattedError("Error: ${0}", err.Error())
+		return nil
+	}
+
+	return &result
 }
 
 // Get if the given credentials are valid
@@ -459,14 +540,22 @@ func mailExists(email string, conn context.Context, coll *mongo.Collection) mode
 //	[param] conn | context.Context : The connection to the database
 //
 //	[return] model.User : The user found or empty
-func authorizationOk(email string, password string, conn context.Context, coll *mongo.Collection) models.User {
+func authorizationOk(email string, password string, conn context.Context, coll *mongo.Collection) *models.User {
 
-	filter := bson.D{{Key: "email", Value: email}, {Key: "password", Value: utils.EncryptSha256(password)}}
+	filter := bson.D{
+		{Key: "email", Value: email},
+		{Key: "password", Value: utils.EncryptSha256(password)},
+	}
 
 	var result models.User
-	coll.FindOne(conn, filter).Decode(&result)
+	err := coll.FindOne(conn, filter).Decode(&result)
 
-	return result
+	if err != nil {
+		log.FormattedError("Error: ${0}", err.Error())
+		return nil
+	}
+
+	return &result
 }
 
 // Get user from token

@@ -16,7 +16,7 @@ func Platform() string {
 func Token() string {
 
 	// Create a user
-	var user = models.User{
+	var user = &models.User{
 		Username: "#TOKENHASH#",
 		Password: "#T0K3NH4SHToKeNHaSH#",
 		Email:    "TokenHash@tokenHash.com",
@@ -24,7 +24,7 @@ func Token() string {
 
 	// Create a device
 
-	var device = models.Device{
+	var device = &models.Device{
 		UserAgent: "Firefox, Linux",
 		Address:   "0.0.0.0",
 	}
