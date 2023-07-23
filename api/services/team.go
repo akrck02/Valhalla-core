@@ -5,7 +5,6 @@ import (
 
 	"github.com/akrck02/valhalla-core/db"
 	"github.com/akrck02/valhalla-core/error"
-	"github.com/akrck02/valhalla-core/log"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
 	"go.mongodb.org/mongo-driver/bson"
@@ -386,39 +385,7 @@ func GetTeam(conn context.Context, client *mongo.Client, team *models.Team) (*mo
 // [return] error: *models.Error: error if any
 func SearchTeams(conn context.Context, client *mongo.Client, searchText *string) (*[]models.Team, *models.Error) {
 
-	coll := client.Database(db.CurrentDatabase).Collection(db.TEAM)
-	var foundTeams []models.Team
-
-	model := mongo.IndexModel{Keys: bson.D{{"name", "text"}}}
-
-	name, err := coll.Indexes().CreateOne(conn, model)
-
-	if err != nil {
-		return nil, &models.Error{
-			Code: utils.HTTP_
-		}
-	}
-	log.Info("Name of index created: " + name)
-	filter := bson.D{{"$text", bson.D{{"$search", searchText}}}}
-	cursor, err := coll.Find(conn, filter)
-
-	if err != nil {
-		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   int(error.TEAM_SEARCH_ERROR),
-			Message: "Team search unsuccessful",
-		}
-	}
-
-	err = cursor.All(conn, &foundTeams)
-
-	if err != nil {
-		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   int(error.TEAM_SEARCH_ERROR),
-			Message: "Team search unsuccessful",
-		}
-	}
+	foundTeams := []models.Team{}
 
 	return &foundTeams, nil
 
