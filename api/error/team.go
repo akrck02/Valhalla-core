@@ -21,4 +21,5 @@ const (
 	NO_PROJECT             = 645
 	USER_IS_OWNER          = 646
 	USER_ALREADY_MEMBER    = 647
+	TEAM_SEARCH_ERROR      = 648
 )

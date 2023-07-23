@@ -5,6 +5,7 @@ import (
 
 	"github.com/akrck02/valhalla-core/db"
 	"github.com/akrck02/valhalla-core/error"
+	"github.com/akrck02/valhalla-core/log"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
 	"go.mongodb.org/mongo-driver/bson"
@@ -318,20 +319,41 @@ func AddMember(conn context.Context, client *mongo.Client, memberChange *MemberC
 	return nil
 }
 
+// Remove member from team logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] team | *models.Team: team to edit
+//
+// [return] error: *models.Error: error if any
 func RemoveMember(conn context.Context, client *mongo.Client, team *models.Team) *models.Error {
 	return nil
 }
 
+// Get teams logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] team | *models.Team: team to edit
+//
+// [return] error: *models.Error: error if any
 func GetTeams(conn context.Context, client *mongo.Client, team *models.Team) *models.Error {
 
 	return nil
 }
 
+// Get team logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] team | *models.Team: team to edit
+//
+// [return] error: *models.Error: error if any
 func GetTeam(conn context.Context, client *mongo.Client, team *models.Team) (*models.Team, *models.Error) {
 
-	objID, err := utils.StringToObjectId(team.ID)
+	objID, err1 := utils.StringToObjectId(team.ID)
 
-	if err != nil {
+	if err1 != nil {
 		return nil, &models.Error{
 			Code:    utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.BAD_OBJECT_ID),
@@ -342,9 +364,9 @@ func GetTeam(conn context.Context, client *mongo.Client, team *models.Team) (*mo
 	coll := client.Database(db.CurrentDatabase).Collection(db.TEAM)
 	var foundTeam models.Team
 
-	err = coll.FindOne(conn, bson.M{"_id": objID}).Decode(&foundTeam)
+	err2 := coll.FindOne(conn, bson.M{"_id": objID}).Decode(&foundTeam)
 
-	if err != nil {
+	if err2 != nil {
 		return nil, &models.Error{
 			Code:    utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.TEAM_NOT_FOUND),
@@ -355,14 +377,61 @@ func GetTeam(conn context.Context, client *mongo.Client, team *models.Team) (*mo
 	return &foundTeam, nil
 }
 
+// Search teams logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] searchText | *string: text to search
+//
+// [return] error: *models.Error: error if any
+func SearchTeams(conn context.Context, client *mongo.Client, searchText *string) (*[]models.Team, *models.Error) {
+
+	coll := client.Database(db.CurrentDatabase).Collection(db.TEAM)
+	var foundTeams []models.Team
+
+	model := mongo.IndexModel{Keys: bson.D{{"name", "text"}}}
+
+	name, err := coll.Indexes().CreateOne(conn, model)
+
+	if err != nil {
+		return nil, &models.Error{
+			Code: utils.HTTP_
+		}
+	}
+	log.Info("Name of index created: " + name)
+	filter := bson.D{{"$text", bson.D{{"$search", searchText}}}}
+	cursor, err := coll.Find(conn, filter)
+
+	if err != nil {
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.TEAM_SEARCH_ERROR),
+			Message: "Team search unsuccessful",
+		}
+	}
+
+	err = cursor.All(conn, &foundTeams)
+
+	if err != nil {
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.TEAM_SEARCH_ERROR),
+			Message: "Team search unsuccessful",
+		}
+	}
+
+	return &foundTeams, nil
+
+}
+
 func userExists(conn context.Context, client *mongo.Client, user string) *models.Error {
 
 	coll := client.Database(db.CurrentDatabase).Collection(db.USER)
 	var foundUser models.User
 
-	objID, err := utils.StringToObjectId(user)
+	objID, err1 := utils.StringToObjectId(user)
 
-	if err != nil {
+	if err1 != nil {
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.BAD_OBJECT_ID),
@@ -370,9 +439,9 @@ func userExists(conn context.Context, client *mongo.Client, user string) *models
 		}
 	}
 
-	err = coll.FindOne(conn, bson.M{"_id": objID}).Decode(&foundUser)
+	err2 := coll.FindOne(conn, bson.M{"_id": objID}).Decode(&foundUser)
 
-	if err != nil {
+	if err2 != nil {
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.OWNER_DOESNT_EXIST),

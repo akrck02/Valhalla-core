@@ -71,3 +71,12 @@ func SetupTest() {
 func Disconnect(client mongo.Client, ctx context.Context) {
 	defer client.Disconnect(ctx)
 }
+
+func Setup() {
+
+	var client = CreateClient()
+	var ctx = Connect(*client)
+
+	defer Disconnect(*client, ctx)
+
+}
