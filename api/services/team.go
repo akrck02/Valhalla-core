@@ -23,7 +23,7 @@ type MemberChangeRequest struct {
 // [param] user | *models.Team: team to create
 //
 // [return] error: *models.Error: error if any
-func CreateTeam(conn context.Context, client *mongo.Client, team models.Team) *models.Error {
+func CreateTeam(conn context.Context, client *mongo.Client, team *models.Team) *models.Error {
 
 	// Check if team name is empty
 	if utils.IsEmpty(team.Name) {
@@ -66,7 +66,7 @@ func CreateTeam(conn context.Context, client *mongo.Client, team models.Team) *m
 	}
 
 	// Check if owner exists
-	err1 := userExists(team.Owner, conn, client)
+	err1 := userExists(conn, client, team.Owner)
 
 	if err1 != nil {
 		return err1
@@ -84,7 +84,7 @@ func CreateTeam(conn context.Context, client *mongo.Client, team models.Team) *m
 	// Check if team already exists
 	coll := client.Database(db.CurrentDatabase).Collection(db.TEAM)
 
-	found := teamExists(&team, conn, coll)
+	found := teamExists(conn, coll, team)
 
 	if found.Name != "" {
 		return &models.Error{
@@ -115,7 +115,7 @@ func CreateTeam(conn context.Context, client *mongo.Client, team models.Team) *m
 // [param] team | *models.Team: team to delete
 //
 // [return] error: *models.Error: error if any
-func DeleteTeam(conn context.Context, client *mongo.Client, team models.Team) *models.Error {
+func DeleteTeam(conn context.Context, client *mongo.Client, team *models.Team) *models.Error {
 
 	// Transform team id to object id
 	// also check if team id is valid
@@ -152,7 +152,7 @@ func DeleteTeam(conn context.Context, client *mongo.Client, team models.Team) *m
 // [param] team | *models.Team: team to edit
 //
 // [return] error: *models.Error: error if any
-func EditTeam(conn context.Context, client *mongo.Client, team models.Team) *models.Error {
+func EditTeam(conn context.Context, client *mongo.Client, team *models.Team) *models.Error {
 
 	// Transform team id to object id
 	// also check if team id is valid
@@ -194,7 +194,7 @@ func EditTeam(conn context.Context, client *mongo.Client, team models.Team) *mod
 // [param] team | *models.Team: team to edit
 //
 // [return] error: *models.Error: error if any
-func EditTeamOwner(conn context.Context, client *mongo.Client, team models.Team) *models.Error {
+func EditTeamOwner(conn context.Context, client *mongo.Client, team *models.Team) *models.Error {
 
 	// Check if team owner is empty
 	if utils.IsEmpty(team.Owner) {
@@ -218,7 +218,7 @@ func EditTeamOwner(conn context.Context, client *mongo.Client, team models.Team)
 	}
 
 	// Check if owner exists
-	err2 := userExists(team.Owner, conn, client)
+	err2 := userExists(conn, client, team.Owner)
 
 	if err2 != nil {
 		return err2
@@ -253,7 +253,7 @@ func EditTeamOwner(conn context.Context, client *mongo.Client, team models.Team)
 // [param] team | *models.Team: team to edit
 //
 // [return] error: *models.Error: error if any
-func AddMember(conn context.Context, client *mongo.Client, memberChange MemberChangeRequest) *models.Error {
+func AddMember(conn context.Context, client *mongo.Client, memberChange *MemberChangeRequest) *models.Error {
 
 	// Check if member is empty
 	if utils.IsEmpty(memberChange.User) {
@@ -274,7 +274,7 @@ func AddMember(conn context.Context, client *mongo.Client, memberChange MemberCh
 	}
 
 	// Check if member exists
-	err1 := userExists(memberChange.User, conn, client)
+	err1 := userExists(conn, client, memberChange.User)
 
 	if err1 != nil {
 		return err1
@@ -318,20 +318,41 @@ func AddMember(conn context.Context, client *mongo.Client, memberChange MemberCh
 	return nil
 }
 
-func RemoveMember(conn context.Context, client *mongo.Client, team models.Team) *models.Error {
+// Remove member from team logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] team | *models.Team: team to edit
+//
+// [return] error: *models.Error: error if any
+func RemoveMember(conn context.Context, client *mongo.Client, team *models.Team) *models.Error {
 	return nil
 }
 
-func GetTeams(conn context.Context, client *mongo.Client, team models.Team) *models.Error {
+// Get teams logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] team | *models.Team: team to edit
+//
+// [return] error: *models.Error: error if any
+func GetTeams(conn context.Context, client *mongo.Client, team *models.Team) *models.Error {
 
 	return nil
 }
 
-func GetTeam(conn context.Context, client *mongo.Client, team models.Team) (*models.Team, *models.Error) {
+// Get team logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] team | *models.Team: team to edit
+//
+// [return] error: *models.Error: error if any
+func GetTeam(conn context.Context, client *mongo.Client, team *models.Team) (*models.Team, *models.Error) {
 
-	objID, err := utils.StringToObjectId(team.ID)
+	objID, err1 := utils.StringToObjectId(team.ID)
 
-	if err != nil {
+	if err1 != nil {
 		return nil, &models.Error{
 			Code:    utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.BAD_OBJECT_ID),
@@ -342,9 +363,9 @@ func GetTeam(conn context.Context, client *mongo.Client, team models.Team) (*mod
 	coll := client.Database(db.CurrentDatabase).Collection(db.TEAM)
 	var foundTeam models.Team
 
-	err = coll.FindOne(conn, bson.M{"_id": objID}).Decode(&foundTeam)
+	err2 := coll.FindOne(conn, bson.M{"_id": objID}).Decode(&foundTeam)
 
-	if err != nil {
+	if err2 != nil {
 		return nil, &models.Error{
 			Code:    utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.TEAM_NOT_FOUND),
@@ -355,14 +376,29 @@ func GetTeam(conn context.Context, client *mongo.Client, team models.Team) (*mod
 	return &foundTeam, nil
 }
 
-func userExists(user string, conn context.Context, client *mongo.Client) *models.Error {
+// Search teams logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] searchText | *string: text to search
+//
+// [return] error: *models.Error: error if any
+func SearchTeams(conn context.Context, client *mongo.Client, searchText *string) (*[]models.Team, *models.Error) {
+
+	foundTeams := []models.Team{}
+
+	return &foundTeams, nil
+
+}
+
+func userExists(conn context.Context, client *mongo.Client, user string) *models.Error {
 
 	coll := client.Database(db.CurrentDatabase).Collection(db.USER)
 	var foundUser models.User
 
-	objID, err := utils.StringToObjectId(user)
+	objID, err1 := utils.StringToObjectId(user)
 
-	if err != nil {
+	if err1 != nil {
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.BAD_OBJECT_ID),
@@ -370,9 +406,9 @@ func userExists(user string, conn context.Context, client *mongo.Client) *models
 		}
 	}
 
-	err = coll.FindOne(conn, bson.M{"_id": objID}).Decode(&foundUser)
+	err2 := coll.FindOne(conn, bson.M{"_id": objID}).Decode(&foundUser)
 
-	if err != nil {
+	if err2 != nil {
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.OWNER_DOESNT_EXIST),
@@ -383,7 +419,7 @@ func userExists(user string, conn context.Context, client *mongo.Client) *models
 	return nil
 }
 
-func teamExists(team *models.Team, conn context.Context, coll *mongo.Collection) models.Team {
+func teamExists(conn context.Context, coll *mongo.Collection, team *models.Team) models.Team {
 
 	filter := bson.D{
 		{Key: "name", Value: team.Name},
@@ -396,7 +432,7 @@ func teamExists(team *models.Team, conn context.Context, coll *mongo.Collection)
 	return result
 }
 
-func isUserMemberOrOwner(conn context.Context, client *mongo.Client, request MemberChangeRequest) *models.Error {
+func isUserMemberOrOwner(conn context.Context, client *mongo.Client, request *MemberChangeRequest) *models.Error {
 
 	filterMember := bson.D{
 		{Key: "_id", Value: request.Team},
