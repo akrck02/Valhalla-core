@@ -45,7 +45,7 @@ func CreateTeamHttp(c *gin.Context) {
 
 	utils.SendResponse(c,
 		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User created"},
+		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Team created"},
 	)
 }
 
@@ -209,12 +209,12 @@ func AddMemberHttp(c *gin.Context) {
 		return
 	}
 
-	var error = AddMember(conn, client, &params)
+	var err2 = AddMember(conn, client, &params)
 
-	if error != nil {
+	if err2 != nil {
 		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
+			err2.Code,
+			gin.H{"http-code": err2.Code, "internal-code": err2.Error, "message": err2.Message},
 		)
 		return
 	}
@@ -222,5 +222,37 @@ func AddMemberHttp(c *gin.Context) {
 	utils.SendResponse(c,
 		utils.HTTP_STATUS_OK,
 		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Member added"},
+	)
+}
+
+func RemoveMemberHttp(c *gin.Context) {
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+	var params MemberChangeRequest
+
+	err1 := utils.ReadBodyJson(c, &params)
+
+	if err1 != nil {
+		utils.SendResponse(c,
+			utils.HTTP_STATUS_BAD_REQUEST,
+			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
+		)
+		return
+	}
+
+	var err2 = RemoveMember(conn, client, &params)
+
+	if err2 != nil {
+		utils.SendResponse(c,
+			err2.Code,
+			gin.H{"http-code": err2.Code, "internal-code": err2.Error, "message": err2.Message},
+		)
+		return
+	}
+
+	utils.SendResponse(c,
+		utils.HTTP_STATUS_OK,
+		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Member removed"},
 	)
 }
