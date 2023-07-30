@@ -102,7 +102,7 @@ func Register(conn context.Context, client *mongo.Client, user *models.User) *mo
 
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Code:    utils.HTTP_STATUS_CONFLICT,
 			Error:   int(error.USER_ALREADY_EXISTS),
 			Message: "User already exists",
 		}
@@ -208,7 +208,7 @@ func EditUser(conn context.Context, client *mongo.Client, user *models.User) *mo
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.USER_NOT_UPDATED),
-			Message: "User not updated ",
+			Message: "User not updated",
 		}
 	}
 
@@ -230,7 +230,7 @@ func EditUser(conn context.Context, client *mongo.Client, user *models.User) *mo
 // [param] user | models.User: user to change email
 //
 // [return] *models.Error: error if any
-func EditUserEmail(conn context.Context, client *mongo.Client, mail EmailChangeRequest) *models.Error {
+func EditUserEmail(conn context.Context, client *mongo.Client, mail *EmailChangeRequest) *models.Error {
 
 	if utils.IsEmpty(mail.Email) || utils.IsEmpty(mail.NewEmail) {
 		return &models.Error{

@@ -699,7 +699,7 @@ func TestEditUserEmail(t *testing.T) {
 		NewEmail: newEmail,
 	}
 
-	err = EditUserEmail(conn, client, emailChangeRequest)
+	err = EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err != nil {
 		t.Error("The user email was not changed", err)
@@ -732,7 +732,7 @@ func TestEditUserEmailNoEmail(t *testing.T) {
 
 	log.Info("Changing user email")
 
-	err := EditUserEmail(conn, client, emailChangeRequest)
+	err := EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
@@ -764,7 +764,7 @@ func TestEditUserEmailNoDotEmail(t *testing.T) {
 
 	log.Info("Changing user email")
 
-	err := EditUserEmail(conn, client, emailChangeRequest)
+	err := EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
@@ -797,7 +797,7 @@ func TestEditUserEmailNoAtEmail(t *testing.T) {
 
 	log.Info("Changing user email")
 
-	err := EditUserEmail(conn, client, emailChangeRequest)
+	err := EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
@@ -829,7 +829,7 @@ func TestEditUserEmailShortEmail(t *testing.T) {
 
 	log.Info("Changing user email")
 
-	err := EditUserEmail(conn, client, emailChangeRequest)
+	err := EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
@@ -861,7 +861,7 @@ func TestEditUserEmailNotFound(t *testing.T) {
 
 	log.Info("Changing user email")
 
-	err := EditUserEmail(conn, client, emailChangeRequest)
+	err := EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
@@ -935,7 +935,7 @@ func TestEditUserEmailExists(t *testing.T) {
 
 	log.FormattedInfo("Changing user email to ${0}", newEmail)
 
-	err = EditUserEmail(conn, client, emailChangeRequest)
+	err = EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
@@ -994,7 +994,7 @@ func TestEditUserSameEmail(t *testing.T) {
 
 	log.Info("Changing user email")
 
-	err := EditUserEmail(conn, client, emailChangeRequest)
+	err := EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")

@@ -10,12 +10,13 @@ import (
 
 // Read body json as the given object
 //
-// [param] c | *gin.Context: gin context
+// [param] c | interface: gin context
 // [param] obj | interface{}: object to read
 //
 // [return] error: error
-func ReadBodyJson(c *gin.Context, obj interface{}) error {
-	return c.BindJSON(obj)
+func ReadBodyJson(params interface{}, obj interface{}) error {
+
+	return nil
 }
 
 // MultipartToBytes reads a file from a multipart request

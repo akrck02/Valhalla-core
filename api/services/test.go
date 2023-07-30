@@ -1,9 +1,10 @@
 package services
 
 import (
-	"net/http"
+	"fmt"
 
-	"github.com/gin-gonic/gin"
+	"github.com/akrck02/valhalla-core/models"
+	"github.com/akrck02/valhalla-core/utils"
 )
 
 type pingResponse struct {
@@ -13,6 +14,17 @@ type pingResponse struct {
 /**
  * Status check endpoint
  */
-func PingHttp(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, pingResponse{Message: "pong"})
+func PingHttp(request models.Request) (*models.Response, *models.Error) {
+
+	fmt.Println(request)
+
+	return &models.Response{
+			Code:     utils.HTTP_STATUS_OK,
+			Response: pingResponse{Message: "pong"},
+		}, &models.Error{
+			Code:    500,
+			Message: "noooooooooo Maideeeer ",
+			Error:   230,
+		}
+
 }

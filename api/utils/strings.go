@@ -88,3 +88,15 @@ func Int642String(num int64) string {
 func Int2String(num int) string {
 	return strconv.Itoa(num)
 }
+
+// Get string pointer from string or nil if empty
+//
+// [param] str | string: string to convert
+//
+// [return] *string: string pointer
+func ValueOrEmpty(str string) *string {
+	if str == "" {
+		return nil
+	}
+	return &str
+}

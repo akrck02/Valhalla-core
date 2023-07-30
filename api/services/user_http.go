@@ -10,268 +10,203 @@ import (
 
 // Register HTTP API endpoint
 //
-// [param] c | *gin.Context: gin context
-func RegisterHttp(c *gin.Context) {
+// [param] request | models.Request: request
+func RegisterHttp(request models.Request) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var params models.User
-	err := c.ShouldBindJSON(&params)
-
-	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+	var user *models.User = &models.User{
+		Username: request.GetParamString("username"),
+		Password: request.GetParamString("password"),
+		Email:    request.GetParamString("email"),
 	}
-
-	var user *models.User
-	user.Username = params.Username
-	user.Password = params.Password
-	user.Email = params.Email
 
 	var error = Register(conn, client, user)
 	if error != nil {
-		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
-		)
-		return
+		return nil, error
 	}
 
-	// send response
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User created"},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "User created"},
+	}, nil
 }
 
 // Login HTTP API endpoint
 //
-// [param] c | *gin.Context: gin context
-func LoginHttp(c *gin.Context) {
+// [param] request | models.Request: request
+func LoginHttp(request models.Request) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user *models.User
-	err := utils.ReadBodyJson(c, user)
-
-	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+	var user *models.User = &models.User{
+		Email:    request.GetParamString("email"),
+		Password: request.GetParamString("password"),
 	}
 
-	ip := c.ClientIP()
-	address := c.Request.Header.Get("User-Agent")
+	ip := request.IP
+	address := request.UserAgent
 	token, error := Login(conn, client, user, ip, address)
 
 	if error != nil {
-		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
-		)
-		return
+		return nil, error
 	}
 
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"code": utils.HTTP_STATUS_OK, "message": "User found", "auth": token},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "User found", "auth": token},
+	}, nil
 }
 
 // Edit user HTTP API endpoint
 //
-// [param] c | *gin.Context: gin context
-func EditUserHttp(c *gin.Context) {
+// [param] request | models.Request: request
+func EditUserHttp(request models.Request) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user *models.User
-	err := utils.ReadBodyJson(c, user)
-
-	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+	var user *models.User = &models.User{
+		Email:      request.GetParamString("email"),
+		Username:   request.GetParamString("username"),
+		Password:   request.GetParamString("password"),
+		ProfilePic: request.GetParamString("profilePic"),
 	}
 
 	// Get token from header
-	var token = c.Request.Header.Get("Authorization")
+	var token = request.Authorization
 
 	// Get user from token
 	tokenUser, error := GetUserFromToken(conn, client, token)
 	if error != nil {
-		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
-		)
-		return
-
+		return nil, error
 	}
 
 	// Check if user is the same
 	if tokenUser.Email != user.Email {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Message: "Invalid request",
+		}
 	}
 
 	updateErr := EditUser(conn, client, user)
 	if updateErr != nil {
-		utils.SendResponse(c,
-			updateErr.Code,
-			gin.H{"http-code": updateErr.Code, "internal-code": updateErr.Error, "message": updateErr.Message},
-		)
-		return
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Message: "Invalid request",
+		}
 	}
 
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User updated"},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "User updated"},
+	}, nil
 }
 
 // Change email HTTP API endpoint
 //
-// [param] c | *gin.Context: gin context
-func EditUserEmailHttp(c *gin.Context) {
+// [param] request | models.Request: request
+func EditUserEmailHttp(request models.Request) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var email EmailChangeRequest
-	err := utils.ReadBodyJson(c, &email)
-
-	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+	var email *EmailChangeRequest = &EmailChangeRequest{
+		Email:    request.GetParamString("email"),
+		NewEmail: request.GetParamString("newEmail"),
 	}
 
 	changeErr := EditUserEmail(conn, client, email)
 	if changeErr != nil {
-		utils.SendResponse(c,
-			changeErr.Code,
-			gin.H{"http-code": changeErr.Code, "internal-code": changeErr.Error, "message": changeErr.Message},
-		)
-		return
+		return nil, changeErr
 	}
 
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Email changed"},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "Email changed"},
+	}, nil
 }
 
 // Delete user HTTP API endpoint
 //
-// [param] c | *gin.Context: gin context
-func DeleteUserHttp(c *gin.Context) {
+// [param] request | models.Request: request
+func DeleteUserHttp(request models.Request) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user *models.User
-	err := utils.ReadBodyJson(c, user)
-
-	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+	var user *models.User = &models.User{
+		Email: request.GetParamString("email"),
 	}
 
 	deleteErr := DeleteUser(conn, client, user)
 	if deleteErr != nil {
-		utils.SendResponse(c,
-			deleteErr.Code,
-			gin.H{"http-code": deleteErr.Code, "internal-code": deleteErr.Error, "message": deleteErr.Message},
-		)
-		return
+		return nil, deleteErr
 	}
 
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User deleted"},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "User deleted"},
+	}, nil
 }
 
 // Get user HTTP API endpoint
 //
-// [param] c | *gin.Context: gin context
-func GetUserHttp(c *gin.Context) {
+// [param] request | models.Request: request
+func GetUserHttp(request models.Request) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user *models.User
-	err := utils.ReadBodyJson(c, user)
+	// Get code from url GET parameter
+	id := request.GetParamString("id")
+	if id == "" {
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Message: "Id cannot be empty",
+		}
+	}
 
-	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+	var user *models.User = &models.User{
+		Email: id,
 	}
 
 	var foundUser, error = GetUser(conn, client, user, true)
 	if error != nil {
-		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
-		)
-		return
+		return nil, error
 	}
 
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User found", "user": foundUser},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "User found", "user": foundUser},
+	}, nil
 
 }
 
 // Edit user profile picture HTTP API endpoint
 //
-// [param] c | *gin.Context: gin context
-func EditUserProfilePictureHttp(c *gin.Context) {
+// [param] request | models.Request: request
+func EditUserProfilePictureHttp(request models.Request) (*models.Response, *models.Error) {
 
 	// Get user
 	var user *models.User = &models.User{
-		Email: c.PostForm("Email"),
+		Email: request.GetParamString("email"),
 	}
 
 	// Get image
-	bytes, err := utils.MultipartToBytes(c, "ProfilePicture")
-
-	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
-	}
-
+	bytes := request.Body
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
@@ -279,42 +214,38 @@ func EditUserProfilePictureHttp(c *gin.Context) {
 	// Upload image
 	var error = EditUserProfilePicture(conn, client, user, bytes)
 	if error != nil {
-		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
-		)
-		return
+		return nil, error
 	}
 
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Profile picture updated"},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "Profile picture updated"},
+	}, nil
 
 }
 
 // Validate user account HTTP API endpoint
-func ValidateUserHttp(c *gin.Context) {
+//
+// [param] request | models.Request: request
+func ValidateUserHttp(request models.Request) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
 	// Get code from url GET parameter
-	code := c.Query("code")
+	code := request.GetParamString("code")
 	log.Info("Query code: " + code)
 
 	var error = ValidateUser(conn, client, code)
 	if error != nil {
-		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
-		)
-		return
+		return nil, error
 	}
 
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User validated"},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "User validated"},
+	}, nil
 }
+
+// Get
