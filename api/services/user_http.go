@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/akrck02/valhalla-core/db"
+	"github.com/akrck02/valhalla-core/error"
 	"github.com/akrck02/valhalla-core/log"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
@@ -10,17 +11,20 @@ import (
 
 // Register HTTP API endpoint
 //
-// [param] request | models.Request: request
-func RegisterHttp(request models.Request) (*models.Response, *models.Error) {
+// [param] c | *gin.Context: context
+func RegisterHttp(c *gin.Context) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user *models.User = &models.User{
-		Username: request.GetParamString("username"),
-		Password: request.GetParamString("password"),
-		Email:    request.GetParamString("email"),
+	var user *models.User = &models.User{}
+	err := c.ShouldBindJSON(user)
+	if err != nil {
+		return nil, &models.Error{
+			Code:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error: utils.HTTP_STATUS_NOT_ACCEPTABLE,
+		}
 	}
 
 	var error = Register(conn, client, user)
@@ -36,16 +40,21 @@ func RegisterHttp(request models.Request) (*models.Response, *models.Error) {
 
 // Login HTTP API endpoint
 //
-// [param] request | models.Request: request
-func LoginHttp(request models.Request) (*models.Response, *models.Error) {
+// [param] c | *gin.Context: context
+func LoginHttp(c *gin.Context) (*models.Response, *models.Error) {
 
+	var request = utils.GetRequestMetadata(c)
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user *models.User = &models.User{
-		Email:    request.GetParamString("email"),
-		Password: request.GetParamString("password"),
+	var user *models.User = &models.User{}
+	err := c.ShouldBindJSON(user)
+	if err != nil {
+		return nil, &models.Error{
+			Code:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error: utils.HTTP_STATUS_NOT_ACCEPTABLE,
+		}
 	}
 
 	ip := request.IP
@@ -64,39 +73,34 @@ func LoginHttp(request models.Request) (*models.Response, *models.Error) {
 
 // Edit user HTTP API endpoint
 //
-// [param] request | models.Request: request
-func EditUserHttp(request models.Request) (*models.Response, *models.Error) {
+// [param] c | *gin.Context: context
+func EditUserHttp(c *gin.Context) (*models.Response, *models.Error) {
 
+	var request = utils.GetRequestMetadata(c)
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user *models.User = &models.User{
-		Email:      request.GetParamString("email"),
-		Username:   request.GetParamString("username"),
-		Password:   request.GetParamString("password"),
-		ProfilePic: request.GetParamString("profilePic"),
-	}
-
-	// Get token from header
-	var token = request.Authorization
-
-	// Get user from token
-	tokenUser, error := GetUserFromToken(conn, client, token)
-	if error != nil {
-		return nil, error
-	}
-
-	// Check if user is the same
-	if tokenUser.Email != user.Email {
+	var userToEdit *models.User = &models.User{}
+	err := c.ShouldBindJSON(userToEdit)
+	if err != nil {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
-			Message: "Invalid request",
+			Code:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error: utils.HTTP_STATUS_NOT_ACCEPTABLE,
 		}
 	}
 
-	updateErr := EditUser(conn, client, user)
+	// get if request user can edit the user
+	canEdit := CanEditUser(request.User, userToEdit)
+	if !canEdit {
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Error:   error.ACCESS_DENIED,
+			Message: "Cannot edit user",
+		}
+	}
+
+	updateErr := EditUser(conn, client, userToEdit)
 	if updateErr != nil {
 		return nil, &models.Error{
 			Code:    utils.HTTP_STATUS_BAD_REQUEST,
@@ -113,16 +117,31 @@ func EditUserHttp(request models.Request) (*models.Response, *models.Error) {
 
 // Change email HTTP API endpoint
 //
-// [param] request | models.Request: request
-func EditUserEmailHttp(request models.Request) (*models.Response, *models.Error) {
+// [param] c | *gin.Context: context
+func EditUserEmailHttp(c *gin.Context) (*models.Response, *models.Error) {
 
+	var request = utils.GetRequestMetadata(c)
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var email *EmailChangeRequest = &EmailChangeRequest{
-		Email:    request.GetParamString("email"),
-		NewEmail: request.GetParamString("newEmail"),
+	var email *EmailChangeRequest = &EmailChangeRequest{}
+	err := c.ShouldBindJSON(email)
+	if err != nil {
+		return nil, &models.Error{
+			Code:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error: utils.HTTP_STATUS_NOT_ACCEPTABLE,
+		}
+	}
+
+	// get if request user can edit the user
+	canEdit := CanEditUser(request.User, &models.User{Email: email.Email})
+	if !canEdit {
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Error:   error.ACCESS_DENIED,
+			Message: "Access denied: Cannot edit user",
+		}
 	}
 
 	changeErr := EditUserEmail(conn, client, email)
@@ -138,15 +157,31 @@ func EditUserEmailHttp(request models.Request) (*models.Response, *models.Error)
 
 // Delete user HTTP API endpoint
 //
-// [param] request | models.Request: request
-func DeleteUserHttp(request models.Request) (*models.Response, *models.Error) {
+// [param] c | *gin.Context: context
+func DeleteUserHttp(c *gin.Context) (*models.Response, *models.Error) {
 
+	var request = utils.GetRequestMetadata(c)
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user *models.User = &models.User{
-		Email: request.GetParamString("email"),
+	var user *models.User = &models.User{}
+	err := c.ShouldBindJSON(user)
+	if err != nil {
+		return nil, &models.Error{
+			Code:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error: utils.HTTP_STATUS_NOT_ACCEPTABLE,
+		}
+	}
+
+	// get if request user can delete the user
+	canDelete := CanEditUser(request.User, user)
+	if !canDelete {
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Error:   error.ACCESS_DENIED,
+			Message: "Access denied: Cannot delete user",
+		}
 	}
 
 	deleteErr := DeleteUser(conn, client, user)
@@ -162,15 +197,16 @@ func DeleteUserHttp(request models.Request) (*models.Response, *models.Error) {
 
 // Get user HTTP API endpoint
 //
-// [param] request | models.Request: request
-func GetUserHttp(request models.Request) (*models.Response, *models.Error) {
+// [param] c | *gin.Context: context
+func GetUserHttp(c *gin.Context) (*models.Response, *models.Error) {
 
+	var request = utils.GetRequestMetadata(c)
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
 	// Get code from url GET parameter
-	id := request.GetParamString("id")
+	id := c.Query("id")
 	if id == "" {
 		return nil, &models.Error{
 			Code:    utils.HTTP_STATUS_BAD_REQUEST,
@@ -181,6 +217,16 @@ func GetUserHttp(request models.Request) (*models.Response, *models.Error) {
 
 	var user *models.User = &models.User{
 		Email: id,
+	}
+
+	// get if request user can see the user
+	canSee := CanSeeUser(request.User, user)
+	if !canSee {
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Error:   error.ACCESS_DENIED,
+			Message: "Access denied: Cannot see the user",
+		}
 	}
 
 	var foundUser, error = GetUser(conn, client, user, true)
@@ -197,16 +243,36 @@ func GetUserHttp(request models.Request) (*models.Response, *models.Error) {
 
 // Edit user profile picture HTTP API endpoint
 //
-// [param] request | models.Request: request
-func EditUserProfilePictureHttp(request models.Request) (*models.Response, *models.Error) {
+// [param] c | *gin.Context: context
+func EditUserProfilePictureHttp(c *gin.Context) (*models.Response, *models.Error) {
+
+	var request = utils.GetRequestMetadata(c)
 
 	// Get user
 	var user *models.User = &models.User{
-		Email: request.GetParamString("email"),
+		Email: c.Query("email"),
 	}
 
-	// Get image
-	bytes := request.Body
+	// Get image as bytes
+	bytes, err := utils.MultipartToBytes(c, "ProfilePicture")
+	if err != nil {
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Message: "Invalid request",
+		}
+	}
+
+	// get if request user can delete the user
+	canEdit := CanEditUser(request.User, user)
+	if !canEdit {
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Error:   error.ACCESS_DENIED,
+			Message: "Access denied: Cannot edit user",
+		}
+	}
+
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
@@ -226,15 +292,15 @@ func EditUserProfilePictureHttp(request models.Request) (*models.Response, *mode
 
 // Validate user account HTTP API endpoint
 //
-// [param] request | models.Request: request
-func ValidateUserHttp(request models.Request) (*models.Response, *models.Error) {
+// [param] c | *gin.Context: context
+func ValidateUserHttp(c *gin.Context) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
 	// Get code from url GET parameter
-	code := request.GetParamString("code")
+	code := c.Query("code")
 	log.Info("Query code: " + code)
 
 	var error = ValidateUser(conn, client, code)

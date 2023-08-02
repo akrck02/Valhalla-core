@@ -5,6 +5,7 @@ import (
 	"io"
 	"mime/multipart"
 
+	"github.com/akrck02/valhalla-core/models"
 	"github.com/gin-gonic/gin"
 )
 
@@ -57,6 +58,22 @@ func MultipartToBytes(c *gin.Context, key string) ([]byte, error) {
 	}
 
 	return buf.Bytes(), nil
+}
+
+// GetRequestMetadata returns the request metadata
+//
+// [param] c | *gin.Context: gin context
+//
+// [return] *models.Request: request metadata
+func GetRequestMetadata(c *gin.Context) *models.Request {
+	var request, exists = c.Get("request")
+
+	if !exists {
+		return nil
+	}
+
+	var casted models.Request = request.(models.Request)
+	return &casted
 }
 
 const (

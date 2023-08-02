@@ -1,30 +1,24 @@
 package services
 
 import (
-	"fmt"
-
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
+	"github.com/gin-gonic/gin"
 )
 
 type pingResponse struct {
 	Message string `json:"message"`
 }
 
-/**
- * Status check endpoint
- */
-func PingHttp(request models.Request) (*models.Response, *models.Error) {
-
-	fmt.Println(request)
+// Ping HTTP API endpoint
+//
+// [param] c | *gin.Context: context
+//
+// [return] *models.Response: response	| *models.Error: error
+func PingHttp(c *gin.Context) (*models.Response, *models.Error) {
 
 	return &models.Response{
-			Code:     utils.HTTP_STATUS_OK,
-			Response: pingResponse{Message: "pong"},
-		}, &models.Error{
-			Code:    500,
-			Message: "noooooooooo Maideeeer ",
-			Error:   230,
-		}
-
+		Code:     utils.HTTP_STATUS_OK,
+		Response: pingResponse{Message: "pong"},
+	}, nil
 }

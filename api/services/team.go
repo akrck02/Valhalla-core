@@ -16,13 +16,6 @@ type MemberChangeRequest struct {
 	User string `json:"userid"`
 }
 
-func (m *MemberChangeRequest) FromRequest(request models.Request) *MemberChangeRequest {
-	return &MemberChangeRequest{
-		Team: request.GetParamString("teamid"),
-		User: request.GetParamString("userid"),
-	}
-}
-
 // Create team logic
 //
 // [param] conn | context.Context: connection to the database

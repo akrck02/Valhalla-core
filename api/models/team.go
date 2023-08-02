@@ -52,13 +52,3 @@ func (t *Team) PurgedBson(hideID bool) bson.M {
 
 	return purgedBson
 }
-
-func (t *Team) FromRequest(request Request) *Team {
-	return &Team{
-		Name:        request.GetParamString("name"),
-		Description: request.GetParamString("description"),
-		ProfilePic:  request.GetParamString("profilePic"),
-		Owner:       request.GetParamString("owner"),
-		ID:          request.GetParamString("id"),
-	}
-}

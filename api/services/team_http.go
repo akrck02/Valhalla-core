@@ -9,15 +9,23 @@ import (
 
 // Create team HTTP API endpoint
 //
-// [param] request | models.Request: request
-func CreateTeamHttp(request models.Request) (*models.Response, *models.Error) {
+// [param] c | *gin.Context: context
+func CreateTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var team *models.Team
-	team = team.FromRequest(request)
+	var team *models.Team = &models.Team{}
+
+	err := c.ShouldBindJSON(team)
+	if err != nil {
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Message: "Invalid request body",
+		}
+	}
 
 	var error = CreateTeam(conn, client, team)
 	if error != nil {
@@ -33,14 +41,22 @@ func CreateTeamHttp(request models.Request) (*models.Response, *models.Error) {
 
 // Edit team HTTP API endpoint
 //
-// [param] request | models.Request: request
-func EditTeamHttp(request models.Request) (*models.Response, *models.Error) {
+// [param] c | *gin.Context: context
+func EditTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
+
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var params *models.Team
-	params = params.FromRequest(request)
+	var params *models.Team = &models.Team{}
+	err := c.ShouldBindJSON(params)
+	if err != nil {
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Message: "Invalid request body",
+		}
+	}
 
 	var error = EditTeam(conn, client, params)
 
@@ -56,14 +72,23 @@ func EditTeamHttp(request models.Request) (*models.Response, *models.Error) {
 
 // Edit team owner HTTP API endpoint
 //
-// [param] request | models.Request: request
-func EditTeamOwnerHttp(request models.Request) (*models.Response, *models.Error) {
+// [param] c | *gin.Context: context
+func EditTeamOwnerHttp(c *gin.Context) (*models.Response, *models.Error) {
+
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var params *models.Team
-	params = params.FromRequest(request)
+	var params *models.Team = &models.Team{}
+
+	err := c.ShouldBindJSON(params)
+	if err != nil {
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Message: "Invalid request body",
+		}
+	}
 
 	var error = EditTeamOwner(conn, client, params)
 
@@ -79,14 +104,22 @@ func EditTeamOwnerHttp(request models.Request) (*models.Response, *models.Error)
 
 // Delete team HTTP API endpoint
 //
-// [param] request | models.Request: request
-func DeleteTeamHttp(request models.Request) (*models.Response, *models.Error) {
+// [param] c | *gin.Context: context
+func DeleteTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
+
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var params *models.Team
-	params = params.FromRequest(request)
+	var params *models.Team = &models.Team{}
+	err := c.ShouldBindJSON(params)
+	if err != nil {
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Message: "Invalid request body",
+		}
+	}
 
 	var error = DeleteTeam(conn, client, params)
 	if error != nil {
@@ -102,14 +135,14 @@ func DeleteTeamHttp(request models.Request) (*models.Response, *models.Error) {
 // Get team HTTP API endpoint
 //
 // [param] request | models.Request: request
-func GetTeamHttp(request models.Request) (*models.Response, *models.Error) {
+func GetTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
 	var params models.Team = models.Team{}
-	params.ID = request.GetParamString("id")
+	params.ID = c.Query("id")
 
 	if params.ID == "" {
 		return nil, &models.Error{
@@ -132,18 +165,26 @@ func GetTeamHttp(request models.Request) (*models.Response, *models.Error) {
 
 // Add user to team HTTP API endpoint
 //
-// [param] request | models.Request: request
-func AddMemberHttp(request models.Request) (*models.Response, *models.Error) {
+// [param] c | *gin.Context: context
+func AddMemberHttp(c *gin.Context) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
-	var params *MemberChangeRequest
-	params = params.FromRequest(request)
+	var params *MemberChangeRequest = &MemberChangeRequest{}
 
-	var err = AddMember(conn, client, params)
+	err := c.ShouldBindJSON(params)
 	if err != nil {
-		return nil, err
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Message: "Invalid request body",
+		}
+	}
+
+	var addMemberErr = AddMember(conn, client, params)
+	if err != nil {
+		return nil, addMemberErr
 	}
 
 	return &models.Response{
@@ -154,18 +195,26 @@ func AddMemberHttp(request models.Request) (*models.Response, *models.Error) {
 
 // Remove user from team HTTP API endpoint
 //
-// [param] request | models.Request: request
-func RemoveMemberHttp(request models.Request) (*models.Response, *models.Error) {
+// [param] c | *gin.Context: context
+func RemoveMemberHttp(c *gin.Context) (*models.Response, *models.Error) {
+
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var params *MemberChangeRequest
-	params = params.FromRequest(request)
-
-	var err = RemoveMember(conn, client, params)
+	var params *MemberChangeRequest = &MemberChangeRequest{}
+	err := c.ShouldBindJSON(params)
 	if err != nil {
-		return nil, err
+		return nil, &models.Error{
+			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Message: "Invalid request body",
+		}
+	}
+
+	var removeMemberErr = RemoveMember(conn, client, params)
+	if err != nil {
+		return nil, removeMemberErr
 	}
 
 	return &models.Response{
