@@ -1391,7 +1391,7 @@ func TestTokenValidation(t *testing.T) {
 		return
 	}
 
-	err = IsTokenValid(client, token)
+	_, err = middleware.IsTokenValid(client, token)
 
 	if err != nil {
 		t.Error("The token was not validated", err)
@@ -1417,7 +1417,7 @@ func TestTokenValidationInvalidToken(t *testing.T) {
 
 	// Create a fake token
 	token := mock.Token()
-	err := IsTokenValid(client, token)
+	_, err := middleware.IsTokenValid(client, token)
 
 	if err == nil {
 		t.Error("The token was validated")
@@ -1441,7 +1441,7 @@ func TestTokenValidationInvalidTokenFormat(t *testing.T) {
 
 	// Create a fake token
 	token := mock.Username()
-	err := IsTokenValid(client, token)
+	_, err := middleware.IsTokenValid(client, token)
 
 	if err == nil {
 		t.Error("The token was validated")
@@ -1465,7 +1465,7 @@ func TestTokenValidationEmptyToken(t *testing.T) {
 
 	// Create a fake token
 	token := ""
-	err := IsTokenValid(client, token)
+	_, err := middleware.IsTokenValid(client, token)
 
 	if err == nil {
 		t.Error("The token was validated")
