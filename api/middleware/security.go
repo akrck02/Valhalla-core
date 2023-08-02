@@ -61,7 +61,7 @@ func Security(endpoints []models.Endpoint, baseUrl string) gin.HandlerFunc {
 		defer db.Disconnect(*client, conn)
 
 		// Check if token is valid
-		user, err := isTokenValid(client, token)
+		user, err := IsTokenValid(client, token)
 
 		if err != nil {
 			c.AbortWithStatusJSON(
@@ -127,7 +127,7 @@ func getUserFromToken(conn context.Context, client *mongo.Client, token string) 
 //	[param] token | string : The token to check
 //
 //	[return] bool : True if token is valid --> *models.Error: error if any
-func isTokenValid(client *mongo.Client, token string) (*models.User, *models.Error) {
+func IsTokenValid(client *mongo.Client, token string) (*models.User, *models.Error) {
 
 	// decode token
 	claims, err := utils.DecryptToken(token)
