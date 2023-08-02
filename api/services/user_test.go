@@ -12,6 +12,7 @@ import (
 	"github.com/akrck02/valhalla-core/mock"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
+	"github.com/akrck02/valhalla-core/middleware"
 )
 
 func TestRegister(t *testing.T) {
@@ -699,7 +700,7 @@ func TestEditUserEmail(t *testing.T) {
 		NewEmail: newEmail,
 	}
 
-	err = EditUserEmail(conn, client, emailChangeRequest)
+	err = EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err != nil {
 		t.Error("The user email was not changed", err)
@@ -732,7 +733,7 @@ func TestEditUserEmailNoEmail(t *testing.T) {
 
 	log.Info("Changing user email")
 
-	err := EditUserEmail(conn, client, emailChangeRequest)
+	err := EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
@@ -764,7 +765,7 @@ func TestEditUserEmailNoDotEmail(t *testing.T) {
 
 	log.Info("Changing user email")
 
-	err := EditUserEmail(conn, client, emailChangeRequest)
+	err := EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
@@ -797,7 +798,7 @@ func TestEditUserEmailNoAtEmail(t *testing.T) {
 
 	log.Info("Changing user email")
 
-	err := EditUserEmail(conn, client, emailChangeRequest)
+	err := EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
@@ -829,7 +830,7 @@ func TestEditUserEmailShortEmail(t *testing.T) {
 
 	log.Info("Changing user email")
 
-	err := EditUserEmail(conn, client, emailChangeRequest)
+	err := EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
@@ -861,7 +862,7 @@ func TestEditUserEmailNotFound(t *testing.T) {
 
 	log.Info("Changing user email")
 
-	err := EditUserEmail(conn, client, emailChangeRequest)
+	err := EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
@@ -935,7 +936,7 @@ func TestEditUserEmailExists(t *testing.T) {
 
 	log.FormattedInfo("Changing user email to ${0}", newEmail)
 
-	err = EditUserEmail(conn, client, emailChangeRequest)
+	err = EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
@@ -994,7 +995,7 @@ func TestEditUserSameEmail(t *testing.T) {
 
 	log.Info("Changing user email")
 
-	err := EditUserEmail(conn, client, emailChangeRequest)
+	err := EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
@@ -1391,7 +1392,7 @@ func TestTokenValidation(t *testing.T) {
 		return
 	}
 
-	err = IsTokenValid(client, token)
+	_, err = middleware.IsTokenValid(client, token)
 
 	if err != nil {
 		t.Error("The token was not validated", err)
@@ -1417,7 +1418,7 @@ func TestTokenValidationInvalidToken(t *testing.T) {
 
 	// Create a fake token
 	token := mock.Token()
-	err := IsTokenValid(client, token)
+	_, err := middleware.IsTokenValid(client, token)
 
 	if err == nil {
 		t.Error("The token was validated")
@@ -1441,7 +1442,7 @@ func TestTokenValidationInvalidTokenFormat(t *testing.T) {
 
 	// Create a fake token
 	token := mock.Username()
-	err := IsTokenValid(client, token)
+	_, err := middleware.IsTokenValid(client, token)
 
 	if err == nil {
 		t.Error("The token was validated")
@@ -1465,7 +1466,7 @@ func TestTokenValidationEmptyToken(t *testing.T) {
 
 	// Create a fake token
 	token := ""
-	err := IsTokenValid(client, token)
+	_, err := middleware.IsTokenValid(client, token)
 
 	if err == nil {
 		t.Error("The token was validated")

@@ -168,19 +168,15 @@ func EditTeam(conn context.Context, client *mongo.Client, team *models.Team) *mo
 
 	coll := client.Database(db.CurrentDatabase).Collection(db.TEAM)
 
-	_, err = coll.UpdateByID(conn, bson.M{"_id": objID}, bson.M{"$set": bson.M{
-		"name":        team.Name,
-		"description": team.Description,
-		"profilepic":  team.ProfilePic,
-	},
-	})
+	update := team.PurgedBson(true)
+	_, err = coll.UpdateOne(conn, bson.M{"_id": objID}, bson.M{"$set": update})
 
 	// Check if team was updated
 	if err != nil {
 		return &models.Error{
 			Code:    utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.UPDATE_ERROR),
-			Message: "Could not update team",
+			Message: "Could not update team: " + err.Error(),
 		}
 	}
 

@@ -1,0 +1,20 @@
+{
+    "client": "Thunder Client",
+    "environmentName": "valhalla-core-dev",
+    "dateExported": "2023-07-29T16:20:16.222Z",
+    "version": "1.0",
+    "variables": [
+        {
+            "name": "valhalla.core.host",
+            "value": "127.0.0.1"
+        },
+        {
+            "name": "valhalla.core.port",
+            "value": "3333"
+        },
+        {
+            "name": "valhalla.core.token",
+            "value": "-"
+        }
+    ]
+}
