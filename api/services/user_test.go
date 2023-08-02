@@ -12,6 +12,7 @@ import (
 	"github.com/akrck02/valhalla-core/mock"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
+	"github.com/akrck02/valhalla-core/middleware"
 )
 
 func TestRegister(t *testing.T) {
