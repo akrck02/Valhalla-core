@@ -20,7 +20,7 @@ func Panic() gin.HandlerFunc {
 			var err = c.Errors[0]
 
 			c.JSON(utils.HTTP_STATUS_INTERNAL_SERVER_ERROR, &models.Error{
-				Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+				Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 				Error:   error.UNEXPECTED_ERROR,
 				Message: err.Error(),
 			})

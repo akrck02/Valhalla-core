@@ -65,8 +65,8 @@ func Security(endpoints []models.Endpoint, baseUrl string) gin.HandlerFunc {
 
 		if err != nil {
 			c.AbortWithStatusJSON(
-				err.Code,
-				gin.H{"code": err.Error, "message": err.Message},
+				err.Status,
+				err,
 			)
 
 			return
@@ -100,7 +100,7 @@ func getUserFromToken(conn context.Context, client *mongo.Client, token string) 
 
 	if err != nil {
 		return models.User{}, &models.Error{
-			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Status:  utils.HTTP_STATUS_FORBIDDEN,
 			Error:   int(error.INVALID_TOKEN),
 			Message: "User not matching token",
 		}
@@ -113,7 +113,7 @@ func getUserFromToken(conn context.Context, client *mongo.Client, token string) 
 
 	if err != nil {
 		return models.User{}, &models.Error{
-			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Status:  utils.HTTP_STATUS_FORBIDDEN,
 			Error:   int(error.INVALID_TOKEN),
 			Message: "User not matching token",
 		}
@@ -134,7 +134,7 @@ func IsTokenValid(client *mongo.Client, token string) (*models.User, *models.Err
 
 	if err != nil {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Status:  utils.HTTP_STATUS_FORBIDDEN,
 			Error:   int(error.INVALID_TOKEN),
 			Message: "invalid token format",
 		}
@@ -151,7 +151,7 @@ func IsTokenValid(client *mongo.Client, token string) (*models.User, *models.Err
 
 	if tokenUserErr != nil {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Status:  utils.HTTP_STATUS_FORBIDDEN,
 			Error:   int(error.INVALID_TOKEN),
 			Message: "invalid token",
 		}
@@ -159,7 +159,7 @@ func IsTokenValid(client *mongo.Client, token string) (*models.User, *models.Err
 
 	if foundUser.Email != email {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Status:  utils.HTTP_STATUS_FORBIDDEN,
 			Error:   int(error.INVALID_TOKEN),
 			Message: "invalid token",
 		}

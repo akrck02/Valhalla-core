@@ -1,8 +1,9 @@
 package middleware
 
 import (
+	"time"
+
 	"github.com/akrck02/valhalla-core/models"
-	"github.com/akrck02/valhalla-core/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,14 +15,20 @@ func APIResponseManagement(endpoint models.Endpoint) func(c *gin.Context) {
 
 	return func(c *gin.Context) {
 
+		//calculate the time of the request
+		start := time.Now()
 		result, error := endpoint.Listener(c)
+		end := time.Now()
+		elapsed := end.Sub(start)
+
 		if error != nil {
 			// log.FormattedError("Error ${0} : ${1} in ${2}", error.Error, error.Message, c.Request.URL.Path)
-			c.JSON(error.Code, error)
+			c.JSON(error.Status, error)
 			return
 		}
 
-		c.JSON(utils.HTTP_STATUS_OK, result)
+		result.ResponseTime = elapsed.Nanoseconds()
+		c.JSON(result.Code, result)
 	}
 
 }

@@ -37,7 +37,7 @@ func ValidateEmail(email string) validateResult {
 	if !strings.Contains(email, "@") {
 		return validateResult{
 			Response: error.NO_AT_EMAIL,
-			Message:  "Email must have at least one @",
+			Message:  "Email must have one @",
 		}
 	}
 

@@ -15,7 +15,7 @@ type Alert struct {
 func AlertTeam(conn context.Context, client *mongo.Client, team models.Team) models.Error {
 
 	return models.Error{
-		Code:    200,
+		Status:  200,
 		Message: "Ok.",
 	}
 }

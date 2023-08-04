@@ -9,10 +9,10 @@ import (
 	"github.com/akrck02/valhalla-core/db"
 	"github.com/akrck02/valhalla-core/error"
 	"github.com/akrck02/valhalla-core/log"
+	"github.com/akrck02/valhalla-core/middleware"
 	"github.com/akrck02/valhalla-core/mock"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
-	"github.com/akrck02/valhalla-core/middleware"
 )
 
 func TestRegister(t *testing.T) {
@@ -74,7 +74,7 @@ func TestRegisterNotEmail(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_EMAIL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -105,7 +105,7 @@ func TestRegisterNotUsername(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_USERNAME {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_USERNAME {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -135,7 +135,7 @@ func TestRegisterNotPassword(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_PASSWORD {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_PASSWORD {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -167,7 +167,7 @@ func TestRegisterNotDotEmail(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_DOT_EMAIL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_DOT_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -197,7 +197,7 @@ func TestRegisterNotAtEmail(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_AT_EMAIL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_AT_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -227,7 +227,7 @@ func TestRegisterShortMail(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_EMAIL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -259,7 +259,7 @@ func TestRegisterNotSpecialCharactersPassword(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_SPECIAL_CHARACTERS_PASSWORD {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_SPECIAL_CHARACTERS_PASSWORD {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -308,7 +308,7 @@ func TestRegisterNotUpperCaseLoweCasePassword(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_UPPER_LOWER_PASSWORD {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_UPPER_LOWER_PASSWORD {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -335,7 +335,7 @@ func TestRegisterShortPassword(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_PASSWORD {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_PASSWORD {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -359,7 +359,7 @@ func TestRegisterNotNumbersPassword(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_ALPHANUMERIC_PASSWORD {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_ALPHANUMERIC_PASSWORD {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -457,7 +457,7 @@ func TestLoginWrongPassword(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_FORBIDDEN {
+	if err.Status != utils.HTTP_STATUS_FORBIDDEN {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -518,7 +518,7 @@ func TestLoginWrongEmail(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_FORBIDDEN {
+	if err.Status != utils.HTTP_STATUS_FORBIDDEN {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -612,7 +612,7 @@ func TestDeleteUserNoEmail(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_EMAIL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -642,7 +642,7 @@ func TestDeleteUserNotFound(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_NOT_FOUND {
+	if err.Status != utils.HTTP_STATUS_NOT_FOUND {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -740,7 +740,7 @@ func TestEditUserEmailNoEmail(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_EMAIL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -772,7 +772,7 @@ func TestEditUserEmailNoDotEmail(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_DOT_EMAIL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_DOT_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -805,7 +805,7 @@ func TestEditUserEmailNoAtEmail(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_AT_EMAIL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_AT_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -837,7 +837,7 @@ func TestEditUserEmailShortEmail(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_EMAIL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -869,7 +869,7 @@ func TestEditUserEmailNotFound(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_NOT_FOUND {
+	if err.Status != utils.HTTP_STATUS_NOT_FOUND {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
@@ -943,7 +943,7 @@ func TestEditUserEmailExists(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_CONFLICT || err.Error != error.USER_ALREADY_EXISTS {
+	if err.Status != utils.HTTP_STATUS_CONFLICT || err.Error != error.USER_ALREADY_EXISTS {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
@@ -1002,7 +1002,7 @@ func TestEditUserSameEmail(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMAILS_EQUAL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMAILS_EQUAL {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
@@ -1092,7 +1092,7 @@ func TestEditUserPasswordUserNotFound(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_NOT_FOUND {
+	if err.Status != utils.HTTP_STATUS_NOT_FOUND {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
@@ -1132,7 +1132,7 @@ func TestEditUserPasswordShort(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_PASSWORD {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_PASSWORD {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
@@ -1183,7 +1183,7 @@ func TestEditUserPasswordNoLowercase(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_UPPER_LOWER_PASSWORD {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_UPPER_LOWER_PASSWORD {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
@@ -1234,7 +1234,7 @@ func TestEditUserPasswordNoUppercase(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_UPPER_LOWER_PASSWORD {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_UPPER_LOWER_PASSWORD {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
@@ -1285,7 +1285,7 @@ func TestEditUserPasswordNoNumber(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_ALPHANUMERIC_PASSWORD {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_ALPHANUMERIC_PASSWORD {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
@@ -1425,12 +1425,12 @@ func TestTokenValidationInvalidToken(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_FORBIDDEN || err.Error != error.INVALID_TOKEN {
+	if err.Status != utils.HTTP_STATUS_FORBIDDEN || err.Error != error.INVALID_TOKEN {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
 
-	log.FormattedInfo("Token not validated, error { http: ${0}, internal: ${1}, message: \"${2}\" }", utils.Int2String(err.Code), utils.Int2String(err.Error), err.Message)
+	log.FormattedInfo("Token not validated, error { http: ${0}, internal: ${1}, message: \"${2}\" }", utils.Int2String(err.Status), utils.Int2String(err.Error), err.Message)
 
 }
 
@@ -1449,12 +1449,12 @@ func TestTokenValidationInvalidTokenFormat(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_FORBIDDEN || err.Error != error.INVALID_TOKEN {
+	if err.Status != utils.HTTP_STATUS_FORBIDDEN || err.Error != error.INVALID_TOKEN {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
 
-	log.FormattedInfo("Token not validated, error { http: ${0}, internal: ${1}, message: \"${2}\" }", utils.Int2String(err.Code), utils.Int2String(err.Error), err.Message)
+	log.FormattedInfo("Token not validated, error { http: ${0}, internal: ${1}, message: \"${2}\" }", utils.Int2String(err.Status), utils.Int2String(err.Error), err.Message)
 
 }
 
@@ -1473,12 +1473,12 @@ func TestTokenValidationEmptyToken(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_FORBIDDEN || err.Error != error.INVALID_TOKEN {
+	if err.Status != utils.HTTP_STATUS_FORBIDDEN || err.Error != error.INVALID_TOKEN {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
 
-	log.FormattedInfo("Token not validated, error { http: ${0}, internal: ${1}, message: \"${2}\" }", utils.Int2String(err.Code), utils.Int2String(err.Error), err.Message)
+	log.FormattedInfo("Token not validated, error { http: ${0}, internal: ${1}, message: \"${2}\" }", utils.Int2String(err.Status), utils.Int2String(err.Error), err.Message)
 
 }
 
@@ -1504,6 +1504,11 @@ func TestValidationCode(t *testing.T) {
 
 	// get the user
 	user, err = GetUser(conn, client, user, true)
+
+	if err != nil {
+		t.Error("The user was not found", err)
+		return
+	}
 
 	// validate the user
 	err = ValidateUser(conn, client, user.ValidationCode)

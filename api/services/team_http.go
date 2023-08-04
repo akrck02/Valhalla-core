@@ -2,6 +2,7 @@ package services
 
 import (
 	"github.com/akrck02/valhalla-core/db"
+	"github.com/akrck02/valhalla-core/error"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
 	"github.com/gin-gonic/gin"
@@ -10,6 +11,8 @@ import (
 // Create team HTTP API endpoint
 //
 // [param] c | *gin.Context: context
+//
+// [return] *models.Response: response | *models.Error: error
 func CreateTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
@@ -21,8 +24,8 @@ func CreateTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
 	err := c.ShouldBindJSON(team)
 	if err != nil {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
 			Message: "Invalid request body",
 		}
 	}
@@ -42,6 +45,8 @@ func CreateTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
 // Edit team HTTP API endpoint
 //
 // [param] c | *gin.Context: context
+//
+// [return] *models.Response: response | *models.Error: error
 func EditTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
@@ -52,8 +57,8 @@ func EditTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
 	err := c.ShouldBindJSON(params)
 	if err != nil {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
 			Message: "Invalid request body",
 		}
 	}
@@ -73,6 +78,8 @@ func EditTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
 // Edit team owner HTTP API endpoint
 //
 // [param] c | *gin.Context: context
+//
+// [return] *models.Response: response | *models.Error: error
 func EditTeamOwnerHttp(c *gin.Context) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
@@ -84,8 +91,8 @@ func EditTeamOwnerHttp(c *gin.Context) (*models.Response, *models.Error) {
 	err := c.ShouldBindJSON(params)
 	if err != nil {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
 			Message: "Invalid request body",
 		}
 	}
@@ -105,6 +112,8 @@ func EditTeamOwnerHttp(c *gin.Context) (*models.Response, *models.Error) {
 // Delete team HTTP API endpoint
 //
 // [param] c | *gin.Context: context
+//
+// [return] *models.Response: response | *models.Error: error
 func DeleteTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
@@ -115,8 +124,8 @@ func DeleteTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
 	err := c.ShouldBindJSON(params)
 	if err != nil {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
 			Message: "Invalid request body",
 		}
 	}
@@ -135,6 +144,8 @@ func DeleteTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
 // Get team HTTP API endpoint
 //
 // [param] request | models.Request: request
+//
+// [return] *models.Response: response | *models.Error: error
 func GetTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
@@ -146,8 +157,8 @@ func GetTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
 
 	if params.ID == "" {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
 			Message: "Team ID is required",
 		}
 	}
@@ -166,6 +177,8 @@ func GetTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
 // Add user to team HTTP API endpoint
 //
 // [param] c | *gin.Context: context
+//
+// [return] *models.Response: response | *models.Error: error
 func AddMemberHttp(c *gin.Context) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
@@ -176,8 +189,8 @@ func AddMemberHttp(c *gin.Context) (*models.Response, *models.Error) {
 	err := c.ShouldBindJSON(params)
 	if err != nil {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
 			Message: "Invalid request body",
 		}
 	}
@@ -196,6 +209,8 @@ func AddMemberHttp(c *gin.Context) (*models.Response, *models.Error) {
 // Remove user from team HTTP API endpoint
 //
 // [param] c | *gin.Context: context
+//
+// [return] *models.Response: response | *models.Error: error
 func RemoveMemberHttp(c *gin.Context) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
@@ -206,8 +221,8 @@ func RemoveMemberHttp(c *gin.Context) (*models.Response, *models.Error) {
 	err := c.ShouldBindJSON(params)
 	if err != nil {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
 			Message: "Invalid request body",
 		}
 	}

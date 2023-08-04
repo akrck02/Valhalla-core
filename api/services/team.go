@@ -28,7 +28,7 @@ func CreateTeam(conn context.Context, client *mongo.Client, team *models.Team) *
 	// Check if team name is empty
 	if utils.IsEmpty(team.Name) {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.EMPTY_TEAM_NAME),
 			Message: "Team cannot be nameless",
 		}
@@ -39,7 +39,7 @@ func CreateTeam(conn context.Context, client *mongo.Client, team *models.Team) *
 
 	if checkedName.Response != 200 {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(checkedName.Response),
 			Message: checkedName.Message,
 		}
@@ -48,7 +48,7 @@ func CreateTeam(conn context.Context, client *mongo.Client, team *models.Team) *
 	// Check if team description is empty
 	if utils.IsEmpty(team.Description) {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.EMPTY_TEAM_DESCRIPTION),
 			Message: "Team cannot be descriptionless",
 		}
@@ -59,7 +59,7 @@ func CreateTeam(conn context.Context, client *mongo.Client, team *models.Team) *
 
 	if checkedDescription.Response != 200 {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(checkedDescription.Response),
 			Message: checkedDescription.Message,
 		}
@@ -75,7 +75,7 @@ func CreateTeam(conn context.Context, client *mongo.Client, team *models.Team) *
 	// Check if team owner is empty
 	if utils.IsEmpty(team.Owner) {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.NO_OWNER),
 			Message: "Team requires an owner",
 		}
@@ -88,7 +88,7 @@ func CreateTeam(conn context.Context, client *mongo.Client, team *models.Team) *
 
 	if found.Name != "" {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.TEAM_ALREADY_EXISTS),
 			Message: "Team already exists with name " + team.Name,
 		}
@@ -99,7 +99,7 @@ func CreateTeam(conn context.Context, client *mongo.Client, team *models.Team) *
 
 	if err2 != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.TEAM_ALREADY_EXISTS),
 			Message: "Team already exists",
 		}
@@ -123,7 +123,7 @@ func DeleteTeam(conn context.Context, client *mongo.Client, team *models.Team) *
 
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.BAD_OBJECT_ID),
 			Message: "Bad object id",
 		}
@@ -136,7 +136,7 @@ func DeleteTeam(conn context.Context, client *mongo.Client, team *models.Team) *
 	// Check if team was deleted
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.TEAM_NOT_FOUND),
 			Message: "Team not found",
 		}
@@ -160,7 +160,7 @@ func EditTeam(conn context.Context, client *mongo.Client, team *models.Team) *mo
 
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.BAD_OBJECT_ID),
 			Message: "Bad object id",
 		}
@@ -174,7 +174,7 @@ func EditTeam(conn context.Context, client *mongo.Client, team *models.Team) *mo
 	// Check if team was updated
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.UPDATE_ERROR),
 			Message: "Could not update team: " + err.Error(),
 		}
@@ -195,7 +195,7 @@ func EditTeamOwner(conn context.Context, client *mongo.Client, team *models.Team
 	// Check if team owner is empty
 	if utils.IsEmpty(team.Owner) {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.NO_OWNER),
 			Message: "Team requires an owner",
 		}
@@ -207,7 +207,7 @@ func EditTeamOwner(conn context.Context, client *mongo.Client, team *models.Team
 
 	if err1 != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.BAD_OBJECT_ID),
 			Message: "Bad object id",
 		}
@@ -233,7 +233,7 @@ func EditTeamOwner(conn context.Context, client *mongo.Client, team *models.Team
 
 	if err3 != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.UPDATE_ERROR),
 			Message: "Could not change owner",
 		}
@@ -254,7 +254,7 @@ func AddMember(conn context.Context, client *mongo.Client, memberChange *MemberC
 	// Check if member is empty
 	if utils.IsEmpty(memberChange.User) {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.NO_MEMBER),
 			Message: "Adding a member requires a member",
 		}
@@ -263,7 +263,7 @@ func AddMember(conn context.Context, client *mongo.Client, memberChange *MemberC
 	// Check if team is empty
 	if utils.IsEmpty(memberChange.Team) {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.NO_TEAM),
 			Message: "Adding a member requires a team",
 		}
@@ -282,7 +282,7 @@ func AddMember(conn context.Context, client *mongo.Client, memberChange *MemberC
 
 	if err2 != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.BAD_OBJECT_ID),
 			Message: "Bad object id",
 		}
@@ -305,7 +305,7 @@ func AddMember(conn context.Context, client *mongo.Client, memberChange *MemberC
 
 	if err4 != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.UPDATE_ERROR),
 			Message: "Could not add member",
 		}
@@ -350,7 +350,7 @@ func GetTeam(conn context.Context, client *mongo.Client, team *models.Team) (*mo
 
 	if err1 != nil {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.BAD_OBJECT_ID),
 			Message: "Bad object id",
 		}
@@ -363,7 +363,7 @@ func GetTeam(conn context.Context, client *mongo.Client, team *models.Team) (*mo
 
 	if err2 != nil {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.TEAM_NOT_FOUND),
 			Message: "Team not found",
 		}
@@ -396,7 +396,7 @@ func userExists(conn context.Context, client *mongo.Client, user string) *models
 
 	if err1 != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.BAD_OBJECT_ID),
 			Message: "Bad object id",
 		}
@@ -406,7 +406,7 @@ func userExists(conn context.Context, client *mongo.Client, user string) *models
 
 	if err2 != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.OWNER_DOESNT_EXIST),
 			Message: "User doesn't exists",
 		}
@@ -448,7 +448,7 @@ func isUserMemberOrOwner(conn context.Context, client *mongo.Client, request *Me
 
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.USER_ALREADY_MEMBER),
 			Message: "User is already a member of the team",
 		}
@@ -458,7 +458,7 @@ func isUserMemberOrOwner(conn context.Context, client *mongo.Client, request *Me
 
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.USER_IS_OWNER),
 			Message: "User is owner of the team",
 		}
