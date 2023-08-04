@@ -6,6 +6,9 @@ Valhalla is a API for the [Valhalla](https://github.com/akrck02/valhalla) modern
 
 Valhalla relies on a microservice architecture, which means that the API is separated from the core. This allows for a more flexible and scalable architecture, as well as a better separation of concerns.
 
+# Documentation
+You can find the documentation for the Valhalla core API [here](docs/00.%20Valhalla%20core%20API.md).
+
 # Contributing
 
 If you want to contribute to Valhalla, please read the [contributing guidelines](CONTRIBUTING.md).
