@@ -2,7 +2,7 @@ version: '3'
 services:    
   mongodb:
     image: mongo
-    container_name: mongodb   
+    container_name: valhalla-dev-mongodb   
     ports:
       - "27017:27017"
     restart: unless-stopped       
@@ -12,24 +12,24 @@ services:
     volumes:
       - ./mongo-data:/data/db
     networks:
-      backend:
+      valhalla-dev:
         ipv4_address: ${IP_MONGODB}
       
   mongo-express:
     image: mongo-express
-    container_name: mongo-express    
+    container_name: valhalla-dev-mongo-express    
     ports:
       - "8080:8081"
     restart: unless-stopped       
     networks:
-      - backend
+      - valhalla-dev
     environment:
       - ME_CONFIG_MONGODB_ADMINUSERNAME=${MONGO_ADMIN_USERNAME}
       - ME_CONFIG_MONGODB_ADMINPASSWORD=${MONGO_ADMIN_PASSWORD}
       - ME_CONFIG_MONGODB_SERVER=${MONGO_ADMIN_SERVER}
 networks:
-      backend:
-        name: backend
+      valhalla-dev:
+        name: valhalla-dev
         ipam:
           driver: default
           config:

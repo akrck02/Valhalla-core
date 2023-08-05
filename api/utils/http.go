@@ -5,17 +5,19 @@ import (
 	"io"
 	"mime/multipart"
 
+	"github.com/akrck02/valhalla-core/models"
 	"github.com/gin-gonic/gin"
 )
 
 // Read body json as the given object
 //
-// [param] c | *gin.Context: gin context
+// [param] c | interface: gin context
 // [param] obj | interface{}: object to read
 //
 // [return] error: error
-func ReadBodyJson(c *gin.Context, obj interface{}) error {
-	return c.BindJSON(obj)
+func ReadBodyJson(params interface{}, obj interface{}) error {
+
+	return nil
 }
 
 // MultipartToBytes reads a file from a multipart request
@@ -57,3 +59,31 @@ func MultipartToBytes(c *gin.Context, key string) ([]byte, error) {
 
 	return buf.Bytes(), nil
 }
+
+// GetRequestMetadata returns the request metadata
+//
+// [param] c | *gin.Context: gin context
+//
+// [return] *models.Request: request metadata
+func GetRequestMetadata(c *gin.Context) *models.Request {
+	var request, exists = c.Get("request")
+
+	if !exists {
+		return nil
+	}
+
+	var casted models.Request = request.(models.Request)
+	return &casted
+}
+
+const (
+	HTTP_METHOD_GET     = 0
+	HTTP_METHOD_POST    = 1
+	HTTP_METHOD_PUT     = 2
+	HTTP_METHOD_DELETE  = 3
+	HTTP_METHOD_PATCH   = 4
+	HTTP_METHOD_HEAD    = 5
+	HTTP_METHOD_OPTIONS = 6
+	HTTP_METHOD_TRACE   = 7
+	HTTP_METHOD_CONNECT = 8
+)

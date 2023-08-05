@@ -1,7 +1,5 @@
 package configuration
 
-import "github.com/akrck02/valhalla-core/log"
-
 var (
 	BASE_PATH             = ""
 	ENV_PATH              = ""
@@ -11,8 +9,6 @@ var (
 )
 
 func SetBasePath(path string) int {
-
-	log.Info("Base path: " + path)
 
 	BASE_PATH = path
 	ENV_PATH = BASE_PATH + "/.env"

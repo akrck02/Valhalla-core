@@ -9,6 +9,7 @@ import (
 	"github.com/akrck02/valhalla-core/db"
 	"github.com/akrck02/valhalla-core/error"
 	"github.com/akrck02/valhalla-core/log"
+	"github.com/akrck02/valhalla-core/middleware"
 	"github.com/akrck02/valhalla-core/mock"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
@@ -20,7 +21,7 @@ func TestRegister(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.Email(),
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -57,7 +58,7 @@ func TestRegisterNotEmail(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Password: mock.Password(),
 		Username: mock.Username(),
 	}
@@ -73,7 +74,7 @@ func TestRegisterNotEmail(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_EMAIL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -88,7 +89,7 @@ func TestRegisterNotUsername(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.Email(),
 		Password: mock.Password(),
 	}
@@ -104,7 +105,7 @@ func TestRegisterNotUsername(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_USERNAME {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_USERNAME {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -118,7 +119,7 @@ func TestRegisterNotPassword(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.Email(),
 		Username: mock.Username(),
 	}
@@ -134,7 +135,7 @@ func TestRegisterNotPassword(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_PASSWORD {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_PASSWORD {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -149,7 +150,7 @@ func TestRegisterNotDotEmail(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.EmailNotDot(),
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -166,7 +167,7 @@ func TestRegisterNotDotEmail(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_DOT_EMAIL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_DOT_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -181,7 +182,7 @@ func TestRegisterNotAtEmail(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.EmailNotAt(),
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -196,7 +197,7 @@ func TestRegisterNotAtEmail(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_AT_EMAIL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_AT_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -211,7 +212,7 @@ func TestRegisterShortMail(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.EmailShort(),
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -226,7 +227,7 @@ func TestRegisterShortMail(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_EMAIL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -241,7 +242,7 @@ func TestRegisterNotSpecialCharactersPassword(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.Email(),
 		Password: mock.PasswordNotSpecialChar(),
 		Username: mock.Username(),
@@ -258,7 +259,7 @@ func TestRegisterNotSpecialCharactersPassword(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_SPECIAL_CHARACTERS_PASSWORD {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_SPECIAL_CHARACTERS_PASSWORD {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -273,7 +274,7 @@ func TestRegisterNotUpperCaseLoweCasePassword(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.Email(),
 		Password: mock.PasswordNotLowerCase(),
 		Username: mock.Username(),
@@ -290,7 +291,7 @@ func TestRegisterNotUpperCaseLoweCasePassword(t *testing.T) {
 		return
 	}
 
-	user = models.User{
+	user = &models.User{
 		Email:    mock.Email(),
 		Password: mock.PasswordNotUpperCase(),
 		Username: mock.Username(),
@@ -307,7 +308,7 @@ func TestRegisterNotUpperCaseLoweCasePassword(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_UPPER_LOWER_PASSWORD {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_UPPER_LOWER_PASSWORD {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -322,7 +323,7 @@ func TestRegisterShortPassword(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.Email(),
 		Password: mock.PasswordShort(),
 		Username: mock.Username(),
@@ -334,7 +335,7 @@ func TestRegisterShortPassword(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_PASSWORD {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_PASSWORD {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -346,7 +347,7 @@ func TestRegisterNotNumbersPassword(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.Email(),
 		Password: mock.PasswordNotNumber(),
 		Username: mock.Username(),
@@ -358,10 +359,11 @@ func TestRegisterNotNumbersPassword(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_ALPHANUMERIC_PASSWORD {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_ALPHANUMERIC_PASSWORD {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
+
 }
 
 func TestLogin(t *testing.T) {
@@ -370,7 +372,7 @@ func TestLogin(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.Email(),
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -386,9 +388,6 @@ func TestLogin(t *testing.T) {
 		t.Error("The user was not registered", err)
 		return
 	}
-
-	user.Password = "PasswordPassword1#"
-	log.FormattedInfo("New password : ${0}", user.Password)
 
 	// login the user
 	var token string
@@ -425,7 +424,7 @@ func TestLoginWrongPassword(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.Email(),
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -458,7 +457,7 @@ func TestLoginWrongPassword(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_FORBIDDEN {
+	if err.Status != utils.HTTP_STATUS_FORBIDDEN {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -489,7 +488,7 @@ func TestLoginWrongEmail(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    "wrong" + mock.Email(),
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -509,7 +508,7 @@ func TestLoginWrongEmail(t *testing.T) {
 	log.FormattedInfo("Login with email that does not exist ${0}", user.Email)
 
 	// login the user
-	_, err = Login(conn, client, models.User{
+	_, err = Login(conn, client, &models.User{
 		Email:    mock.Email(),
 		Password: user.Password,
 	}, mock.Ip(), mock.Platform())
@@ -519,7 +518,7 @@ func TestLoginWrongEmail(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_FORBIDDEN {
+	if err.Status != utils.HTTP_STATUS_FORBIDDEN {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -545,7 +544,7 @@ func TestDeleteUser(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.Email(),
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -599,7 +598,7 @@ func TestDeleteUserNoEmail(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Password: mock.Password(),
 		Username: mock.Username(),
 	}
@@ -613,7 +612,7 @@ func TestDeleteUserNoEmail(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_EMAIL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -628,7 +627,7 @@ func TestDeleteUserNotFound(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.Email(),
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -643,7 +642,7 @@ func TestDeleteUserNotFound(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_NOT_FOUND {
+	if err.Status != utils.HTTP_STATUS_NOT_FOUND {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -661,7 +660,7 @@ func TestEditUserEmail(t *testing.T) {
 	var email = mock.Email()
 	var newEmail = "xXx" + mock.Email()
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    email,
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -701,10 +700,10 @@ func TestEditUserEmail(t *testing.T) {
 		NewEmail: newEmail,
 	}
 
-	err = EditUserEmail(conn, client, emailChangeRequest)
+	err = EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err != nil {
-		t.Error("The user email was not changed ", err)
+		t.Error("The user email was not changed", err)
 		return
 	}
 
@@ -734,14 +733,14 @@ func TestEditUserEmailNoEmail(t *testing.T) {
 
 	log.Info("Changing user email")
 
-	err := EditUserEmail(conn, client, emailChangeRequest)
+	err := EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_EMAIL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMPTY_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -766,14 +765,14 @@ func TestEditUserEmailNoDotEmail(t *testing.T) {
 
 	log.Info("Changing user email")
 
-	err := EditUserEmail(conn, client, emailChangeRequest)
+	err := EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_DOT_EMAIL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_DOT_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -799,14 +798,14 @@ func TestEditUserEmailNoAtEmail(t *testing.T) {
 
 	log.Info("Changing user email")
 
-	err := EditUserEmail(conn, client, emailChangeRequest)
+	err := EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_AT_EMAIL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_AT_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -831,14 +830,14 @@ func TestEditUserEmailShortEmail(t *testing.T) {
 
 	log.Info("Changing user email")
 
-	err := EditUserEmail(conn, client, emailChangeRequest)
+	err := EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_EMAIL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_EMAIL {
 		t.Error("The error is not the expected" + err.Message)
 		return
 	}
@@ -863,14 +862,14 @@ func TestEditUserEmailNotFound(t *testing.T) {
 
 	log.Info("Changing user email")
 
-	err := EditUserEmail(conn, client, emailChangeRequest)
+	err := EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_NOT_FOUND {
+	if err.Status != utils.HTTP_STATUS_NOT_FOUND {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
@@ -888,7 +887,7 @@ func TestEditUserEmailExists(t *testing.T) {
 	var email = mock.Email()
 	var newEmail = mock.Email() + "xXx"
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    email,
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -909,7 +908,7 @@ func TestEditUserEmailExists(t *testing.T) {
 	log.Jump()
 
 	// Create a new user with the new email
-	newUser := models.User{
+	newUser := &models.User{
 		Email:    newEmail,
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -937,14 +936,14 @@ func TestEditUserEmailExists(t *testing.T) {
 
 	log.FormattedInfo("Changing user email to ${0}", newEmail)
 
-	err = EditUserEmail(conn, client, emailChangeRequest)
+	err = EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_CONFLICT || err.Error != error.USER_ALREADY_EXISTS {
+	if err.Status != utils.HTTP_STATUS_CONFLICT || err.Error != error.USER_ALREADY_EXISTS {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
@@ -996,14 +995,14 @@ func TestEditUserSameEmail(t *testing.T) {
 
 	log.Info("Changing user email")
 
-	err := EditUserEmail(conn, client, emailChangeRequest)
+	err := EditUserEmail(conn, client, &emailChangeRequest)
 
 	if err == nil {
 		t.Error("The user email was changed")
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMAILS_EQUAL {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.EMAILS_EQUAL {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
@@ -1018,7 +1017,7 @@ func TestEditUserPassword(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.Email(),
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -1039,7 +1038,7 @@ func TestEditUserPassword(t *testing.T) {
 	err = EditUser(conn, client, user)
 
 	if err != nil {
-		t.Error("The user password was not changed")
+		t.Error("The user password was not changed: " + err.Message)
 		return
 	}
 
@@ -1078,7 +1077,7 @@ func TestEditUserPasswordUserNotFound(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.Email(),
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -1093,7 +1092,7 @@ func TestEditUserPasswordUserNotFound(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_NOT_FOUND {
+	if err.Status != utils.HTTP_STATUS_NOT_FOUND {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
@@ -1108,7 +1107,7 @@ func TestEditUserPasswordShort(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.Email(),
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -1133,7 +1132,7 @@ func TestEditUserPasswordShort(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_PASSWORD {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.SHORT_PASSWORD {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
@@ -1158,7 +1157,7 @@ func TestEditUserPasswordNoLowercase(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.Email(),
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -1184,7 +1183,7 @@ func TestEditUserPasswordNoLowercase(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_UPPER_LOWER_PASSWORD {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_UPPER_LOWER_PASSWORD {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
@@ -1209,7 +1208,7 @@ func TestEditUserPasswordNoUppercase(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.Email(),
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -1235,7 +1234,7 @@ func TestEditUserPasswordNoUppercase(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_UPPER_LOWER_PASSWORD {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_UPPER_LOWER_PASSWORD {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
@@ -1260,7 +1259,7 @@ func TestEditUserPasswordNoNumber(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.Email(),
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -1286,7 +1285,7 @@ func TestEditUserPasswordNoNumber(t *testing.T) {
 		return
 	}
 
-	if err.Code != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_ALPHANUMERIC_PASSWORD {
+	if err.Status != utils.HTTP_STATUS_BAD_REQUEST || err.Error != error.NO_ALPHANUMERIC_PASSWORD {
 		t.Error("The error is not the expected", err.Message)
 		return
 	}
@@ -1311,7 +1310,7 @@ func TestEditProfilePicture(t *testing.T) {
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user = models.User{
+	var user = &models.User{
 		Email:    mock.Email(),
 		Password: mock.Password(),
 		Username: mock.Username(),
@@ -1362,4 +1361,169 @@ func TestOsDirName(t *testing.T) {
 	filepath = path.Dir(path.Dir(filepath))
 
 	fmt.Println(filepath)
+}
+
+func TestTokenValidation(t *testing.T) {
+
+	// Create a new user
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = &models.User{
+		Username: mock.Username(),
+		Email:    mock.Email(),
+		Password: mock.Password(),
+	}
+
+	err := Register(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not registered", err)
+		return
+	}
+
+	// Login the user
+	var token string
+	token, err = Login(conn, client, user, mock.Ip(), mock.Platform())
+
+	if err != nil {
+		t.Error("The user was not logged in", err)
+		return
+	}
+
+	_, err = middleware.IsTokenValid(client, token)
+
+	if err != nil {
+		t.Error("The token was not validated", err)
+		return
+	}
+
+	// delete the user
+	err = DeleteUser(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not deleted", err)
+		return
+	}
+
+	log.Info("User deleted")
+}
+
+func TestTokenValidationInvalidToken(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	// Create a fake token
+	token := mock.Token()
+	_, err := middleware.IsTokenValid(client, token)
+
+	if err == nil {
+		t.Error("The token was validated")
+		return
+	}
+
+	if err.Status != utils.HTTP_STATUS_FORBIDDEN || err.Error != error.INVALID_TOKEN {
+		t.Error("The error is not the expected", err.Message)
+		return
+	}
+
+	log.FormattedInfo("Token not validated, error { http: ${0}, internal: ${1}, message: \"${2}\" }", utils.Int2String(err.Status), utils.Int2String(err.Error), err.Message)
+
+}
+
+func TestTokenValidationInvalidTokenFormat(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	// Create a fake token
+	token := mock.Username()
+	_, err := middleware.IsTokenValid(client, token)
+
+	if err == nil {
+		t.Error("The token was validated")
+		return
+	}
+
+	if err.Status != utils.HTTP_STATUS_FORBIDDEN || err.Error != error.INVALID_TOKEN {
+		t.Error("The error is not the expected", err.Message)
+		return
+	}
+
+	log.FormattedInfo("Token not validated, error { http: ${0}, internal: ${1}, message: \"${2}\" }", utils.Int2String(err.Status), utils.Int2String(err.Error), err.Message)
+
+}
+
+func TestTokenValidationEmptyToken(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	// Create a fake token
+	token := ""
+	_, err := middleware.IsTokenValid(client, token)
+
+	if err == nil {
+		t.Error("The token was validated")
+		return
+	}
+
+	if err.Status != utils.HTTP_STATUS_FORBIDDEN || err.Error != error.INVALID_TOKEN {
+		t.Error("The error is not the expected", err.Message)
+		return
+	}
+
+	log.FormattedInfo("Token not validated, error { http: ${0}, internal: ${1}, message: \"${2}\" }", utils.Int2String(err.Status), utils.Int2String(err.Error), err.Message)
+
+}
+
+func TestValidationCode(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	// Create a new user
+	var user = &models.User{
+		Username: mock.Username(),
+		Email:    mock.Email(),
+		Password: mock.Password(),
+	}
+
+	err := Register(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not registered", err)
+		return
+	}
+
+	// get the user
+	user, err = GetUser(conn, client, user, true)
+
+	if err != nil {
+		t.Error("The user was not found", err)
+		return
+	}
+
+	// validate the user
+	err = ValidateUser(conn, client, user.ValidationCode)
+
+	if err != nil {
+		t.Error("The user was not validated", err)
+		return
+	}
+
+	// delete the user
+	err = DeleteUser(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not deleted", err)
+		return
+	}
+
 }

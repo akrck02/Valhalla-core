@@ -2,12 +2,19 @@ package services
 
 import (
 	"github.com/akrck02/valhalla-core/db"
+	"github.com/akrck02/valhalla-core/error"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
 	"github.com/gin-gonic/gin"
 )
 
-func CreateRoleHttp(c *gin.Context) {
+// CreateRole HTTP API endpoint
+//
+// [param] c | *gin.Context: context
+//
+// [return] *models.Response: response | *models.Error: error
+func CreateRoleHttp(c *gin.Context) (*models.Response, *models.Error) {
+
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
@@ -16,41 +23,62 @@ func CreateRoleHttp(c *gin.Context) {
 	err := c.ShouldBindJSON(&params)
 
 	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request",
+		}
 	}
 
 	var role models.Role
-
 	var error = CreateRole(conn, client, role)
 
 	if error != nil {
-		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
-		)
-		return
+		return nil, error
 	}
 
-	// send response
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User created"},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: "User created",
+	}, nil
 
 }
 
-func DeleteRoleHttp(c *gin.Context) {
-
+// DeleteRole HTTP API endpoint
+//
+// [param] c | *gin.Context: context
+//
+// [return] *models.Response: response | *models.Error: error
+func DeleteRoleHttp(c *gin.Context) (*models.Response, *models.Error) {
+	return nil, &models.Error{
+		Status:  utils.HTTP_STATUS_NOT_IMPLEMENTED,
+		Error:   error.NOT_IMPLEMENTED,
+		Message: "Not implemented",
+	}
 }
 
-func EditRoleHttp(c *gin.Context) {
-
+// EditRole HTTP API endpoint
+//
+// [param] c | *gin.Context: context
+//
+// [return] *models.Response: response | *models.Error: error
+func EditRoleHttp(c *gin.Context) (*models.Response, *models.Error) {
+	return nil, &models.Error{
+		Status:  utils.HTTP_STATUS_NOT_IMPLEMENTED,
+		Error:   error.NOT_IMPLEMENTED,
+		Message: "Not implemented",
+	}
 }
 
-func GetRoleHttp(c *gin.Context) {
-
+// GetRole HTTP API endpoint
+//
+// [param] c | *gin.Context: context
+//
+// [return] *models.Response: response | *models.Error: error
+func GetRoleHttp(c *gin.Context) (*models.Response, *models.Error) {
+	return nil, &models.Error{
+		Status:  utils.HTTP_STATUS_NOT_IMPLEMENTED,
+		Error:   error.NOT_IMPLEMENTED,
+		Message: "Not implemented",
+	}
 }

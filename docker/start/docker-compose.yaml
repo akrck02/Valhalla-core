@@ -2,7 +2,7 @@ version: '3'
 services:
   valhalla:
     image: akrck02/valhalla-core:latest
-    container_name: valhalla
+    container_name: valhalla-core-dev
     restart: always
     ports:
       - 3333:3333
@@ -10,12 +10,12 @@ services:
       - ../../api:/compile
       - ./cache:/cache
     networks:
-      - backend
+      - valhalla-dev
 
 networks:
-      backend:
-        name: backend
+      valhalla-dev:
+        name: valhalla-dev
         ipam:
           driver: default
           config:
-            - subnet: 172.20.0.0/16
+            - subnet: ${MASK_MONGODB}

@@ -1,35 +1,35 @@
 {
     "client": "Thunder Client",
     "collectionName": "Valhalla-core",
-    "dateExported": "2023-04-17T15:54:50.160Z",
+    "dateExported": "2023-06-24T14:04:52.066Z",
     "version": "1.1",
     "folders": [
         {
-            "_id": "c9af3182-d1e4-44d1-b47d-23a27de40633",
+            "_id": "78f1036a-7752-4138-9f30-98eac1e7eaf8",
             "name": "user",
             "containerId": "",
-            "created": "2023-04-14T18:19:43.100Z",
+            "created": "2023-04-30T21:16:43.450Z",
             "sortNum": 10000
         },
         {
-            "_id": "ed7d30f7-b43e-4356-8454-77199b6fa582",
+            "_id": "addf51d3-39f3-4b4e-af92-704eaec60109",
             "name": "team",
             "containerId": "",
-            "created": "2023-04-14T18:20:09.956Z",
+            "created": "2023-04-30T21:16:43.451Z",
             "sortNum": 20000
         }
     ],
     "requests": [
         {
-            "_id": "58091a3a-07a2-438a-8d7d-4bf44d39105f",
-            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
-            "containerId": "c9af3182-d1e4-44d1-b47d-23a27de40633",
+            "_id": "3d73dd7b-fe19-4351-bf50-78cf62d5defc",
+            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
+            "containerId": "78f1036a-7752-4138-9f30-98eac1e7eaf8",
             "name": "Register",
             "url": "http://127.0.0.1:3333/api/v1/user/register",
             "method": "POST",
             "sortNum": 5000,
-            "created": "2023-02-22T18:26:16.354Z",
-            "modified": "2023-04-16T14:13:31.813Z",
+            "created": "2023-04-30T21:16:43.450Z",
+            "modified": "2023-04-30T21:20:43.166Z",
             "headers": [],
             "params": [],
             "body": {
@@ -40,29 +40,29 @@
             "tests": []
         },
         {
-            "_id": "d48e3804-41a8-48e1-9622-93ffc12cdf65",
-            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
+            "_id": "e8e86846-3222-43d1-b8fa-50078f10b3e1",
+            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
             "containerId": "",
             "name": "ping",
             "url": "http://127.0.0.1:3333/api/v1/ping",
             "method": "GET",
             "sortNum": 10000,
-            "created": "2023-02-22T18:26:16.352Z",
-            "modified": "2023-02-22T18:26:16.352Z",
+            "created": "2023-04-30T21:16:43.452Z",
+            "modified": "2023-04-30T21:16:43.452Z",
             "headers": [],
             "params": [],
             "tests": []
         },
         {
-            "_id": "5cf2c2ce-33e1-48f0-8513-e18d9fe2e9a0",
-            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
-            "containerId": "c9af3182-d1e4-44d1-b47d-23a27de40633",
+            "_id": "ad2a6b90-1b00-42f5-aa5c-8a66783a67b2",
+            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
+            "containerId": "78f1036a-7752-4138-9f30-98eac1e7eaf8",
             "name": "Login",
             "url": "http://127.0.0.1:3333/api/v1/user/login",
             "method": "POST",
             "sortNum": 10000,
-            "created": "2023-02-22T18:26:16.353Z",
-            "modified": "2023-04-16T14:12:15.112Z",
+            "created": "2023-04-30T21:16:43.453Z",
+            "modified": "2023-04-30T21:16:43.453Z",
             "headers": [],
             "params": [],
             "body": {
@@ -73,15 +73,15 @@
             "tests": []
         },
         {
-            "_id": "32fecf47-5e23-43a3-8042-bdf627c83fbb",
-            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
-            "containerId": "ed7d30f7-b43e-4356-8454-77199b6fa582",
+            "_id": "dafad554-487b-49bb-8d73-0488ea707c05",
+            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
+            "containerId": "addf51d3-39f3-4b4e-af92-704eaec60109",
             "name": "New team",
             "url": "http://127.0.0.1:3333/api/v1/team/create",
             "method": "POST",
             "sortNum": 10000,
-            "created": "2023-04-12T17:29:41.599Z",
-            "modified": "2023-04-14T18:20:44.129Z",
+            "created": "2023-04-30T21:16:43.454Z",
+            "modified": "2023-04-30T21:16:43.454Z",
             "headers": [],
             "params": [],
             "body": {
@@ -92,16 +92,21 @@
             "tests": []
         },
         {
-            "_id": "48037a02-5811-45dc-844b-37cf00847b4d",
-            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
-            "containerId": "c9af3182-d1e4-44d1-b47d-23a27de40633",
+            "_id": "0caf3ad8-6d95-4399-86b4-6a841621819a",
+            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
+            "containerId": "78f1036a-7752-4138-9f30-98eac1e7eaf8",
             "name": "Edit user",
             "url": "http://127.0.0.1:3333/api/v1/user/edit",
             "method": "POST",
             "sortNum": 20000,
-            "created": "2023-04-14T18:14:55.152Z",
-            "modified": "2023-04-15T19:59:00.134Z",
-            "headers": [],
+            "created": "2023-04-30T21:16:43.455Z",
+            "modified": "2023-06-10T18:59:58.445Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkZXZpY2UiOiJUaHVuZGVyIENsaWVudCAoaHR0cHM6Ly93d3cudGh1bmRlcmNsaWVudC5jb20pLTE3Mi4yMC4wLjEiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJ0aW1lc3RhbXAiOjE2ODY0MTc1MDgwNTEsInVzZXJuYW1lIjoidGVzdCJ9.eBCXO3HBSsT3qPBuRFqOKMFqpF_WMQM510vL6oFEOpU"
+                }
+            ],
             "params": [],
             "body": {
                 "type": "json",
@@ -111,15 +116,15 @@
             "tests": []
         },
         {
-            "_id": "44142b4d-8707-4162-a6f8-ff159328d356",
-            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
-            "containerId": "c9af3182-d1e4-44d1-b47d-23a27de40633",
+            "_id": "1f06125e-70f0-48ef-882c-342f06e6767c",
+            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
+            "containerId": "78f1036a-7752-4138-9f30-98eac1e7eaf8",
             "name": "Edit password",
             "url": "http://127.0.0.1:3333/api/v1/user/edit/",
             "method": "POST",
             "sortNum": 22500,
-            "created": "2023-04-15T19:54:06.473Z",
-            "modified": "2023-04-16T16:04:47.655Z",
+            "created": "2023-04-30T21:16:43.456Z",
+            "modified": "2023-04-30T21:16:43.456Z",
             "headers": [],
             "params": [],
             "body": {
@@ -130,15 +135,15 @@
             "tests": []
         },
         {
-            "_id": "73d0bdaf-592e-405a-8aa8-a3d9c9ab9379",
-            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
-            "containerId": "c9af3182-d1e4-44d1-b47d-23a27de40633",
+            "_id": "9e0b3923-a1a6-4bf9-8e01-44ea50d926c1",
+            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
+            "containerId": "78f1036a-7752-4138-9f30-98eac1e7eaf8",
             "name": "Edit Profile Picture",
             "url": "http://127.0.0.1:3333/api/v1/user/edit/profilepicture",
             "method": "POST",
             "sortNum": 23125,
-            "created": "2023-04-17T14:12:58.057Z",
-            "modified": "2023-04-17T14:35:12.634Z",
+            "created": "2023-04-30T21:16:43.457Z",
+            "modified": "2023-04-30T21:16:43.457Z",
             "headers": [
                 {
                     "name": "enctype",
@@ -165,15 +170,15 @@
             "tests": []
         },
         {
-            "_id": "7c4e1d6a-cdea-4a55-8dda-f14a772d42e8",
-            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
-            "containerId": "c9af3182-d1e4-44d1-b47d-23a27de40633",
+            "_id": "f2569940-c06d-469a-bd33-fc84b153321e",
+            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
+            "containerId": "78f1036a-7752-4138-9f30-98eac1e7eaf8",
             "name": "Edit email",
             "url": "http://127.0.0.1:3333/api/v1/user/edit/email",
             "method": "POST",
             "sortNum": 23750,
-            "created": "2023-04-15T19:54:33.029Z",
-            "modified": "2023-04-17T15:13:10.300Z",
+            "created": "2023-04-30T21:16:43.458Z",
+            "modified": "2023-04-30T21:16:43.458Z",
             "headers": [],
             "params": [],
             "body": {
@@ -184,20 +189,44 @@
             "tests": []
         },
         {
-            "_id": "359b15f1-fb83-4868-9992-e846718550d1",
-            "colId": "55480cef-57e5-4429-9d9d-75a37c5523b6",
-            "containerId": "c9af3182-d1e4-44d1-b47d-23a27de40633",
+            "_id": "65655c11-239d-414d-a504-aed7f1bbbdd2",
+            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
+            "containerId": "78f1036a-7752-4138-9f30-98eac1e7eaf8",
             "name": "Delete user ",
             "url": "http://127.0.0.1:3333/api/v1/user/delete",
             "method": "POST",
             "sortNum": 25000,
-            "created": "2023-04-14T18:56:07.786Z",
-            "modified": "2023-04-16T14:14:06.894Z",
+            "created": "2023-04-30T21:16:43.459Z",
+            "modified": "2023-04-30T21:16:43.459Z",
             "headers": [],
             "params": [],
             "body": {
                 "type": "json",
                 "raw": "{\n  \"email\" : \"test0@test0.com\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "2aa4f824-f430-4047-9e8c-04779a58bd28",
+            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
+            "containerId": "78f1036a-7752-4138-9f30-98eac1e7eaf8",
+            "name": "Get user",
+            "url": "http://127.0.0.1:3333/api/v1/user/get",
+            "method": "POST",
+            "sortNum": 35000,
+            "created": "2023-06-24T13:56:41.880Z",
+            "modified": "2023-06-24T13:58:10.100Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkZXZpY2UiOiJUaHVuZGVyIENsaWVudCAoaHR0cHM6Ly93d3cudGh1bmRlcmNsaWVudC5jb20pLTE3Mi4yMC4wLjEiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJ0aW1lc3RhbXAiOjE2ODc2MTUwNTU2OTIsInVzZXJuYW1lIjoidGVzdCJ9.zGqFH3jNJd4x_oKtTx2Uwzei0A-rdxulScMR3yqyjWA"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"email\" : \"test@test.com\"\n}",
                 "form": []
             },
             "tests": []

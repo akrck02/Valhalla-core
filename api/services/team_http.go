@@ -2,175 +2,238 @@ package services
 
 import (
 	"github.com/akrck02/valhalla-core/db"
+	"github.com/akrck02/valhalla-core/error"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
 	"github.com/gin-gonic/gin"
 )
 
-func CreateTeamHttp(c *gin.Context) {
+// Create team HTTP API endpoint
+//
+// [param] c | *gin.Context: context
+//
+// [return] *models.Response: response | *models.Error: error
+func CreateTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var params models.Team
-	err := utils.ReadBodyJson(c, &params)
+	var team *models.Team = &models.Team{}
 
+	err := c.ShouldBindJSON(team)
 	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request body",
+		}
 	}
-
-	var team models.Team
-
-	team.Name = params.Name
-	team.Description = params.Description
-	team.Owner = params.Owner
-	team.ProfilePic = params.ProfilePic
 
 	var error = CreateTeam(conn, client, team)
 	if error != nil {
-		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
-		)
-		return
+		return nil, error
 	}
 
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User created"},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "Team created"},
+	}, nil
+
 }
 
-func EditTeamHttp(c *gin.Context) {
+// Edit team HTTP API endpoint
+//
+// [param] c | *gin.Context: context
+//
+// [return] *models.Response: response | *models.Error: error
+func EditTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
+
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var params models.Team
-	err := utils.ReadBodyJson(c, &params)
-
+	var params *models.Team = &models.Team{}
+	err := c.ShouldBindJSON(params)
 	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request body",
+		}
 	}
 
 	var error = EditTeam(conn, client, params)
 
 	if error != nil {
-		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
-		)
-		return
+		return nil, error
 	}
 
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Team changed"},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "Team changed"},
+	}, nil
 }
 
-func EditTeamOwnerHttp(c *gin.Context) {
+// Edit team owner HTTP API endpoint
+//
+// [param] c | *gin.Context: context
+//
+// [return] *models.Response: response | *models.Error: error
+func EditTeamOwnerHttp(c *gin.Context) (*models.Response, *models.Error) {
+
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var params models.Team
-	err := utils.ReadBodyJson(c, &params)
+	var params *models.Team = &models.Team{}
 
+	err := c.ShouldBindJSON(params)
 	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request body",
+		}
 	}
 
 	var error = EditTeamOwner(conn, client, params)
 
 	if error != nil {
-		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
-		)
-		return
+		return nil, error
 	}
 
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Team owner edited"},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "Team owner edited"},
+	}, nil
 }
 
-func DeleteTeamHttp(c *gin.Context) {
+// Delete team HTTP API endpoint
+//
+// [param] c | *gin.Context: context
+//
+// [return] *models.Response: response | *models.Error: error
+func DeleteTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
+
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var params models.Team
-	err := utils.ReadBodyJson(c, &params)
-
+	var params *models.Team = &models.Team{}
+	err := c.ShouldBindJSON(params)
 	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request body",
+		}
 	}
 
-	error := DeleteTeam(conn, client, params)
-
+	var error = DeleteTeam(conn, client, params)
 	if error != nil {
-		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": err.Error, "message": error.Message},
-		)
-		return
+		return nil, error
 	}
 
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Team deleted"},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "Team deleted"},
+	}, nil
 }
 
-func GetTeamHttp(c *gin.Context) {
+// Get team HTTP API endpoint
+//
+// [param] request | models.Request: request
+//
+// [return] *models.Response: response | *models.Error: error
+func GetTeamHttp(c *gin.Context) (*models.Response, *models.Error) {
+
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
-	var params models.Team
 
-	err := utils.ReadBodyJson(c, &params)
+	var params models.Team = models.Team{}
+	params.ID = c.Query("id")
 
-	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+	if params.ID == "" {
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Team ID is required",
+		}
 	}
 
-	team, error := GetTeam(conn, client, params)
-
+	team, error := GetTeam(conn, client, &params)
 	if error != nil {
-		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": err.Error, "message": error.Message},
-		)
-		return
+		return nil, error
 	}
 
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Team found", "team": team},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "Team found", "team": team},
+	}, nil
+}
 
+// Add user to team HTTP API endpoint
+//
+// [param] c | *gin.Context: context
+//
+// [return] *models.Response: response | *models.Error: error
+func AddMemberHttp(c *gin.Context) (*models.Response, *models.Error) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+	var params *MemberChangeRequest = &MemberChangeRequest{}
+
+	err := c.ShouldBindJSON(params)
+	if err != nil {
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request body",
+		}
+	}
+
+	var addMemberErr = AddMember(conn, client, params)
+	if err != nil {
+		return nil, addMemberErr
+	}
+
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "Member added"},
+	}, nil
+}
+
+// Remove user from team HTTP API endpoint
+//
+// [param] c | *gin.Context: context
+//
+// [return] *models.Response: response | *models.Error: error
+func RemoveMemberHttp(c *gin.Context) (*models.Response, *models.Error) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var params *MemberChangeRequest = &MemberChangeRequest{}
+	err := c.ShouldBindJSON(params)
+	if err != nil {
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request body",
+		}
+	}
+
+	var removeMemberErr = RemoveMember(conn, client, params)
+	if err != nil {
+		return nil, removeMemberErr
+	}
+
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "Member removed"},
+	}, nil
 }

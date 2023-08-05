@@ -1,7 +1,6 @@
 package log
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
@@ -16,7 +15,7 @@ var Logger = log.New(os.Stderr)
 
 func ShowLogAppTitle() {
 	Line()
-	fmt.Println("               " + lang.APP_TITLE)
+	Log("               " + lang.APP_TITLE)
 	Line()
 }
 
@@ -53,13 +52,13 @@ func Jump() {
 }
 
 func Line() {
-	fmt.Println(strings.Repeat(titleChar, titleCharNum))
+	Logger.Info(strings.Repeat(titleChar, titleCharNum))
 }
 
 func Title(title string) {
 	Jump()
 	Line()
-	fmt.Println("   " + title)
+	Info("   " + title)
 	Line()
 }
 

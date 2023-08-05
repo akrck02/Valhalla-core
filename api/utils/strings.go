@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"strconv"
 	"strings"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -68,4 +69,34 @@ func IsEmpty(str string) bool {
 // [return] primitive.ObjectID: converted string
 func StringToObjectId(str string) (primitive.ObjectID, error) {
 	return primitive.ObjectIDFromHex(str)
+}
+
+// Convert Int64 to String
+//
+// [param] num | int64: number to convert
+//
+// [return] string: converted number
+func Int642String(num int64) string {
+	return strconv.FormatInt(num, 10)
+}
+
+// Convert int to string
+//
+// [param] num | int: number to convert
+//
+// [return] string: converted number
+func Int2String(num int) string {
+	return strconv.Itoa(num)
+}
+
+// Get string pointer from string or nil if empty
+//
+// [param] str | string: string to convert
+//
+// [return] *string: string pointer
+func ValueOrEmpty(str string) *string {
+	if str == "" {
+		return nil
+	}
+	return &str
 }

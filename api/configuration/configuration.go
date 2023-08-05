@@ -45,5 +45,8 @@ func checkCompulsoryVariables(Configuration GlobalConfiguration) {
 	log.Info("PORT: " + Configuration.Port)
 	log.Info("SECRET: " + strings.Repeat("*", len(Configuration.Secret)))
 	log.Info("MONGO: " + Configuration.Mongo)
-	log.Line()
+}
+
+func IsDevelopment() bool {
+	return os.Getenv("ENV") == "development"
 }

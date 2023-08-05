@@ -21,4 +21,8 @@ const (
 	EMPTY_USERNAME                 = 615
 	EMPTY_PASSWORD                 = 616
 	EMPTY_EMAIL                    = 617
+	INVALID_TOKEN                  = 618
+	CANNOT_CREATE_VALIDATION_CODE  = 619
+	INVALID_VALIDATION_CODE        = 620
+	USER_ALREADY_VALIDATED         = 621
 )

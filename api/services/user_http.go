@@ -2,6 +2,8 @@ package services
 
 import (
 	"github.com/akrck02/valhalla-core/db"
+	"github.com/akrck02/valhalla-core/error"
+	"github.com/akrck02/valhalla-core/log"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
 	"github.com/gin-gonic/gin"
@@ -9,242 +11,270 @@ import (
 
 // Register HTTP API endpoint
 //
-// [param] c | *gin.Context: gin context
-func RegisterHttp(c *gin.Context) {
+// [param] c | *gin.Context: context
+func RegisterHttp(c *gin.Context) (*models.Response, *models.Error) {
 
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var params models.User
-	err := c.ShouldBindJSON(&params)
-
+	var user *models.User = &models.User{}
+	err := c.ShouldBindJSON(user)
 	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request",
+		}
 	}
-
-	var user models.User
-	user.Username = params.Username
-	user.Password = params.Password
-	user.Email = params.Email
 
 	var error = Register(conn, client, user)
 	if error != nil {
-		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
-		)
-		return
+		return nil, error
 	}
 
-	// send response
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User created"},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "User created"},
+	}, nil
 }
 
 // Login HTTP API endpoint
 //
-// [param] c | *gin.Context: gin context
-func LoginHttp(c *gin.Context) {
+// [param] c | *gin.Context: context
+func LoginHttp(c *gin.Context) (*models.Response, *models.Error) {
 
+	var request = utils.GetRequestMetadata(c)
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user models.User
-	err := utils.ReadBodyJson(c, &user)
-
+	var user *models.User = &models.User{}
+	err := c.ShouldBindJSON(user)
 	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request",
+		}
 	}
 
-	ip := c.ClientIP()
-	address := c.Request.Header.Get("User-Agent")
+	ip := request.IP
+	address := request.UserAgent
 	token, error := Login(conn, client, user, ip, address)
 
 	if error != nil {
-		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
-		)
-		return
+		return nil, error
 	}
 
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"code": utils.HTTP_STATUS_OK, "message": "User found", "auth": token},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"auth": token},
+	}, nil
 }
 
 // Edit user HTTP API endpoint
 //
-// [param] c | *gin.Context: gin context
-func EditUserHttp(c *gin.Context) {
+// [param] c | *gin.Context: context
+func EditUserHttp(c *gin.Context) (*models.Response, *models.Error) {
 
+	var request = utils.GetRequestMetadata(c)
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user models.User
-	err := utils.ReadBodyJson(c, &user)
-
+	var userToEdit *models.User = &models.User{}
+	err := c.ShouldBindJSON(userToEdit)
 	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request",
+		}
 	}
 
-	updateErr := EditUser(conn, client, user)
+	// get if request user can edit the user
+	canEdit := CanEditUser(request.User, userToEdit)
+	if !canEdit {
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_FORBIDDEN,
+			Error:   error.ACCESS_DENIED,
+			Message: "Cannot edit user",
+		}
+	}
+
+	updateErr := EditUser(conn, client, userToEdit)
 	if updateErr != nil {
-		utils.SendResponse(c,
-			updateErr.Code,
-			gin.H{"http-code": updateErr.Code, "internal-code": updateErr.Error, "message": updateErr.Message},
-		)
-		return
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request",
+		}
 	}
 
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User updated"},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "User updated"},
+	}, nil
 }
 
 // Change email HTTP API endpoint
 //
-// [param] c | *gin.Context: gin context
-// [return] *models.Error: error if any
-func EditUserEmailHttp(c *gin.Context) {
+// [param] c | *gin.Context: context
+func EditUserEmailHttp(c *gin.Context) (*models.Response, *models.Error) {
 
+	var request = utils.GetRequestMetadata(c)
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var email EmailChangeRequest
-	err := utils.ReadBodyJson(c, &email)
-
+	var email *EmailChangeRequest = &EmailChangeRequest{}
+	err := c.ShouldBindJSON(email)
 	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request",
+		}
+	}
+
+	// get if request user can edit the user
+	canEdit := CanEditUser(request.User, &models.User{Email: email.Email})
+	if !canEdit {
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_FORBIDDEN,
+			Error:   error.ACCESS_DENIED,
+			Message: "Access denied: Cannot edit user",
+		}
 	}
 
 	changeErr := EditUserEmail(conn, client, email)
 	if changeErr != nil {
-		utils.SendResponse(c,
-			changeErr.Code,
-			gin.H{"http-code": changeErr.Code, "internal-code": changeErr.Error, "message": changeErr.Message},
-		)
-		return
+		return nil, changeErr
 	}
 
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Email changed"},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "Email changed"},
+	}, nil
 }
 
 // Delete user HTTP API endpoint
 //
-// [param] c | *gin.Context: gin context
-// [return] *models.Error: error if any
-func DeleteUserHttp(c *gin.Context) {
+// [param] c | *gin.Context: context
+func DeleteUserHttp(c *gin.Context) (*models.Response, *models.Error) {
 
+	var request = utils.GetRequestMetadata(c)
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user models.User
-	err := utils.ReadBodyJson(c, &user)
-
+	var user *models.User = &models.User{}
+	err := c.ShouldBindJSON(user)
 	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+		return nil, &models.Error{
+			Status: utils.HTTP_STATUS_BAD_REQUEST,
+			Error:  error.INVALID_REQUEST,
+		}
+	}
+
+	// get if request user can delete the user
+	canDelete := CanEditUser(request.User, user)
+	if !canDelete {
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_FORBIDDEN,
+			Error:   error.ACCESS_DENIED,
+			Message: "Access denied: Cannot delete user",
+		}
 	}
 
 	deleteErr := DeleteUser(conn, client, user)
 	if deleteErr != nil {
-		utils.SendResponse(c,
-			deleteErr.Code,
-			gin.H{"http-code": deleteErr.Code, "internal-code": deleteErr.Error, "message": deleteErr.Message},
-		)
-		return
+		return nil, deleteErr
 	}
 
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User deleted"},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "User deleted"},
+	}, nil
 }
 
 // Get user HTTP API endpoint
-func GetUserHttp(c *gin.Context) {
+//
+// [param] c | *gin.Context: context
+func GetUserHttp(c *gin.Context) (*models.Response, *models.Error) {
 
+	var request = utils.GetRequestMetadata(c)
 	var client = db.CreateClient()
 	var conn = db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
-	var user models.User
-	err := utils.ReadBodyJson(c, &user)
-
-	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+	// Get code from url GET parameter
+	id := c.Query("id")
+	if id == "" {
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Id cannot be empty",
+		}
 	}
 
-	var foundUser models.User
-	var error = GetUser(conn, client, user, &foundUser)
+	var user *models.User = &models.User{
+		Email: id,
+	}
+
+	// get if request user can see the user
+	canSee := CanSeeUser(request.User, user)
+	if !canSee {
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_FORBIDDEN,
+			Error:   error.ACCESS_DENIED,
+			Message: "Access denied: Cannot see the user",
+		}
+	}
+
+	var foundUser, error = GetUser(conn, client, user, true)
 	if error != nil {
-		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
-		)
-		return
+		return nil, error
 	}
 
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "User found", "user": foundUser},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "User found", "user": foundUser},
+	}, nil
 
 }
 
-// Get user HTTP API endpoint
-func EditUserProfilePictureHttp(c *gin.Context) {
+// Edit user profile picture HTTP API endpoint
+//
+// [param] c | *gin.Context: context
+func EditUserProfilePictureHttp(c *gin.Context) (*models.Response, *models.Error) {
+
+	var request = utils.GetRequestMetadata(c)
 
 	// Get user
-	var user models.User = models.User{
-		Email: c.PostForm("Email"),
+	var user *models.User = &models.User{
+		Email: c.Query("email"),
 	}
 
-	// Get image
+	// Get image as bytes
 	bytes, err := utils.MultipartToBytes(c, "ProfilePicture")
-
 	if err != nil {
-		utils.SendResponse(c,
-			utils.HTTP_STATUS_BAD_REQUEST,
-			gin.H{"code": utils.HTTP_STATUS_NOT_ACCEPTABLE, "message": "Invalid request"},
-		)
-		return
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request body",
+		}
+	}
+
+	// get if request user can delete the user
+	canEdit := CanEditUser(request.User, user)
+	if !canEdit {
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_FORBIDDEN,
+			Error:   error.ACCESS_DENIED,
+			Message: "Access denied: Cannot edit user",
+		}
 	}
 
 	var client = db.CreateClient()
@@ -254,16 +284,38 @@ func EditUserProfilePictureHttp(c *gin.Context) {
 	// Upload image
 	var error = EditUserProfilePicture(conn, client, user, bytes)
 	if error != nil {
-		utils.SendResponse(c,
-			error.Code,
-			gin.H{"http-code": error.Code, "internal-code": error.Error, "message": error.Message},
-		)
-		return
+		return nil, error
 	}
 
-	utils.SendResponse(c,
-		utils.HTTP_STATUS_OK,
-		gin.H{"http-code": utils.HTTP_STATUS_OK, "message": "Profile picture updated"},
-	)
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "Profile picture updated"},
+	}, nil
 
 }
+
+// Validate user account HTTP API endpoint
+//
+// [param] c | *gin.Context: context
+func ValidateUserHttp(c *gin.Context) (*models.Response, *models.Error) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	// Get code from url GET parameter
+	code := c.Query("code")
+	log.Info("Query code: " + code)
+
+	var error = ValidateUser(conn, client, code)
+	if error != nil {
+		return nil, error
+	}
+
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "User validated"},
+	}, nil
+}
+
+// Get
