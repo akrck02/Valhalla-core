@@ -15,7 +15,7 @@ func CreateProject(conn context.Context, client *mongo.Client, project models.Pr
 
 	if utils.IsEmpty(project.Name) {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.EMPTY_NAME),
 			Message: "Project name cannot be empty",
 		}
@@ -23,7 +23,7 @@ func CreateProject(conn context.Context, client *mongo.Client, project models.Pr
 
 	if utils.IsEmpty(project.Description) {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.EMPTY_DESCRIPTION),
 			Message: "Project description cannot be empty",
 		}
@@ -31,7 +31,7 @@ func CreateProject(conn context.Context, client *mongo.Client, project models.Pr
 
 	if utils.IsEmpty(project.Owner) {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.EMPTY_DESCRIPTION),
 			Message: "Owner cannot be empty",
 		}
@@ -42,7 +42,7 @@ func CreateProject(conn context.Context, client *mongo.Client, project models.Pr
 
 	if found.Name != "" {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_CONFLICT,
+			Status:  utils.HTTP_STATUS_CONFLICT,
 			Error:   int(error.PROJECT_ALREADY_EXISTS),
 			Message: "Project already exists",
 		}
@@ -52,7 +52,7 @@ func CreateProject(conn context.Context, client *mongo.Client, project models.Pr
 
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.PROJECT_ALREADY_EXISTS),
 			Message: "Project already exists",
 		}
@@ -70,7 +70,7 @@ func DeleteProject(conn context.Context, client *mongo.Client, project models.Pr
 
 	if utils.IsEmpty(project.Name) {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.EMPTY_NAME),
 			Message: "Project name cannot be empty",
 		}
@@ -82,7 +82,7 @@ func DeleteProject(conn context.Context, client *mongo.Client, project models.Pr
 
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.PROJECT_NOT_DELETED),
 			Message: "Project not deleted",
 		}
@@ -95,7 +95,7 @@ func DeleteProject(conn context.Context, client *mongo.Client, project models.Pr
 
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.PROJECT_NOT_DELETED),
 			Message: "Project not deleted",
 		}
@@ -103,7 +103,7 @@ func DeleteProject(conn context.Context, client *mongo.Client, project models.Pr
 
 	if deleteResult.DeletedCount == 0 {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_NOT_FOUND,
+			Status:  utils.HTTP_STATUS_NOT_FOUND,
 			Error:   int(error.PROJECT_NOT_FOUND),
 			Message: "Project not found",
 		}
@@ -121,7 +121,7 @@ func GetProject(conn context.Context, client *mongo.Client, project models.Proje
 
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_NOT_FOUND,
+			Status:  utils.HTTP_STATUS_NOT_FOUND,
 			Error:   int(error.PROJECT_NOT_FOUND),
 			Message: "Project not found",
 		}

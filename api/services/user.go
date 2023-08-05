@@ -28,7 +28,7 @@ func Register(conn context.Context, client *mongo.Client, user *models.User) *mo
 
 	if utils.IsEmpty(user.Email) {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.EMPTY_EMAIL),
 			Message: "Email cannot be empty",
 		}
@@ -36,7 +36,7 @@ func Register(conn context.Context, client *mongo.Client, user *models.User) *mo
 
 	if utils.IsEmpty(user.Password) {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.EMPTY_PASSWORD),
 			Message: "Password cannot be empty",
 		}
@@ -44,7 +44,7 @@ func Register(conn context.Context, client *mongo.Client, user *models.User) *mo
 
 	if utils.IsEmpty(user.Username) {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.EMPTY_USERNAME),
 			Message: "Username cannot be empty",
 		}
@@ -54,7 +54,7 @@ func Register(conn context.Context, client *mongo.Client, user *models.User) *mo
 
 	if checkedPass.Response != 200 {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(checkedPass.Response),
 			Message: checkedPass.Message,
 		}
@@ -64,7 +64,7 @@ func Register(conn context.Context, client *mongo.Client, user *models.User) *mo
 
 	if checkedPass.Response != 200 {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(checkedPass.Response),
 			Message: checkedPass.Message,
 		}
@@ -76,7 +76,7 @@ func Register(conn context.Context, client *mongo.Client, user *models.User) *mo
 	if found != nil {
 
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_CONFLICT,
+			Status:  utils.HTTP_STATUS_CONFLICT,
 			Error:   int(error.USER_ALREADY_EXISTS),
 			Message: "User already exists",
 		}
@@ -86,7 +86,7 @@ func Register(conn context.Context, client *mongo.Client, user *models.User) *mo
 
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.CANNOT_CREATE_VALIDATION_CODE),
 			Message: "User not created",
 		}
@@ -101,7 +101,7 @@ func Register(conn context.Context, client *mongo.Client, user *models.User) *mo
 
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_CONFLICT,
+			Status:  utils.HTTP_STATUS_CONFLICT,
 			Error:   int(error.USER_ALREADY_EXISTS),
 			Message: "User already exists",
 		}
@@ -127,7 +127,7 @@ func Login(conn context.Context, client *mongo.Client, user *models.User, ip str
 
 	if found == nil {
 		return "", &models.Error{
-			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Status:  utils.HTTP_STATUS_FORBIDDEN,
 			Message: "Invalid credentials",
 		}
 	}
@@ -137,7 +137,8 @@ func Login(conn context.Context, client *mongo.Client, user *models.User, ip str
 
 	if err != nil {
 		return "", &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Error:   error.UNEXPECTED_ERROR,
 			Message: "Cannot generate your auth token",
 		}
 	}
@@ -162,7 +163,7 @@ func EditUser(conn context.Context, client *mongo.Client, user *models.User) *mo
 
 		if checkedPass.Response != 200 {
 			return &models.Error{
-				Code:    utils.HTTP_STATUS_BAD_REQUEST,
+				Status:  utils.HTTP_STATUS_BAD_REQUEST,
 				Error:   int(checkedPass.Response),
 				Message: checkedPass.Message,
 			}
@@ -176,7 +177,7 @@ func EditUser(conn context.Context, client *mongo.Client, user *models.User) *mo
 
 		if checkedPass.Response != 200 {
 			return &models.Error{
-				Code:    utils.HTTP_STATUS_BAD_REQUEST,
+				Status:  utils.HTTP_STATUS_BAD_REQUEST,
 				Error:   int(checkedPass.Response),
 				Message: checkedPass.Message,
 			}
@@ -205,7 +206,7 @@ func EditUser(conn context.Context, client *mongo.Client, user *models.User) *mo
 
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.USER_NOT_UPDATED),
 			Message: "User not updated",
 		}
@@ -213,7 +214,7 @@ func EditUser(conn context.Context, client *mongo.Client, user *models.User) *mo
 
 	if res.MatchedCount == 0 && res.ModifiedCount == 0 {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_NOT_FOUND,
+			Status:  utils.HTTP_STATUS_NOT_FOUND,
 			Error:   int(error.USER_NOT_FOUND),
 			Message: "Users not found",
 		}
@@ -233,7 +234,7 @@ func EditUserEmail(conn context.Context, client *mongo.Client, mail *EmailChange
 
 	if utils.IsEmpty(mail.Email) || utils.IsEmpty(mail.NewEmail) {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.EMPTY_EMAIL),
 			Message: "Email cannot be empty",
 		}
@@ -242,7 +243,7 @@ func EditUserEmail(conn context.Context, client *mongo.Client, mail *EmailChange
 	// Equal emails
 	if mail.Email == mail.NewEmail {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.EMAILS_EQUAL),
 			Message: "The new email is the same as the old one",
 		}
@@ -252,7 +253,7 @@ func EditUserEmail(conn context.Context, client *mongo.Client, mail *EmailChange
 	var checkedPass = utils.ValidateEmail(mail.Email)
 	if checkedPass.Response != 200 {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(checkedPass.Response),
 			Message: checkedPass.Message,
 		}
@@ -264,7 +265,7 @@ func EditUserEmail(conn context.Context, client *mongo.Client, mail *EmailChange
 
 	if found != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_CONFLICT,
+			Status:  utils.HTTP_STATUS_CONFLICT,
 			Error:   int(error.USER_ALREADY_EXISTS),
 			Message: "That email is already in use",
 		}
@@ -274,7 +275,7 @@ func EditUserEmail(conn context.Context, client *mongo.Client, mail *EmailChange
 	var checkedEmail = utils.ValidateEmail(mail.NewEmail)
 	if checkedEmail.Response != 200 {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(checkedEmail.Response),
 			Message: checkedEmail.Message,
 		}
@@ -285,7 +286,7 @@ func EditUserEmail(conn context.Context, client *mongo.Client, mail *EmailChange
 
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.USER_NOT_UPDATED),
 			Message: "User not updated" + err.Error(),
 		}
@@ -293,7 +294,7 @@ func EditUserEmail(conn context.Context, client *mongo.Client, mail *EmailChange
 
 	if updateStatus.MatchedCount == 0 {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_NOT_FOUND,
+			Status:  utils.HTTP_STATUS_NOT_FOUND,
 			Error:   int(error.USER_NOT_FOUND),
 			Message: "User not found",
 		}
@@ -301,7 +302,7 @@ func EditUserEmail(conn context.Context, client *mongo.Client, mail *EmailChange
 
 	if updateStatus.ModifiedCount == 0 {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.USER_NOT_UPDATED),
 			Message: "User not updated",
 		}
@@ -314,7 +315,7 @@ func EditUserEmail(conn context.Context, client *mongo.Client, mail *EmailChange
 
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.USER_NOT_UPDATED),
 			Message: "User devices not updated",
 		}
@@ -322,7 +323,7 @@ func EditUserEmail(conn context.Context, client *mongo.Client, mail *EmailChange
 
 	if updateStatus.MatchedCount != 0 && updateStatus.ModifiedCount == 0 {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.USER_NOT_UPDATED),
 			Message: "User devices not updated",
 		}
@@ -343,23 +344,45 @@ func EditUserProfilePicture(conn context.Context, client *mongo.Client, user *mo
 
 	if utils.IsEmpty(user.Email) {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.EMPTY_EMAIL),
 			Message: "Email cannot be empty",
 		}
 	}
 
-	var profilePicPath = utils.GetProfilePicturePath(user.Email)
-	utils.SaveFile(profilePicPath, picture)
+	var profilePathDir = utils.GetProfilePicturePath("")
 
-	user.ProfilePic = profilePicPath
-	err := EditUser(conn, client, user)
+	if !utils.ExistsDir(profilePathDir) {
+		err := utils.CreateDir(profilePathDir)
+
+		if err != nil {
+			return &models.Error{
+				Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+				Error:   int(error.USER_NOT_UPDATED),
+				Message: "User not updated, image not saved :" + err.Error(),
+			}
+		}
+	}
+
+	var profilePicPath = utils.GetProfilePicturePath(user.Email)
+	err := utils.SaveFile(profilePicPath, picture)
 
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.USER_NOT_UPDATED),
-			Message: "User not updated ",
+			Message: "User not updated, image not saved :" + err.Error(),
+		}
+	}
+
+	user.ProfilePic = profilePicPath
+	editErr := EditUser(conn, client, user)
+
+	if editErr != nil {
+		return &models.Error{
+			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Error:   int(error.USER_NOT_UPDATED),
+			Message: "User not updated",
 		}
 	}
 
@@ -377,7 +400,7 @@ func DeleteUser(conn context.Context, client *mongo.Client, user *models.User) *
 
 	if utils.IsEmpty(user.Email) {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.EMPTY_EMAIL),
 			Message: "Email cannot be empty",
 		}
@@ -389,7 +412,7 @@ func DeleteUser(conn context.Context, client *mongo.Client, user *models.User) *
 
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.USER_NOT_DELETED),
 			Message: "User not deleted",
 		}
@@ -403,7 +426,7 @@ func DeleteUser(conn context.Context, client *mongo.Client, user *models.User) *
 
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.USER_NOT_DELETED),
 			Message: "User not deleted",
 		}
@@ -411,7 +434,7 @@ func DeleteUser(conn context.Context, client *mongo.Client, user *models.User) *
 
 	if deleteResult.DeletedCount == 0 {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_NOT_FOUND,
+			Status:  utils.HTTP_STATUS_NOT_FOUND,
 			Error:   int(error.USER_NOT_FOUND),
 			Message: "User not found",
 		}
@@ -424,14 +447,12 @@ func DeleteUser(conn context.Context, client *mongo.Client, user *models.User) *
 func GetUser(conn context.Context, client *mongo.Client, user *models.User, secure bool) (*models.User, *models.Error) { // get user from database
 
 	users := client.Database(db.CurrentDatabase).Collection(db.USER)
-
 	var found models.User
-
 	err := users.FindOne(conn, bson.M{"email": user.Email}).Decode(&found)
 
 	if err != nil {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_NOT_FOUND,
+			Status:  utils.HTTP_STATUS_NOT_FOUND,
 			Error:   int(error.USER_NOT_FOUND),
 			Message: "User not found",
 		}
@@ -455,7 +476,7 @@ func ValidateUser(conn context.Context, client *mongo.Client, code string) *mode
 
 	if utils.IsEmpty(code) {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.INVALID_VALIDATION_CODE),
 			Message: "Code cannot be empty",
 		}
@@ -472,15 +493,23 @@ func ValidateUser(conn context.Context, client *mongo.Client, code string) *mode
 
 	if err != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_NOT_FOUND,
-			Error:   int(error.USER_NOT_FOUND),
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   int(error.INVALID_VALIDATION_CODE),
 			Message: "Invalid validation code",
+		}
+	}
+
+	if user.Validated {
+		return &models.Error{
+			Status:  utils.HTTP_STATUS_OK,
+			Error:   int(error.USER_ALREADY_VALIDATED),
+			Message: "User already validated",
 		}
 	}
 
 	if user.ValidationCode != code {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
 			Error:   int(error.INVALID_VALIDATION_CODE),
 			Message: "Invalid validation code",
 		}
@@ -494,7 +523,7 @@ func ValidateUser(conn context.Context, client *mongo.Client, code string) *mode
 
 	if result.MatchedCount == 0 {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_NOT_FOUND,
+			Status:  utils.HTTP_STATUS_NOT_FOUND,
 			Error:   int(error.USER_NOT_FOUND),
 			Message: "User not found",
 		}
@@ -502,7 +531,7 @@ func ValidateUser(conn context.Context, client *mongo.Client, code string) *mode
 
 	if editerr != nil {
 		return &models.Error{
-			Code:    utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.USER_NOT_UPDATED),
 			Message: "User not validated: " + editerr.Error(),
 		}

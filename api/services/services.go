@@ -34,21 +34,27 @@ var ENDPOINTS = []models.Endpoint{
 	models.EndpointFrom("team/add/member", utils.HTTP_METHOD_PUT, AddMemberHttp, true),
 
 	// Role endpoints
-	// models.EndpointFrom("rol/create", utils.HTTP_METHOD_PUT, CreateRoleHttp, true),
-	// models.EndpointFrom("rol/edit", utils.HTTP_METHOD_POST, EditRoleHttp, true),
-	// models.EndpointFrom("rol/delete", utils.HTTP_METHOD_DELETE, DeleteRoleHttp, true),
-	// models.EndpointFrom("rol/get", utils.HTTP_METHOD_GET, GetRoleHttp, true),
+	models.EndpointFrom("rol/create", utils.HTTP_METHOD_PUT, CreateRoleHttp, true),
+	models.EndpointFrom("rol/edit", utils.HTTP_METHOD_POST, EditRoleHttp, true),
+	models.EndpointFrom("rol/delete", utils.HTTP_METHOD_DELETE, DeleteRoleHttp, true),
+	models.EndpointFrom("rol/get", utils.HTTP_METHOD_GET, GetRoleHttp, true),
 
-	// Ping
-	models.EndpointFrom("ping", utils.HTTP_METHOD_GET, PingHttp, false),
+	// System endpoints
+	models.EndpointFrom("", utils.HTTP_METHOD_GET, ValhallaCoreInfoHttp, false),
 }
 
 // Start API
 func Start() {
 
-	log.Logger.WithDebug()
-	log.ShowLogAppTitle()
+	// set debug or release mode
+	if configuration.IsDevelopment() {
+		gin.SetMode(gin.DebugMode)
+		log.Logger.WithDebug()
+	} else {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
+	log.ShowLogAppTitle()
 	router := gin.Default()
 	router.NoRoute(middleware.NotFound())
 	router.Use(middleware.Request())

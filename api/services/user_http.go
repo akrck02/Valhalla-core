@@ -22,8 +22,9 @@ func RegisterHttp(c *gin.Context) (*models.Response, *models.Error) {
 	err := c.ShouldBindJSON(user)
 	if err != nil {
 		return nil, &models.Error{
-			Code:  utils.HTTP_STATUS_BAD_REQUEST,
-			Error: utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request",
 		}
 	}
 
@@ -52,8 +53,9 @@ func LoginHttp(c *gin.Context) (*models.Response, *models.Error) {
 	err := c.ShouldBindJSON(user)
 	if err != nil {
 		return nil, &models.Error{
-			Code:  utils.HTTP_STATUS_BAD_REQUEST,
-			Error: utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request",
 		}
 	}
 
@@ -67,7 +69,7 @@ func LoginHttp(c *gin.Context) (*models.Response, *models.Error) {
 
 	return &models.Response{
 		Code:     utils.HTTP_STATUS_OK,
-		Response: gin.H{"message": "User found", "auth": token},
+		Response: gin.H{"auth": token},
 	}, nil
 }
 
@@ -85,8 +87,9 @@ func EditUserHttp(c *gin.Context) (*models.Response, *models.Error) {
 	err := c.ShouldBindJSON(userToEdit)
 	if err != nil {
 		return nil, &models.Error{
-			Code:  utils.HTTP_STATUS_BAD_REQUEST,
-			Error: utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request",
 		}
 	}
 
@@ -94,7 +97,7 @@ func EditUserHttp(c *gin.Context) (*models.Response, *models.Error) {
 	canEdit := CanEditUser(request.User, userToEdit)
 	if !canEdit {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Status:  utils.HTTP_STATUS_FORBIDDEN,
 			Error:   error.ACCESS_DENIED,
 			Message: "Cannot edit user",
 		}
@@ -103,8 +106,8 @@ func EditUserHttp(c *gin.Context) (*models.Response, *models.Error) {
 	updateErr := EditUser(conn, client, userToEdit)
 	if updateErr != nil {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
 			Message: "Invalid request",
 		}
 	}
@@ -129,8 +132,9 @@ func EditUserEmailHttp(c *gin.Context) (*models.Response, *models.Error) {
 	err := c.ShouldBindJSON(email)
 	if err != nil {
 		return nil, &models.Error{
-			Code:  utils.HTTP_STATUS_BAD_REQUEST,
-			Error: utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request",
 		}
 	}
 
@@ -138,7 +142,7 @@ func EditUserEmailHttp(c *gin.Context) (*models.Response, *models.Error) {
 	canEdit := CanEditUser(request.User, &models.User{Email: email.Email})
 	if !canEdit {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Status:  utils.HTTP_STATUS_FORBIDDEN,
 			Error:   error.ACCESS_DENIED,
 			Message: "Access denied: Cannot edit user",
 		}
@@ -169,8 +173,8 @@ func DeleteUserHttp(c *gin.Context) (*models.Response, *models.Error) {
 	err := c.ShouldBindJSON(user)
 	if err != nil {
 		return nil, &models.Error{
-			Code:  utils.HTTP_STATUS_BAD_REQUEST,
-			Error: utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Status: utils.HTTP_STATUS_BAD_REQUEST,
+			Error:  error.INVALID_REQUEST,
 		}
 	}
 
@@ -178,7 +182,7 @@ func DeleteUserHttp(c *gin.Context) (*models.Response, *models.Error) {
 	canDelete := CanEditUser(request.User, user)
 	if !canDelete {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Status:  utils.HTTP_STATUS_FORBIDDEN,
 			Error:   error.ACCESS_DENIED,
 			Message: "Access denied: Cannot delete user",
 		}
@@ -209,8 +213,8 @@ func GetUserHttp(c *gin.Context) (*models.Response, *models.Error) {
 	id := c.Query("id")
 	if id == "" {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
 			Message: "Id cannot be empty",
 		}
 	}
@@ -223,7 +227,7 @@ func GetUserHttp(c *gin.Context) (*models.Response, *models.Error) {
 	canSee := CanSeeUser(request.User, user)
 	if !canSee {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Status:  utils.HTTP_STATUS_FORBIDDEN,
 			Error:   error.ACCESS_DENIED,
 			Message: "Access denied: Cannot see the user",
 		}
@@ -257,9 +261,9 @@ func EditUserProfilePictureHttp(c *gin.Context) (*models.Response, *models.Error
 	bytes, err := utils.MultipartToBytes(c, "ProfilePicture")
 	if err != nil {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   utils.HTTP_STATUS_NOT_ACCEPTABLE,
-			Message: "Invalid request",
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request body",
 		}
 	}
 
@@ -267,7 +271,7 @@ func EditUserProfilePictureHttp(c *gin.Context) (*models.Response, *models.Error
 	canEdit := CanEditUser(request.User, user)
 	if !canEdit {
 		return nil, &models.Error{
-			Code:    utils.HTTP_STATUS_FORBIDDEN,
+			Status:  utils.HTTP_STATUS_FORBIDDEN,
 			Error:   error.ACCESS_DENIED,
 			Message: "Access denied: Cannot edit user",
 		}
