@@ -350,6 +350,20 @@ func EditUserProfilePicture(conn context.Context, client *mongo.Client, user *mo
 		}
 	}
 
+	var profilePathDir = utils.GetProfilePicturePath("")
+
+	if !utils.ExistsDir(profilePathDir) {
+		err := utils.CreateDir(profilePathDir)
+
+		if err != nil {
+			return &models.Error{
+				Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
+				Error:   int(error.USER_NOT_UPDATED),
+				Message: "User not updated, image not saved :" + err.Error(),
+			}
+		}
+	}
+
 	var profilePicPath = utils.GetProfilePicturePath(user.Email)
 	err := utils.SaveFile(profilePicPath, picture)
 
@@ -357,7 +371,7 @@ func EditUserProfilePicture(conn context.Context, client *mongo.Client, user *mo
 		return &models.Error{
 			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.USER_NOT_UPDATED),
-			Message: "User not updated, image not saved",
+			Message: "User not updated, image not saved :" + err.Error(),
 		}
 	}
 
@@ -368,7 +382,7 @@ func EditUserProfilePicture(conn context.Context, client *mongo.Client, user *mo
 		return &models.Error{
 			Status:  utils.HTTP_STATUS_INTERNAL_SERVER_ERROR,
 			Error:   int(error.USER_NOT_UPDATED),
-			Message: "User not updated ",
+			Message: "User not updated",
 		}
 	}
 
