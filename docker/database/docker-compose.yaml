@@ -11,6 +11,7 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ADMIN_PASSWORD}
     volumes:
       - ./mongo-data:/data/db
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js
     networks:
       valhalla-dev:
         ipv4_address: ${IP_MONGODB}
@@ -34,3 +35,6 @@ networks:
           driver: default
           config:
             - subnet: ${MASK_MONGODB}
+
+volumes:
+  mongo:
