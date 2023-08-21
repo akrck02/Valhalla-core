@@ -94,6 +94,9 @@ func CreateTeam(conn context.Context, client *mongo.Client, team *models.Team) *
 		}
 	}
 
+	// add current date to team
+	team.CreationDate = utils.CurrentDate()
+
 	// Create team
 	_, err2 := coll.InsertOne(conn, team)
 
@@ -168,8 +171,16 @@ func EditTeam(conn context.Context, client *mongo.Client, team *models.Team) *mo
 
 	coll := client.Database(db.CurrentDatabase).Collection(db.TEAM)
 
-	update := team.PurgedBson(true)
-	_, err = coll.UpdateOne(conn, bson.M{"_id": objID}, bson.M{"$set": update})
+	_, err = coll.UpdateOne(conn, bson.M{"_id": objID}, bson.M{
+		"$set": bson.M{
+			"name":        team.Name,
+			"description": team.Description,
+			"profilepic":  team.ProfilePic,
+		},
+		"$currentDate": bson.M{
+			"lastupdate": true,
+		},
+	})
 
 	// Check if team was updated
 	if err != nil {
@@ -223,9 +234,13 @@ func EditTeamOwner(conn context.Context, client *mongo.Client, team *models.Team
 	// Update owner
 	coll := client.Database(db.CurrentDatabase).Collection(db.TEAM)
 
-	result := coll.FindOneAndUpdate(conn, bson.M{"_id": objID}, bson.M{"$set": bson.M{
-		"owner": team.Owner,
-	},
+	result := coll.FindOneAndUpdate(conn, bson.M{"_id": objID}, bson.M{
+		"$set": bson.M{
+			"owner": team.Owner,
+		},
+		"$currentDate": bson.M{
+			"lastupdate": true,
+		},
 	})
 
 	// Check if team was updated
@@ -298,7 +313,7 @@ func AddMember(conn context.Context, client *mongo.Client, memberChange *MemberC
 	}
 
 	// Add member to team
-	_, err4 := coll.UpdateOne(conn, bson.M{"_id": objID}, bson.M{"$push": bson.M{
+	_, err4 := coll.UpdateByID(conn, bson.M{"_id": objID}, bson.M{"$push": bson.M{
 		"members": memberChange.User,
 	},
 	})
