@@ -1,1 +1,1 @@
-cd ../docker/database && docker-compose up
+cd ../docker/database && docker compose up

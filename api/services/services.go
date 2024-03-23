@@ -1,12 +1,15 @@
 package services
 
 import (
+	"time"
+
 	"github.com/akrck02/valhalla-core/configuration"
 	"github.com/akrck02/valhalla-core/log"
 	"github.com/akrck02/valhalla-core/middleware"
 	"github.com/akrck02/valhalla-core/models"
 	"github.com/akrck02/valhalla-core/utils"
 	"github.com/gin-gonic/gin"
+	cors "github.com/itsjamie/gin-cors"
 )
 
 const API_PATH = "api"
@@ -57,8 +60,17 @@ func Start() {
 	log.ShowLogAppTitle()
 	router := gin.Default()
 	router.NoRoute(middleware.NotFound())
+
+	router.Use(cors.Middleware(cors.Config{
+		Origins:         "*",
+		Methods:         "GET, PUT, POST, DELETE, OPTIONS",
+		RequestHeaders:  "User-Agent, Accept, Accept-Language, Accept-Encoding, Referer, Content-type, mode, Origin, Connection, Sec-Fetch-Dest, Sec-Fetch-Mode, Sec-Fetch-Site, Pragma, Cache-Control",
+		ExposedHeaders:  "",
+		MaxAge:          300 * time.Second,
+		Credentials:     false,
+		ValidateHeaders: false,
+	}))
 	router.Use(middleware.Request())
-	router.Use(middleware.CORS())
 	router.Use(middleware.Security(ENDPOINTS, API_COMPLETE))
 	router.Use(middleware.Panic())
 

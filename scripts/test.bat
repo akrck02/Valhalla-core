@@ -1,1 +1,1 @@
-cd ../docker/start && docker-compose up
+cd ../docker/start && docker compose up
