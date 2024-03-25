@@ -538,6 +538,76 @@ func TestLoginWrongEmail(t *testing.T) {
 	log.Info("User deleted")
 }
 
+func TestLoginAuth(t *testing.T) {
+
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var user = &models.User{
+		Email:    mock.Email(),
+		Password: mock.Password(),
+		Username: mock.Username(),
+	}
+
+	log.FormattedInfo("Registering user: ${0}", user.Email)
+	log.FormattedInfo("Password: ${0}", user.Password)
+	log.FormattedInfo("Username: ${0}", user.Username)
+
+	err := Register(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not registered", err)
+		return
+	}
+
+	// login the user
+	var token string
+	token, err = Login(conn, client, user, mock.Ip(), mock.Platform())
+
+	if err != nil {
+		t.Error("The user was not logged in", err)
+		return
+	}
+
+	if token == "" {
+		t.Error("The token is empty")
+		return
+	}
+
+	log.Info("User logged in")
+	log.FormattedInfo("Token: ${0}", token)
+
+	// check if the token is valid
+	log.Info("Checking if the token is valid")
+
+	var authLogin = &models.AuthLogin{
+		Email:     user.Email,
+		AuthToken: token,
+	}
+
+	err = LoginAuth(conn, client, authLogin, mock.Ip(), mock.Platform())
+
+	if err != nil {
+		t.Error("The token is not valid", err)
+		return
+	}
+
+	log.Info("Token is valid")
+
+	// delete the user
+	log.Info("Deleting user")
+	err = DeleteUser(conn, client, user)
+
+	if err != nil {
+		t.Error("The user was not deleted", err)
+		return
+	}
+
+	log.Info("User deleted")
+
+}
+
 func TestDeleteUser(t *testing.T) {
 
 	var client = db.CreateClient()

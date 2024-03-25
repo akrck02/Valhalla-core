@@ -1,35 +1,35 @@
 {
     "client": "Thunder Client",
     "collectionName": "Valhalla-core",
-    "dateExported": "2023-06-24T14:04:52.066Z",
+    "dateExported": "2024-03-23T20:56:29.941Z",
     "version": "1.1",
     "folders": [
         {
-            "_id": "78f1036a-7752-4138-9f30-98eac1e7eaf8",
+            "_id": "e14f9c46-70f7-412c-a2b8-2e4eddfc1432",
             "name": "user",
             "containerId": "",
-            "created": "2023-04-30T21:16:43.450Z",
+            "created": "2024-03-23T18:10:01.296Z",
             "sortNum": 10000
         },
         {
-            "_id": "addf51d3-39f3-4b4e-af92-704eaec60109",
+            "_id": "b691ffbb-17ee-4e5e-bc3e-f874024d6511",
             "name": "team",
             "containerId": "",
-            "created": "2023-04-30T21:16:43.451Z",
+            "created": "2024-03-23T18:10:01.297Z",
             "sortNum": 20000
         }
     ],
     "requests": [
         {
-            "_id": "3d73dd7b-fe19-4351-bf50-78cf62d5defc",
-            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
-            "containerId": "78f1036a-7752-4138-9f30-98eac1e7eaf8",
+            "_id": "fb50181c-58a8-454f-a77a-081328047703",
+            "colId": "d5a2f5c4-a850-4b54-b1a5-fc693bd84692",
+            "containerId": "e14f9c46-70f7-412c-a2b8-2e4eddfc1432",
             "name": "Register",
-            "url": "http://127.0.0.1:3333/api/v1/user/register",
-            "method": "POST",
+            "url": "http://{{valhalla.core.host}}:{{valhalla.core.port}}/api/v1/user/register",
+            "method": "PUT",
             "sortNum": 5000,
-            "created": "2023-04-30T21:16:43.450Z",
-            "modified": "2023-04-30T21:20:43.166Z",
+            "created": "2024-03-23T18:10:01.296Z",
+            "modified": "2024-03-23T20:43:14.132Z",
             "headers": [],
             "params": [],
             "body": {
@@ -40,29 +40,29 @@
             "tests": []
         },
         {
-            "_id": "e8e86846-3222-43d1-b8fa-50078f10b3e1",
-            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
+            "_id": "8c420edb-6dc6-4a19-9cde-4edd3f1caba3",
+            "colId": "d5a2f5c4-a850-4b54-b1a5-fc693bd84692",
             "containerId": "",
             "name": "ping",
-            "url": "http://127.0.0.1:3333/api/v1/ping",
+            "url": "http://{{valhalla.core.host}}:{{valhalla.core.port}}/api/v1/",
             "method": "GET",
             "sortNum": 10000,
-            "created": "2023-04-30T21:16:43.452Z",
-            "modified": "2023-04-30T21:16:43.452Z",
+            "created": "2024-03-23T18:10:01.297Z",
+            "modified": "2024-03-23T20:43:31.519Z",
             "headers": [],
             "params": [],
             "tests": []
         },
         {
-            "_id": "ad2a6b90-1b00-42f5-aa5c-8a66783a67b2",
-            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
-            "containerId": "78f1036a-7752-4138-9f30-98eac1e7eaf8",
+            "_id": "4bc14102-c251-4e73-b8ac-5257df086189",
+            "colId": "d5a2f5c4-a850-4b54-b1a5-fc693bd84692",
+            "containerId": "e14f9c46-70f7-412c-a2b8-2e4eddfc1432",
             "name": "Login",
-            "url": "http://127.0.0.1:3333/api/v1/user/login",
+            "url": "http://{{valhalla.core.host}}:{{valhalla.core.port}}/api/v1/user/login",
             "method": "POST",
             "sortNum": 10000,
-            "created": "2023-04-30T21:16:43.453Z",
-            "modified": "2023-04-30T21:16:43.453Z",
+            "created": "2024-03-23T18:10:01.298Z",
+            "modified": "2024-03-23T20:43:09.359Z",
             "headers": [],
             "params": [],
             "body": {
@@ -73,15 +73,15 @@
             "tests": []
         },
         {
-            "_id": "dafad554-487b-49bb-8d73-0488ea707c05",
-            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
-            "containerId": "addf51d3-39f3-4b4e-af92-704eaec60109",
+            "_id": "ce9a7fdc-ecd2-4cdc-a7d6-1cadd5de1f26",
+            "colId": "d5a2f5c4-a850-4b54-b1a5-fc693bd84692",
+            "containerId": "b691ffbb-17ee-4e5e-bc3e-f874024d6511",
             "name": "New team",
-            "url": "http://127.0.0.1:3333/api/v1/team/create",
+            "url": "http://{{valhalla.core.host}}:{{valhalla.core.port}}/api/v1/team/create",
             "method": "POST",
             "sortNum": 10000,
-            "created": "2023-04-30T21:16:43.454Z",
-            "modified": "2023-04-30T21:16:43.454Z",
+            "created": "2024-03-23T18:10:01.299Z",
+            "modified": "2024-03-23T20:43:24.144Z",
             "headers": [],
             "params": [],
             "body": {
@@ -92,19 +92,38 @@
             "tests": []
         },
         {
-            "_id": "0caf3ad8-6d95-4399-86b4-6a841621819a",
-            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
-            "containerId": "78f1036a-7752-4138-9f30-98eac1e7eaf8",
-            "name": "Edit user",
-            "url": "http://127.0.0.1:3333/api/v1/user/edit",
+            "_id": "d87b8f9d-e0fb-4458-84c4-d9d5e6d21895",
+            "colId": "d5a2f5c4-a850-4b54-b1a5-fc693bd84692",
+            "containerId": "e14f9c46-70f7-412c-a2b8-2e4eddfc1432",
+            "name": "Login with token",
+            "url": "http://{{valhalla.core.host}}:{{valhalla.core.port}}/api/v1/user/login/auth",
             "method": "POST",
-            "sortNum": 20000,
-            "created": "2023-04-30T21:16:43.455Z",
-            "modified": "2023-06-10T18:59:58.445Z",
+            "sortNum": 15000,
+            "created": "2024-03-23T20:32:53.131Z",
+            "modified": "2024-03-23T20:46:37.569Z",
             "headers": [
                 {
                     "name": "Authorization",
-                    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkZXZpY2UiOiJUaHVuZGVyIENsaWVudCAoaHR0cHM6Ly93d3cudGh1bmRlcmNsaWVudC5jb20pLTE3Mi4yMC4wLjEiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJ0aW1lc3RhbXAiOjE2ODY0MTc1MDgwNTEsInVzZXJuYW1lIjoidGVzdCJ9.eBCXO3HBSsT3qPBuRFqOKMFqpF_WMQM510vL6oFEOpU"
+                    "value": "{{valhalla.core.token}}"
+                }
+            ],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "0e4484db-3c58-46d3-beee-a18feaf9dc72",
+            "colId": "d5a2f5c4-a850-4b54-b1a5-fc693bd84692",
+            "containerId": "e14f9c46-70f7-412c-a2b8-2e4eddfc1432",
+            "name": "Edit user",
+            "url": "http://{{valhalla.core.host}}:{{valhalla.core.port}}/api/v1/user/edit",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2024-03-23T18:10:01.300Z",
+            "modified": "2024-03-23T20:47:29.559Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "{{valhalla.core.token}}"
                 }
             ],
             "params": [],
@@ -116,16 +135,21 @@
             "tests": []
         },
         {
-            "_id": "1f06125e-70f0-48ef-882c-342f06e6767c",
-            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
-            "containerId": "78f1036a-7752-4138-9f30-98eac1e7eaf8",
+            "_id": "d51279f0-397b-4cc8-99c6-3d396a286a3e",
+            "colId": "d5a2f5c4-a850-4b54-b1a5-fc693bd84692",
+            "containerId": "e14f9c46-70f7-412c-a2b8-2e4eddfc1432",
             "name": "Edit password",
-            "url": "http://127.0.0.1:3333/api/v1/user/edit/",
+            "url": "http://{{valhalla.core.host}}:{{valhalla.core.port}}/api/v1/user/edit/",
             "method": "POST",
             "sortNum": 22500,
-            "created": "2023-04-30T21:16:43.456Z",
-            "modified": "2023-04-30T21:16:43.456Z",
-            "headers": [],
+            "created": "2024-03-23T18:10:01.301Z",
+            "modified": "2024-03-23T20:47:04.191Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "{{valhalla.core.token}}"
+                }
+            ],
             "params": [],
             "body": {
                 "type": "json",
@@ -135,19 +159,23 @@
             "tests": []
         },
         {
-            "_id": "9e0b3923-a1a6-4bf9-8e01-44ea50d926c1",
-            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
-            "containerId": "78f1036a-7752-4138-9f30-98eac1e7eaf8",
+            "_id": "3be5b1f7-1a3f-48fd-8f2c-2dc2aa793d00",
+            "colId": "d5a2f5c4-a850-4b54-b1a5-fc693bd84692",
+            "containerId": "e14f9c46-70f7-412c-a2b8-2e4eddfc1432",
             "name": "Edit Profile Picture",
-            "url": "http://127.0.0.1:3333/api/v1/user/edit/profilepicture",
+            "url": "http://{{valhalla.core.host}}:{{valhalla.core.port}}/api/v1/user/edit/profilepicture",
             "method": "POST",
             "sortNum": 23125,
-            "created": "2023-04-30T21:16:43.457Z",
-            "modified": "2023-04-30T21:16:43.457Z",
+            "created": "2024-03-23T18:10:01.302Z",
+            "modified": "2024-03-23T20:48:34.368Z",
             "headers": [
                 {
                     "name": "enctype",
                     "value": "multipart/form-data"
+                },
+                {
+                    "name": "Authorization",
+                    "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJkZXZpY2UiOiJUaHVuZGVyIENsaWVudCAoaHR0cHM6Ly93d3cudGh1bmRlcmNsaWVudC5jb20pLTE3Mi4yMC4wLjEiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJ0aW1lc3RhbXAiOjE3MTEyMjY4NTA5ODQsInVzZXJuYW1lIjoidGVzdCJ9.MG_hrXAWu3u4iDyrlc8hBcmiLlAcYn6tTRvWVG4Y-K4"
                 }
             ],
             "params": [],
@@ -163,41 +191,50 @@
                 "files": [
                     {
                         "name": "ProfilePicture",
-                        "value": "/home/vscode/Valhalla-core/api/resources/images/cat.jpg"
+                        "value": "/home/slimbook/Imágenes/1200px-HowIMetYourMother.svg.png"
                     }
                 ]
             },
             "tests": []
         },
         {
-            "_id": "f2569940-c06d-469a-bd33-fc84b153321e",
-            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
-            "containerId": "78f1036a-7752-4138-9f30-98eac1e7eaf8",
+            "_id": "6e514123-6467-4e41-bfef-90940431602c",
+            "colId": "d5a2f5c4-a850-4b54-b1a5-fc693bd84692",
+            "containerId": "e14f9c46-70f7-412c-a2b8-2e4eddfc1432",
             "name": "Edit email",
-            "url": "http://127.0.0.1:3333/api/v1/user/edit/email",
+            "url": "http://{{valhalla.core.host}}:{{valhalla.core.port}}/api/v1/user/edit/email",
             "method": "POST",
             "sortNum": 23750,
-            "created": "2023-04-30T21:16:43.458Z",
-            "modified": "2023-04-30T21:16:43.458Z",
-            "headers": [],
+            "created": "2024-03-23T18:10:01.303Z",
+            "modified": "2024-03-23T20:51:50.791Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "{{valhalla.core.token}}"
+                }
+            ],
             "params": [],
             "body": {
                 "type": "json",
                 "raw": "{\n  \"email\" : \"test@test.com\",\n  \"new_email\" : \"test0@test0.com\"\n}",
                 "form": []
             },
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{valhalla.core.token}}"
+            },
             "tests": []
         },
         {
-            "_id": "65655c11-239d-414d-a504-aed7f1bbbdd2",
-            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
-            "containerId": "78f1036a-7752-4138-9f30-98eac1e7eaf8",
+            "_id": "6a1ff092-4f9d-4f93-9040-0f48ed9d837d",
+            "colId": "d5a2f5c4-a850-4b54-b1a5-fc693bd84692",
+            "containerId": "e14f9c46-70f7-412c-a2b8-2e4eddfc1432",
             "name": "Delete user ",
-            "url": "http://127.0.0.1:3333/api/v1/user/delete",
+            "url": "http://{{valhalla.core.host}}:{{valhalla.core.port}}/api/v1/user/delete",
             "method": "POST",
             "sortNum": 25000,
-            "created": "2023-04-30T21:16:43.459Z",
-            "modified": "2023-04-30T21:16:43.459Z",
+            "created": "2024-03-23T18:10:01.304Z",
+            "modified": "2024-03-23T20:42:37.439Z",
             "headers": [],
             "params": [],
             "body": {
@@ -208,15 +245,15 @@
             "tests": []
         },
         {
-            "_id": "2aa4f824-f430-4047-9e8c-04779a58bd28",
-            "colId": "f6a0a08d-cad9-4997-8e88-62d83074559d",
-            "containerId": "78f1036a-7752-4138-9f30-98eac1e7eaf8",
+            "_id": "0cab9e27-a629-48ad-b976-eabdb6b87909",
+            "colId": "d5a2f5c4-a850-4b54-b1a5-fc693bd84692",
+            "containerId": "e14f9c46-70f7-412c-a2b8-2e4eddfc1432",
             "name": "Get user",
-            "url": "http://127.0.0.1:3333/api/v1/user/get",
+            "url": "http://{{valhalla.core.host}}:{{valhalla.core.port}}/api/v1/user/get",
             "method": "POST",
             "sortNum": 35000,
-            "created": "2023-06-24T13:56:41.880Z",
-            "modified": "2023-06-24T13:58:10.100Z",
+            "created": "2024-03-23T18:10:01.305Z",
+            "modified": "2024-03-23T20:42:43.090Z",
             "headers": [
                 {
                     "name": "Authorization",

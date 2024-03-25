@@ -21,6 +21,7 @@ var ENDPOINTS = []models.Endpoint{
 	// User endpoints
 	models.EndpointFrom("user/register", utils.HTTP_METHOD_PUT, RegisterHttp, false),
 	models.EndpointFrom("user/login", utils.HTTP_METHOD_POST, LoginHttp, false),
+	models.EndpointFrom("user/login/auth", utils.HTTP_METHOD_POST, LoginAuthHttp, true),
 	models.EndpointFrom("user/edit", utils.HTTP_METHOD_POST, EditUserHttp, true),
 	models.EndpointFrom("user/edit/email", utils.HTTP_METHOD_POST, EditUserEmailHttp, true),
 	models.EndpointFrom("user/edit/profilepicture", utils.HTTP_METHOD_POST, EditUserProfilePictureHttp, true),

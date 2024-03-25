@@ -73,6 +73,38 @@ func LoginHttp(c *gin.Context) (*models.Response, *models.Error) {
 	}, nil
 }
 
+// Login auth HTTP API endpoint
+//
+// [param] c | *gin.Context: context
+func LoginAuthHttp(c *gin.Context) (*models.Response, *models.Error) {
+
+	var request = utils.GetRequestMetadata(c)
+	var client = db.CreateClient()
+	var conn = db.Connect(*client)
+	defer db.Disconnect(*client, conn)
+
+	var auth *models.AuthLogin = &models.AuthLogin{}
+	err := c.ShouldBindJSON(auth)
+	if err != nil {
+		return nil, &models.Error{
+			Status:  utils.HTTP_STATUS_BAD_REQUEST,
+			Error:   error.INVALID_REQUEST,
+			Message: "Invalid request",
+		}
+	}
+
+	var error = LoginAuth(conn, client, auth, request.IP, request.UserAgent)
+	if error != nil {
+		return nil, error
+	}
+
+	return &models.Response{
+		Code:     utils.HTTP_STATUS_OK,
+		Response: gin.H{"message": "User logged in"},
+	}, nil
+
+}
+
 // Edit user HTTP API endpoint
 //
 // [param] c | *gin.Context: context

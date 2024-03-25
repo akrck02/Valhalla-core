@@ -146,6 +146,42 @@ func Login(conn context.Context, client *mongo.Client, user *models.User, ip str
 	return token, nil
 }
 
+// Login auth logic
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] auth | models.AuthLogin: auth to login
+func LoginAuth(conn context.Context, client *mongo.Client, auth *models.AuthLogin, ip string, userAgent string) *models.Error {
+
+	found, err := GetUser(conn, client, &models.User{Email: auth.Email}, false)
+
+	if err != nil {
+		return err
+	}
+
+	// Search a user device with the same ip and user agent that has the token
+	var filter = models.Device{
+		User:      found.Email,
+		UserAgent: userAgent,
+		Address:   ip,
+		Token:     auth.AuthToken,
+	}
+
+	var devices = client.Database(db.CurrentDatabase).Collection(db.DEVICE)
+	var device = findDeviceByAuthToken(conn, devices, &filter)
+
+	if device == nil {
+		return &models.Error{
+			Status:  utils.HTTP_STATUS_NOT_FOUND,
+			Error:   error.USER_NOT_AUTHORIZED,
+			Message: "No possible login devices",
+		}
+	}
+
+	return nil
+
+}
+
 // Edit user logic
 //
 // [param] conn | context.Context: connection to the database

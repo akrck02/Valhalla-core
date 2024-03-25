@@ -67,3 +67,19 @@ func findDevice(conn context.Context, coll *mongo.Collection, device *models.Dev
 
 	return found
 }
+
+// FindDeviceByAuthToken finds a device in the database by its token, user, address and user agent
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] token | string: token of the device
+//
+// [return] models.Device: device found --> error : The error that occurred
+func findDeviceByAuthToken(conn context.Context, coll *mongo.Collection, device *models.Device) *models.Device {
+
+	var found *models.Device
+	coll.FindOne(conn, bson.M{"user": device.User, "address": device.Address, "useragent": device.UserAgent, "token": device.Token}).Decode(found)
+
+	return found
+
+}
