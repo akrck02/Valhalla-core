@@ -32,7 +32,11 @@ func AddUserDevice(conn context.Context, client *mongo.Client, user *models.User
 	device.Token = token
 	device.User = user.Email
 
-	found := findDevice(conn, coll, device)
+	found, err := FindDevice(conn, coll, device)
+
+	if err != nil && err != mongo.ErrNoDocuments {
+		return "", err
+	}
 
 	if found != nil {
 
@@ -53,19 +57,23 @@ func AddUserDevice(conn context.Context, client *mongo.Client, user *models.User
 	return token, nil
 }
 
-// findDevice finds a device in the database
+// FindDevice finds a device in the database
 //
 // [param] conn | context.Context: connection to the database
 // [param] coll | *mongo.Collection: collection to search
 // [param] device | models.Device: device to find
 //
 // [return] models.Device: device found --> error : The error that occurred
-func findDevice(conn context.Context, coll *mongo.Collection, device *models.Device) *models.Device {
+func FindDevice(conn context.Context, coll *mongo.Collection, device *models.Device) (*models.Device, error) {
 
-	var found *models.Device
-	coll.FindOne(conn, bson.M{"user": device.User, "address": device.Address, "useragent": device.UserAgent}).Decode(found)
+	var found models.Device
+	err := coll.FindOne(conn, bson.M{"user": device.User, "address": device.Address, "useragent": device.UserAgent}).Decode(&found)
 
-	return found
+	if err != nil {
+		return nil, err
+	}
+
+	return &found, nil
 }
 
 // FindDeviceByAuthToken finds a device in the database by its token, user, address and user agent
@@ -75,11 +83,31 @@ func findDevice(conn context.Context, coll *mongo.Collection, device *models.Dev
 // [param] token | string: token of the device
 //
 // [return] models.Device: device found --> error : The error that occurred
-func findDeviceByAuthToken(conn context.Context, coll *mongo.Collection, device *models.Device) *models.Device {
+func FindDeviceByAuthToken(conn context.Context, coll *mongo.Collection, device *models.Device) (*models.Device, error) {
 
-	var found *models.Device
-	coll.FindOne(conn, bson.M{"user": device.User, "address": device.Address, "useragent": device.UserAgent, "token": device.Token}).Decode(found)
+	var found models.Device
+	err := coll.FindOne(conn, bson.M{"user": device.User, "address": device.Address, "useragent": device.UserAgent, "token": device.Token}).Decode(&found)
 
-	return found
+	if err != nil {
+		return nil, err
+	}
 
+	return &found, nil
+
+}
+
+// DeleteDevice removes a device from the database
+//
+// [param] conn | context.Context: connection to the database
+// [param] client | *mongo.Client: client to the database
+// [param] user | models.User: user that owns the device
+// [param] device | models.Device: device to remove
+//
+// [return] *mongo.DeleteResult: result of the operation --> error : The error that occurred
+func DeleteDevice(conn context.Context, client *mongo.Client, device *models.Device) error {
+
+	coll := client.Database(db.CurrentDatabase).Collection(db.DEVICE)
+	_, err := coll.DeleteOne(conn, bson.M{"user": device.User, "address": device.Address, "useragent": device.UserAgent})
+
+	return err
 }

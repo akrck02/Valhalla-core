@@ -93,6 +93,8 @@ func LoginAuthHttp(c *gin.Context) (*models.Response, *models.Error) {
 		}
 	}
 
+	auth.AuthToken = request.Authorization
+
 	var error = LoginAuth(conn, client, auth, request.IP, request.UserAgent)
 	if error != nil {
 		return nil, error

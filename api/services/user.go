@@ -168,9 +168,9 @@ func LoginAuth(conn context.Context, client *mongo.Client, auth *models.AuthLogi
 	}
 
 	var devices = client.Database(db.CurrentDatabase).Collection(db.DEVICE)
-	var device = findDeviceByAuthToken(conn, devices, &filter)
+	device, deviceFindingError := FindDeviceByAuthToken(conn, devices, &filter)
 
-	if device == nil {
+	if deviceFindingError != nil || device == nil {
 		return &models.Error{
 			Status:  utils.HTTP_STATUS_NOT_FOUND,
 			Error:   error.USER_NOT_AUTHORIZED,
