@@ -65,7 +65,7 @@ func Start() {
 	router.Use(cors.Middleware(cors.Config{
 		Origins:         "*",
 		Methods:         "GET, PUT, POST, DELETE, OPTIONS",
-		RequestHeaders:  "User-Agent, Accept, Accept-Language, Accept-Encoding, Referer, Content-type, mode, Origin, Connection, Sec-Fetch-Dest, Sec-Fetch-Mode, Sec-Fetch-Site, Pragma, Cache-Control",
+		RequestHeaders:  "User-Agent, Accept, Accept-Language, Authorization, Accept-Encoding, Referer, Content-type, mode, Origin, Connection, Sec-Fetch-Dest, Sec-Fetch-Mode, Sec-Fetch-Site, Pragma, Cache-Control",
 		ExposedHeaders:  "",
 		MaxAge:          300 * time.Second,
 		Credentials:     false,

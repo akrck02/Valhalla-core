@@ -128,6 +128,7 @@ func Login(conn context.Context, client *mongo.Client, user *models.User, ip str
 	if found == nil {
 		return "", &models.Error{
 			Status:  utils.HTTP_STATUS_FORBIDDEN,
+			Error:   error.USER_NOT_AUTHORIZED,
 			Message: "Invalid credentials",
 		}
 	}

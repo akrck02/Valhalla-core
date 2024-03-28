@@ -68,8 +68,11 @@ func LoginHttp(c *gin.Context) (*models.Response, *models.Error) {
 	}
 
 	return &models.Response{
-		Code:     utils.HTTP_STATUS_OK,
-		Response: gin.H{"auth": token},
+		Code: utils.HTTP_STATUS_OK,
+		Response: gin.H{
+			"auth":  token,
+			"email": user.Email,
+		},
 	}, nil
 }
 
