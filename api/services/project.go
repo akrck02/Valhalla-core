@@ -11,12 +11,12 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func CreateProject(conn context.Context, client *mongo.Client, project models.Project) *models.Error {
+func CreateProject(conn context.Context, client *mongo.Client, project *models.Project) *models.Error {
 
 	if utils.IsEmpty(project.Name) {
 		return &models.Error{
 			Status:  utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   int(error.EMPTY_NAME),
+			Error:   int(error.EMPTY_PROJECT_NAME),
 			Message: "Project name cannot be empty",
 		}
 	}
@@ -24,7 +24,7 @@ func CreateProject(conn context.Context, client *mongo.Client, project models.Pr
 	if utils.IsEmpty(project.Description) {
 		return &models.Error{
 			Status:  utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   int(error.EMPTY_DESCRIPTION),
+			Error:   int(error.EMPTY_PROJECT_DESCRIPTION),
 			Message: "Project description cannot be empty",
 		}
 	}
@@ -32,7 +32,7 @@ func CreateProject(conn context.Context, client *mongo.Client, project models.Pr
 	if utils.IsEmpty(project.Owner) {
 		return &models.Error{
 			Status:  utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   int(error.EMPTY_DESCRIPTION),
+			Error:   int(error.EMPTY_PROJECT_OWNER),
 			Message: "Owner cannot be empty",
 		}
 	}
@@ -71,7 +71,7 @@ func DeleteProject(conn context.Context, client *mongo.Client, project models.Pr
 	if utils.IsEmpty(project.Name) {
 		return &models.Error{
 			Status:  utils.HTTP_STATUS_BAD_REQUEST,
-			Error:   int(error.EMPTY_NAME),
+			Error:   int(error.EMPTY_PROJECT_NAME),
 			Message: "Project name cannot be empty",
 		}
 	}

@@ -43,6 +43,9 @@ var ENDPOINTS = []models.Endpoint{
 	models.EndpointFrom("rol/delete", utils.HTTP_METHOD_DELETE, DeleteRoleHttp, true),
 	models.EndpointFrom("rol/get", utils.HTTP_METHOD_GET, GetRoleHttp, true),
 
+	// Project endpoints
+	models.EndpointFrom("project/create", utils.HTTP_METHOD_PUT, CreateProjectHttp, true),
+
 	// System endpoints
 	models.EndpointFrom("", utils.HTTP_METHOD_GET, ValhallaCoreInfoHttp, false),
 }

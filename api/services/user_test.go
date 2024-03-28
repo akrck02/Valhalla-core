@@ -622,12 +622,12 @@ func TestTokenValidationEmptyToken(t *testing.T) {
 
 func TestValidationCode(t *testing.T) {
 
-	var client = db.CreateClient()
-	var conn = db.Connect(*client)
+	client := db.CreateClient()
+	conn := db.Connect(*client)
 	defer db.Disconnect(*client, conn)
 
 	// Create a new user
-	var user = RegisterMockTestUser(t, conn, client)
+	user := RegisterMockTestUser(t, conn, client)
 
 	// get the user
 	user, err := GetUser(conn, client, user, true)
